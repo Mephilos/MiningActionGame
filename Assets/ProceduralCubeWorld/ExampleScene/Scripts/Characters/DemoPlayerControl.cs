@@ -232,7 +232,7 @@ namespace SoftKitty.PCW.Demo
             if (inWater) return;
             if (StandingCube != null)
             {
-                FootstepPar.startColor = Color.Lerp(Color.white, StandingCube._topColor, 0.8F);
+               // FootstepPar.startColor = Color.Lerp(Color.white, StandingCube._topColor, 0.8F);
             }
             FootstepPar.Emit(Random.Range(2, 5));
         }
