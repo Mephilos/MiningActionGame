@@ -5123,7 +5123,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2735528353554701840}
-  - component: {fileID: 4796299571955240387}
+  - component: {fileID: 7644506723212050486}
   m_Layer: 2
   m_Name: Left_Foot
   m_TagString: Untagged
@@ -5147,7 +5147,7 @@ Transform:
   - {fileID: 69952061452074702}
   m_Father: {fileID: 6706797961442685977}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4796299571955240387
+--- !u!114 &7644506723212050486
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5156,7 +5156,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 589974413287087881}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 2, y: 1, z: 2}
@@ -10668,7 +10668,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 743629358764108421}
-  - component: {fileID: 7825526860886180889}
+  - component: {fileID: 5315910995211826076}
   m_Layer: 2
   m_Name: Left_Hand
   m_TagString: Untagged
@@ -10696,7 +10696,7 @@ Transform:
   - {fileID: 2570313375825180658}
   m_Father: {fileID: 5015546547608779821}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7825526860886180889
+--- !u!114 &5315910995211826076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10705,7 +10705,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3201954976367692303}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 3, y: 3, z: 3}
@@ -10718,7 +10718,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5733576578522101223}
-  - component: {fileID: 3544681290364975842}
+  - component: {fileID: 60133901844766114}
   m_Layer: 2
   m_Name: Head
   m_TagString: Untagged
@@ -10744,7 +10744,7 @@ Transform:
   - {fileID: 4894558860134697994}
   m_Father: {fileID: 2067489968340215119}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3544681290364975842
+--- !u!114 &60133901844766114
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10753,7 +10753,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3244121856478250769}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 3.5, y: 3.2, z: 3.5}
@@ -11675,8 +11675,8 @@ SkinnedMeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 43714b68324cc2c409d534d9874f2a2b, type: 2}
-  - {fileID: 2100000, guid: 766fd3ff04aab4745a764d33daac86fa, type: 2}
   - {fileID: 2100000, guid: 8b25e99361ac31d4e9ae83c46aee69ea, type: 2}
+  - {fileID: 2100000, guid: 766fd3ff04aab4745a764d33daac86fa, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11882,7 +11882,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2067489968340215119}
-  - component: {fileID: 5290926264641127371}
+  - component: {fileID: 192126984219907499}
   m_Layer: 2
   m_Name: Neck
   m_TagString: Untagged
@@ -11907,7 +11907,7 @@ Transform:
   - {fileID: 7715100853910174637}
   m_Father: {fileID: 4633800893424489087}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5290926264641127371
+--- !u!114 &192126984219907499
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11916,7 +11916,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7950699923030952730}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 1.5, y: 1.5, z: 1.5}
@@ -11961,7 +11961,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7764091629086487901}
-  - component: {fileID: 4675988386069033259}
+  - component: {fileID: 2407046696237154367}
   m_Layer: 2
   m_Name: Right_Foot
   m_TagString: Untagged
@@ -11985,7 +11985,7 @@ Transform:
   - {fileID: 8629085987737840198}
   m_Father: {fileID: 4423954963529858902}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4675988386069033259
+--- !u!114 &2407046696237154367
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11994,7 +11994,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8064131473534578091}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 1, y: 1, z: 1}
@@ -12292,7 +12292,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4873149279938485943}
-  - component: {fileID: 3991051382896699176}
+  - component: {fileID: 4901390619226744170}
   m_Layer: 2
   m_Name: Right_Hand
   m_TagString: Untagged
@@ -12320,7 +12320,7 @@ Transform:
   - {fileID: 2004170157846347453}
   m_Father: {fileID: 8779014406422654453}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3991051382896699176
+--- !u!114 &4901390619226744170
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -12329,7 +12329,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 9121533786251484033}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f4e39fab8c5fd4c907e8f01a4a5ab4, type: 3}
+  m_Script: {fileID: 11500000, guid: 58efcd26ddcb34827a74ca5cbf8d2a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Size: {x: 3, y: 3, z: 3}
