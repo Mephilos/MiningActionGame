@@ -50,7 +50,10 @@ public class WeapenController : MonoBehaviour
         }
         // 발사체 생성
         Vector3 fireDir = (targetPoint - firePoint.position).normalized;
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(fireDir));
+        //미사일 머리 방향 수정
+        Quaternion bulletRotation = Quaternion.LookRotation(fireDir) * Quaternion.Euler(90f, 0f, 0f);
+        //미사일 인스턴스 생성
+        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, bulletRotation);
         bullet.GetComponent<Rigidbody>().linearVelocity = fireDir * bulletSpeed;
         Debug.Log("발사");
     }

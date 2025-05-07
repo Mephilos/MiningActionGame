@@ -5446,6 +5446,37 @@ Transform:
   - {fileID: 2735528353554701840}
   m_Father: {fileID: 2210405359416155723}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1933455355802896021
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5616558153871213032}
+  m_Layer: 2
+  m_Name: FirePoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5616558153871213032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1933455355802896021}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.223, z: 0.65}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8412697098108679351}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1945377612014703693
 GameObject:
   m_ObjectHideFlags: 0
@@ -10801,6 +10832,7 @@ GameObject:
   - component: {fileID: 8412697098108679351}
   - component: {fileID: -2280788958821354642}
   - component: {fileID: 6883540361478055780}
+  - component: {fileID: 6898573589470979714}
   m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
@@ -10823,6 +10855,7 @@ Transform:
   m_Children:
   - {fileID: 1586250989730369026}
   - {fileID: 902621958067745285}
+  - {fileID: 5616558153871213032}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &-2280788958821354642
@@ -10866,6 +10899,23 @@ MonoBehaviour:
   jumpForce: 8
   gravity: -20
   cameraFollow: {fileID: 0}
+--- !u!114 &6898573589470979714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3469187922386512396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 1633774235790774350, guid: 9d14358003ad7489ea0162dabce431c1, type: 3}
+  firePoint: {fileID: 5616558153871213032}
+  bulletSpeed: 30
+  maxFireDistance: 100
+  rotateOwnerToAim: 1
 --- !u!1 &3599911416880207941
 GameObject:
   m_ObjectHideFlags: 0
