@@ -182,7 +182,7 @@ Material:
     - _BottleColor: {r: 1, g: 0.6745098, b: 0.1764706, a: 0}
     - _BottomColor: {r: 0.41568628, g: 0.39607844, b: 0.37254903, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _GlowColor: {r: 0, g: 0, b: 0, a: 0}
     - _MidColor: {r: 1, g: 0.6745098, b: 0.1764706, a: 0}
     - _MidleColor: {r: 0.41568628, g: 0.39607844, b: 0.37254903, a: 0}
@@ -191,3 +191,4 @@ Material:
     - _TopColor: {r: 0.41568628, g: 0.39607844, b: 0.37254903, a: 0}
     - _TopColor1: {r: 1, g: 0.68883955, b: 0.36470592, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
