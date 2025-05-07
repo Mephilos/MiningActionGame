@@ -53,8 +53,8 @@ public class ChunkManager : MonoBehaviour
                     Vector3 worldPosition = new(coord.x * chunkSize, 0f, coord.y * chunkSize);
                     GameObject chunkGO = Instantiate(chunkPrefab, worldPosition, Quaternion.identity, transform);
                     Chunk chunk = chunkGO.GetComponent<Chunk>();
-                    int derivedSeed = worldSeed + coord.x * 73856093 + coord.y * 19349663;
-                    chunk.Initialize(coord, chunkSize, derivedSeed, 0.2f, 5f);
+                    int derivedSeed = worldSeed + coord.x * 7384 + coord.y * 1934;
+                    chunk.Initialize(coord, chunkSize, derivedSeed, 0.02f, 5f);
                     loadedChunks.Add(coord, chunk);
                 }
             }

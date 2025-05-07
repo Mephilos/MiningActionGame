@@ -42,7 +42,7 @@ public class Chunk : MonoBehaviour
                 int worldX = chunkCoord.x * chunkSize + x;
                 int worldZ = chunkCoord.y * chunkSize + z;
 
-                float noiseValue = Mathf.PerlinNoise((worldX + seed * 73856093) * noiseScale, (worldZ + seed * 19349663) * noiseScale);
+                float noiseValue = Mathf.PerlinNoise((worldX + seed * 7385) * noiseScale, (worldZ + seed * 1934) * noiseScale);
                 int height = Mathf.FloorToInt(noiseValue * heightMultiplier);
 
                 for (int y = 0; y <= height; y++)
@@ -69,22 +69,20 @@ public class Chunk : MonoBehaviour
     /// 청크가 제거될 때 블록을 모두 오브젝트 풀로 반환
     /// </summary>
     public void ReturnAllBlocks()
-{
-    for (int i = transform.childCount - 1; i >= 0; i--)
     {
-        Transform child = transform.GetChild(i);
-        GameObject block = child.gameObject;
-
-        if (block != null)
+        for (int i = transform.childCount - 1; i >= 0; i--)
         {
-            BlockType type = block.name.Contains("Stone") ? BlockType.Stone : BlockType.Grass;
+            Transform child = transform.GetChild(i);
+            GameObject block = child.gameObject;
 
-            if (block.activeSelf)
+            if (block != null && block.activeSelf) 
             {
-                child.SetParent(null); // 🔑 부모(Chunk)에서 분리
-                BlockPool.Instance.ReturnBlock(block);
+                if (block.activeSelf)
+                {
+                    BlockPool.Instance.ReturnBlock(block);
+                    child.SetParent(null);
+                }
             }
         }
     }
-}
 }
