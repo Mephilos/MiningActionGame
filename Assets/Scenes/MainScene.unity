@@ -575,11 +575,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1919904655}
   chunkPrefab: {fileID: 2894990324775518276, guid: 31e6a517d903e432d81ff687f1a3433b, type: 3}
-  chunkSharedMaterial: {fileID: 2100000, guid: b8682d73d5136fb4fa18a9f9cd45785e, type: 2}
+  chunkSharedMaterial: {fileID: 2100000, guid: ccf1580dc67ad450ca972f393f78933a, type: 2}
   chunkSize: 16
   chunkBuildHeight: 64
   worldSeed: 12345
-  noiseScale: 0.05
+  noiseScale: 0.02
   terrainHeightMultiplier: 10
   viewDistanceInChunks: 4
 --- !u!4 &955373697

@@ -3,9 +3,9 @@ using Unity.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 하나의 청크(Chunk)를 구성하는 클래스.
-/// - Perlin Noise 기반으로 블록을 배치.
-/// - 메쉬 결합 사용.
+/// 하나의 청크(Chunk)를 구성하는 클래스
+/// - Perlin Noise 기반으로 블록을 배치
+/// - 메쉬 결합 사용
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -227,7 +227,7 @@ public class Chunk : MonoBehaviour
                 == BlockType.Air;
     }
     // <summary>
-    /// 특정 블록 타입과 면 방향에 대한 UV 좌표 배열을 반환합니다.(텍스처를 잘라서 면판별)
+    /// 특정 블록 타입과 면 방향에 대한 UV 좌표 배열을 반환(텍스처를 잘라서 면판별)
     /// </summary>
     /// <param name="blockType">현재 블록의 타입</param>
     /// <param name="faceIndex">면의 인덱스 (0:Back, 1:Front, 2:Top, 3:Bottom, 4:Left, 5:Right)</param>
@@ -259,7 +259,7 @@ public class Chunk : MonoBehaviour
                 break;
         }
         // UV 좌표 계산 (타일 오프셋 * 타일 크기)를 기준으로 각 꼭짓점의 UV를 설정
-        // UV는 0~1 사이의 값. 아틀라스 이미지의 왼쪽 하단이 (0,0), 오른쪽 상단이 (1,1)
+        // UV는 0 1 사이의 값. 아틀라스 이미지의 왼쪽 하단이 (0,0), 오른쪽 상단이 (1,1)
         // 정점 순서: 왼쪽 아래, 왼쪽 위, 오른쪽 위, 오른쪽 아래 (AllFaceVertices[faceIndex] 와 동일한 순서여야 함)
         uvs[0] = new Vector2(tileOffset.x * TileU, tileOffset.y * TileV);                         // 좌하단
         uvs[1] = new Vector2(tileOffset.x * TileU, (tileOffset.y + 1) * TileV);                 // 좌상단
@@ -269,7 +269,7 @@ public class Chunk : MonoBehaviour
         return uvs;
     }
     /// <summary>
-    /// 청크가 파괴될 때 메시를 명시적으로 파괴하여 메모리 누수를 방지합니다.
+    /// 청크가 파괴될 때 메시를 명시적으로 파괴하여 메모리 누수를 방지
     /// </summary>
     private void OnDestroy()
     {
@@ -284,6 +284,73 @@ public class Chunk : MonoBehaviour
             }
         }
     }
+    /// <summary>
+    /// 청크 내의 지정된 로컬 좌표의 블록 타입을 변경하고 메시를 업데이트
+    /// </summary>
+    /// <param name="localX">변경할 블록의 청크 내 X 좌표 (0 ~ chunkSize-1)</param>
+    /// <param name="localY">변경할 블록의 청크 내 Y 좌표 (0 ~ chunkBuildHeight-1)</param>
+    /// <param name="localZ">변경할 블록의 청크 내 Z 좌표 (0 ~ chunkSize-1)</param>
+    /// <param name="newType">새로 설정할 블록 타입</param>
+    /// <returns>변경 성공 여부</returns>
+    public bool ChangeBlock(int localX, int localY, int localZ, BlockType newType)
+    {
+        // 1. 좌표 유효성 검사
+        if (localX < 0 || localX >= chunkSize ||
+            localY < 0 || localY >= chunkBuildHeight ||
+            localZ < 0 || localZ >= chunkSize)
+        {
+            Debug.LogWarning($"ChangeBlock failed: Coordinate ({localX}, {localY}, {localZ}) is out of bounds for chunk {chunkCoord}.");
+            return false; // 청크 범위 밖
+        }
+
+        // 변경할 위치의 현재 블록 타입 확인 (이미 같은 타입이거나 Air인데 Air로 바꾸려는 경우는 무시)
+        if (blockData[localX, localY, localZ] == newType)
+        {
+            return false; // 변경 사항 없음
+        }
+
+        // 블록 데이터 업데이트
+        blockData[localX, localY, localZ] = newType;
+
+        // 메시 재생성 요청
+        CreateChunkMesh(); // 변경된 데이터로 메시를 다시 만듦
+
+        // 인접 청크 업데이트 확인
+        CheckAndUpdateNeighborChunks(localX, localY, localZ);
+        //TODO: 만약 변경된 블록이 청크 경계에 있다면 인접 청크의 메시도 업데이트해야 할 수 있음(이웃 블록의 노출 여부가 있기 때문)
+
+        return true; // 변경 성공
+    }
+    // <<< 추가 끝 >>>
+
+    // <<< 추가: 인접 청크 업데이트 확인 함수 (선택적, 고급) >>>
+    private void CheckAndUpdateNeighborChunks(int localX, int localY, int localZ)
+    {
+        // 변경된 블록이 현재 청크의 경계면에 있는지 확인
+        bool needsUpdateN = false, needsUpdateE = false, needsUpdateS = false, needsUpdateW = false;
+
+        if (localX == 0) needsUpdateW = true;           // 서쪽 경계
+        else if (localX == chunkSize - 1) needsUpdateE = true; // 동쪽 경계
+
+        if (localZ == 0) needsUpdateS = true;           // 남쪽 경계
+        else if (localZ == chunkSize - 1) needsUpdateN = true; // 북쪽 경계
+
+        // Y축 경계는 보통 다른 청크와 맞닿지 않으므로 일반적으로는 고려하지 않음 (필요시 추가)
+
+        // 만약 경계면에 있다면, ChunkManager를 통해 해당 방향의 이웃 청크를 찾아 메시 업데이트 요청
+        if (needsUpdateN || needsUpdateE || needsUpdateS || needsUpdateW)
+        {
+            if (ChunkManager.Instance != null) // ChunkManager 인스턴스가 있는지 확인
+            {
+                if (needsUpdateN) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.up); // 북쪽 청크
+                if (needsUpdateE) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.right); // 동쪽 청크
+                if (needsUpdateS) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.down); // 남쪽 청크
+                if (needsUpdateW) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.left); // 서쪽 청크
+            }
+        }
+    }
+    // <<< 추가 끝 >>>
+
 
 
 
