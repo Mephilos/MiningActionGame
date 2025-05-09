@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// 하나의 청크(Chunk)를 구성하는 클래스.
 /// - Perlin Noise 기반으로 블록을 배치.
-/// - BlockPool을 통해 오브젝트를 재사용.
+/// - 메쉬 결합 사용.
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -22,9 +22,12 @@ public class Chunk : MonoBehaviour
     private MeshRenderer meshRenderer;
 
 //------------------------메쉬 정점 데이터---------------------------
-    //텍스처 아틀라스 사이즈
-    //아틀라스에 16*16의 타일이 있고, 타일 택스쳐 uv는 1/16;
-    private const float TileTextureSize = 1f / 16f;
+    private const float AtlasTotalTilesX = 4f; // 가로로 4칸 (1024 / 256 = 4)
+    private const float AtlasTotalTilesY = 4f; // 세로로 4칸 (1024 / 256 = 4)
+
+    // 타일 하나의 U, V 크기 (0~1 UV 공간 기준)
+    private const float TileU = 1f / AtlasTotalTilesX; // 1 / 4 = 0.25
+    private const float TileV = 1f / AtlasTotalTilesY; // 1 / 4 = 0.25
     //메시 생성에 쓰일 타일면의정점 데이터
     private static readonly Vector3[] FaceVertices_Back = { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 0, 0) }; // Z-
     private static readonly Vector3[] FaceVertices_Front = { new Vector3(1, 0, 1), new Vector3(1, 1, 1), new Vector3(0, 1, 1), new Vector3(0, 0, 1) }; // Z+
@@ -104,7 +107,7 @@ public class Chunk : MonoBehaviour
                 surfaceheight = Mathf.Clamp(surfaceheight, 0, chunkBuildHeight - 1);
 
                 // y(지상고?)를 따서 블록 타입 결정
-                for (int y = 0; y <= chunkBuildHeight; y++)
+                for (int y = 0; y < chunkBuildHeight; y++)
                 {
                     if(y > surfaceheight)
                     {
@@ -121,6 +124,7 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
+        CreateChunkMesh();
     }
 
 
@@ -191,6 +195,19 @@ public class Chunk : MonoBehaviour
 
         //메쉬 필터에 할당.
         meshFilter.mesh = mesh;
+
+        MeshCollider meshCollider = GetComponent<MeshCollider>(); // MeshCollider 컴포넌트 가져오기
+        if (meshCollider != null)
+        {
+            // 기존 메시가 있다면 제거 후 새로 할당 (메시 업데이트 시 중요)
+            meshCollider.sharedMesh = null;
+            meshCollider.sharedMesh = mesh; // 생성된 메시를 MeshCollider에도 할당
+            Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider.");
+        }
+        else
+        {
+            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found!");
+        }
     }
 
     /// <summary>
@@ -218,7 +235,7 @@ public class Chunk : MonoBehaviour
     private Vector2[] GetFaceUVs(BlockType blockType, int faceIndex)
     {
         Vector2[] uvs = new Vector2[4];
-        Vector2 tileOffset = Vector2.zero; // 아틀라스(청크하나 기준) 블록 텍스처의 시작 타일 좌표 (0,0 부터 시작)
+        Vector2 tileOffset = Vector2.zero; // 아틀라스(청크하나 기준) 블록 텍스처의 시작 타일 좌표 (0,0 좌측하단 부터 시작)
 
         // 블록 타입에 따라 사용할 타일의 아틀라스 내 좌표(오프셋)를 결정
         switch (blockType)
@@ -226,27 +243,28 @@ public class Chunk : MonoBehaviour
             case BlockType.Grass:
                 // Grass 블록의 경우, 윗면(Top, faceIndex==2)은 풀 텍스처, 옆면은 풀+흙, 아랫면(Bottom, faceIndex==3)은 흙 텍스처
                 if (faceIndex == 2) // Top
-                    tileOffset = new Vector2(0, 0); // 아틀라스 (0,0) 위치에 풀 윗면 텍스처
+                    tileOffset = new Vector2(0, 3); // 아틀라스 (0,3) 위치에 풀 윗면 텍스처
                 else if (faceIndex == 3) // Bottom
-                    tileOffset = new Vector2(2, 0); // 아틀라스 (2,0) 위치에 흙 텍스처
+                    tileOffset = new Vector2(1, 2); // 아틀라스 (1,2) 위치에 흙 텍스처
                 else // Sides
-                    tileOffset = new Vector2(1, 0); // 아틀라스 (1,0) 위치에 풀 옆면 텍스처
+                    tileOffset = new Vector2(1, 3); // 아틀라스 (1,3) 위치에 풀 옆면 텍스처
                 break;
             case BlockType.Stone:
-                tileOffset = new Vector2(3, 0); // 아틀라스 (3,0) 위치에 돌 텍스처 (모든 면 동일 가정)
+                tileOffset = new Vector2(1, 2); // 아틀라스 (1,2) 위치에 돌 텍스처 (모든 면 동일 가정)
                 break;
             
             default: // 정의되지 않은 블록은 기본 텍스처 또는 에러 텍스처
-                tileOffset = new Vector2(15, 15); // 예: 아틀라스 맨 끝 타일
+                tileOffset = new Vector2(AtlasTotalTilesX - 1, AtlasTotalTilesY - 1);
+                Debug.LogWarning($"GetFaceUVs: Unhandled BlockType '{blockType}'. Using default UVs (Atlas last tile).");
                 break;
         }
         // UV 좌표 계산 (타일 오프셋 * 타일 크기)를 기준으로 각 꼭짓점의 UV를 설정
         // UV는 0~1 사이의 값. 아틀라스 이미지의 왼쪽 하단이 (0,0), 오른쪽 상단이 (1,1)
         // 정점 순서: 왼쪽 아래, 왼쪽 위, 오른쪽 위, 오른쪽 아래 (AllFaceVertices[faceIndex] 와 동일한 순서여야 함)
-        uvs[0] = new Vector2(tileOffset.x * TileTextureSize, tileOffset.y * TileTextureSize);                         // 좌하단
-        uvs[1] = new Vector2(tileOffset.x * TileTextureSize, (tileOffset.y + 1) * TileTextureSize);                 // 좌상단
-        uvs[2] = new Vector2((tileOffset.x + 1) * TileTextureSize, (tileOffset.y + 1) * TileTextureSize);           // 우상단
-        uvs[3] = new Vector2((tileOffset.x + 1) * TileTextureSize, tileOffset.y * TileTextureSize);                 // 우하단
+        uvs[0] = new Vector2(tileOffset.x * TileU, tileOffset.y * TileV);                         // 좌하단
+        uvs[1] = new Vector2(tileOffset.x * TileU, (tileOffset.y + 1) * TileV);                 // 좌상단
+        uvs[2] = new Vector2((tileOffset.x + 1) * TileU, (tileOffset.y + 1) * TileV);           // 우상단
+        uvs[3] = new Vector2((tileOffset.x + 1) * TileU, tileOffset.y * TileV);                 // 우하단
 
         return uvs;
     }

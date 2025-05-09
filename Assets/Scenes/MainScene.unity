@@ -206,8 +206,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.06508446, y: -0.46185878, z: 0.0340079, w: 0.88390833}
+  m_LocalPosition: {x: 4.111304, y: 10.892877, z: -0.6056154}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -575,9 +575,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1919904655}
   chunkPrefab: {fileID: 2894990324775518276, guid: 31e6a517d903e432d81ff687f1a3433b, type: 3}
+  chunkSharedMaterial: {fileID: 2100000, guid: b8682d73d5136fb4fa18a9f9cd45785e, type: 2}
   chunkSize: 16
+  chunkBuildHeight: 64
   worldSeed: 12345
-  viewDistanceInChunks: 2
+  noiseScale: 0.05
+  terrainHeightMultiplier: 10
+  viewDistanceInChunks: 4
 --- !u!4 &955373697
 Transform:
   m_ObjectHideFlags: 0
@@ -622,13 +626,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 088cd3034817840798db5e4106d3bd77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockEntries:
-  - type: 0
-    prefab: {fileID: 283139148886384219, guid: 7e03cdaaff9a048fc985871ff5216d71, type: 3}
-    initialSize: 64
-  - type: 1
-    prefab: {fileID: 9099058071473682453, guid: ba8f1168b446741a2b80d3e8bbed06c8, type: 3}
-    initialSize: 64
+  blockEntries: []
 --- !u!4 &1194979697
 Transform:
   m_ObjectHideFlags: 0
@@ -666,7 +664,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 10
+      value: 19
       objectReference: {fileID: 0}
     - target: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: m_LocalPosition.z
