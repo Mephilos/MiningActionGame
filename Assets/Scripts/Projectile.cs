@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    //TODO: 충돌시 파괴 효과
+    //TODO: 충돌시 파괴 효과 추가 요망
     // 수명 설정용
     public float lifeTime = 5f;
 
@@ -48,7 +48,7 @@ public class Projectile : MonoBehaviour
                 Debug.LogWarning($"Failed to destroy block at ({blockX}, {blockY}, {blockZ}). Maybe it's Air or out of bounds?");
             }
 
-            // TODO: 충돌 효과 생성
+            // TODO: 충돌 효과 생성 요망
         }
 
         // 발사체 자신은 충돌 후 파괴
