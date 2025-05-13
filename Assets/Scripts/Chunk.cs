@@ -321,9 +321,6 @@ public class Chunk : MonoBehaviour
 
         return true; // 변경 성공
     }
-    // <<< 추가 끝 >>>
-
-    // <<< 추가: 인접 청크 업데이트 확인 함수 (선택적, 고급) >>>
     private void CheckAndUpdateNeighborChunks(int localX, int localY, int localZ)
     {
         // 변경된 블록이 현재 청크의 경계면에 있는지 확인
@@ -349,7 +346,6 @@ public class Chunk : MonoBehaviour
             }
         }
     }
-    // <<< 추가 끝 >>>
 
 
 
