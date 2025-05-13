@@ -654,10 +654,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5616558153871213032, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5616558153871213032, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.9
+      objectReference: {fileID: 0}
     - target: {fileID: 6883540361478055780, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: cameraFollow
       value: 
       objectReference: {fileID: 330585548}
+    - target: {fileID: 6898573589470979714, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
+      propertyPath: drillDelay
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6898573589470979714, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
+      propertyPath: drillRange
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
