@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 /// <summary>
@@ -149,7 +147,7 @@ public class ChunkManager : MonoBehaviour
     {
         if (loadedChunks.TryGetValue(coord, out Chunk chunkToUnload))
         {
-            Destroy(chunkToUnload.gameObject); // 일단은 즉시 파괴
+            Destroy(chunkToUnload.gameObject);
             loadedChunks.Remove(coord);
         }
     }

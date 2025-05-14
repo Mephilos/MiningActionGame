@@ -5471,7 +5471,7 @@ Transform:
   m_GameObject: {fileID: 1933455355802896021}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.223, z: 0.65}
+  m_LocalPosition: {x: 0, y: 1, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10835,7 +10835,7 @@ GameObject:
   - component: {fileID: 6898573589470979714}
   m_Layer: 2
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10916,6 +10916,10 @@ MonoBehaviour:
   bulletSpeed: 30
   maxFireDistance: 100
   rotateOwnerToAim: 1
+  drillDamage: 1
+  drillDelay: 0
+  drillRange: 2
+  currentWeaponMode: 0
 --- !u!1 &3599911416880207941
 GameObject:
   m_ObjectHideFlags: 0

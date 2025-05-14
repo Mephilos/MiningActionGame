@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 /// <summary>
 /// 하나의 청크(Chunk)를 구성하는 클래스
@@ -8,6 +10,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
+[RequireComponent(typeof(NavMeshSurface))]
 public class Chunk : MonoBehaviour
 {
     private Vector2Int chunkCoord;
@@ -16,11 +19,22 @@ public class Chunk : MonoBehaviour
     private int seed; 
     private float noiseScale;
     private float worldHeightMultiplier;//월드 굴곡 조절
+    private NavMeshSurface navMeshSurface;
     private BlockType[,,] blockData;
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     [Tooltip("청크 바닥에 사용할 바닥Plane프리팹")]
     public GameObject waterPlane;
+    [Header("아이템 스폰 설정")]
+    [Tooltip("청크 안에 매설될 프리팹(아이템")]
+    public GameObject itemPrefab;
+    [Tooltip("청크내에 매설될 확률")]
+    [Range(0f,1f)]
+    public float itemSpawnChance = 0.1f;
+    public int minItemSpawnY = 1;
+    public int maxItemSpawnY = 30;
+
+
 
     //------------------------메쉬 정점 데이터---------------------------
     private const float AtlasTotalTilesX = 4f; // 가로로 4칸 (1024 / 256 = 4)
@@ -73,6 +87,15 @@ public class Chunk : MonoBehaviour
         
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
+        navMeshSurface = GetComponent<NavMeshSurface>();
+
+        navMeshSurface.collectObjects = CollectObjects.Volume;
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.RenderMeshes;
+
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        
+        navMeshSurface.layerMask = 1 << groundLayer;
+        gameObject.layer = groundLayer;
 
         if(chunkMaterial != null)
         {
@@ -87,7 +110,9 @@ public class Chunk : MonoBehaviour
 
         PopulateBlockData();
 
-        CreateBedrockPlane();        
+        CreateBedrockPlane();
+
+        SpawnItemInChunk();
     }
 
     /// <summary>
@@ -129,7 +154,54 @@ public class Chunk : MonoBehaviour
         }
         CreateChunkMesh();
     }
+    /// <summary>
+    /// 청크 내의 랜덤한 위치에 아이템 메설
+    /// </summary>
+    private void SpawnItemInChunk()
+    {
+        // 아이템 프리팹 설정 확인
+        if (itemPrefab == null)
+        {
+            return; // 프리팹 없으면 실행 중단
+        }
 
+        if (Random.value > itemSpawnChance) // Random.value는 0.0과 1.0 사이의 랜덤 실수를 반환
+        {
+            return; // 확률에 당첨되지 않으면 실행 중단
+        }
+
+        // 아이템을 매설할 랜덤한 청크 내부 X, Z 좌표 선택
+        int x = Random.Range(1, chunkSize - 1); // 1 이상 (chunkSize-1) 미만의 정수
+        int z = Random.Range(1, chunkSize - 1);
+
+        
+        // 지정된 Y 범위 안에서 위에서 아래로 스캔하여 Stone 블록이 처음 나오는 위치를 찾아서 해당 좌표에 아이템을 숨김
+        int spawnY = -1; // 매설될 Y 좌표 변수
+
+        // minItemSpawnY 부터 maxItemSpawnY 까지 반복 탐색
+        // (안전하게 chunkBuildHeight 미만으로도 제한)
+        for (int y = Mathf.Clamp(minItemSpawnY, 0, chunkBuildHeight -1) ; y <= Mathf.Clamp(maxItemSpawnY, 0, chunkBuildHeight - 1); y++)
+        {
+            // 현재 (x, y, z) 위치의 블록 타입 확인
+            if (blockData[x, y, z] == BlockType.Stone) // 만약 돌 블록이라면
+            {
+                // 그리고 그 바로 위 칸이 공기가 아니라면 (즉, 완전히 땅 속에 묻히도록) - 선택 사항
+                if (y + 1 < chunkBuildHeight && blockData[x, y + 1, z] != BlockType.Air)
+                {
+                    spawnY = y; // 매설
+                    break;
+                }
+            }
+        }
+        if (spawnY != -1)
+        {
+            // 실제 아이템 오브젝트 생성
+            Vector3 itemPosition = new Vector3(x + 0.5f, spawnY + 0.5f, z + 0.5f); // 블록 중앙에 위치하도록 0.5f 더함
+            GameObject spawnedItem = Instantiate(itemPrefab, this.transform); // 청크의 자식으로 생성
+            spawnedItem.transform.localPosition = itemPosition; // 로컬 위치 설정
+            spawnedItem.name = $"{itemPrefab.name}_({chunkCoord.x * chunkSize + x},{spawnY},{chunkCoord.y * chunkSize + z})"; // 월드 좌표로 이름 설정
+        }
+    }
 
     ///<summary>
     /// 블록데이터 배열을 이용해서 렌더링
@@ -205,12 +277,13 @@ public class Chunk : MonoBehaviour
             // 기존 메시가 있다면 제거 후 새로 할당 (메시 업데이트 시 중요)
             meshCollider.sharedMesh = null;
             meshCollider.sharedMesh = mesh; // 생성된 메시를 MeshCollider에도 할당
-            Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider.");
+            Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
         }
         else
         {
-            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found!");
+            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found");
         }
+        BakeNavMesh();
     }
 
     /// <summary>
@@ -271,6 +344,22 @@ public class Chunk : MonoBehaviour
 
         return uvs;
     }
+
+    ///<summary>
+    /// 생성된 청크의 NavMesh를 Bake
+    /// </summary>
+    public void BakeNavMesh()
+    {
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.BuildNavMesh(); // NavMesh 생성
+            Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
+        }
+        else
+        {
+            Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface component not found for baking");
+        }
+    }
     /// <summary>
     /// 청크가 파괴될 때 메시를 명시적으로 파괴하여 메모리 누수를 방지
     /// </summary>
@@ -282,9 +371,12 @@ public class Chunk : MonoBehaviour
             {
                 Destroy(meshFilter.sharedMesh);
             }
-            else
-            {
-            }
+        }
+        // 이 청크와 관련된 NavMesh 데이터 제거
+        if (navMeshSurface != null)
+        {
+            navMeshSurface.RemoveData();
+            Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
         }
     }
     /// <summary>
