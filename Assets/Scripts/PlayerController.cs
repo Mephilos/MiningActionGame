@@ -1,3 +1,4 @@
+//using System.Numerics;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -44,16 +45,39 @@ public class PlayerController : MonoBehaviour
 
         inputDir = (camForward * moveZ + camRight * moveX).normalized;
 
-        Debug.DrawRay(transform.position, inputDir, Color.blue);
         Vector3 horizontalVelocity = inputDir * moveSpeed;
         //중력 구현
         if (controller.isGrounded && velocity.y < 0)
         {   
             velocity.y = -2f; // 바닥에 눌러붙게
         }
-        velocity.y += gravity * Time.deltaTime;
-        Vector3 finalVelocity = horizontalVelocity + Vector3.up * velocity.y;
-        controller.Move(finalVelocity * Time.deltaTime);
+        velocity.y += gravity * Time.fixedDeltaTime;
+
+        Vector3 currentPosition = transform.position;
+        Vector3 intendedDeltaMovement = (horizontalVelocity + Vector3.up * velocity.y) * Time.fixedDeltaTime;
+        Vector3 targetPosition = currentPosition + intendedDeltaMovement;
+
+        if(ChunkManager.Instance != null && ChunkManager.Instance.useWorldBorder)
+        {
+            float playerRadius = controller.radius;
+
+            float worldMinX = ChunkManager.Instance.minChunkX * ChunkManager.Instance.chunkSize + playerRadius;
+            float worldMaxX = (ChunkManager.Instance.maxChunkX + 1) * ChunkManager.Instance.chunkSize - playerRadius;
+            float worldMinZ = ChunkManager.Instance.minChunkZ * ChunkManager.Instance.chunkSize + playerRadius;
+            float worldMaxZ = (ChunkManager.Instance.maxChunkZ + 1) * ChunkManager.Instance.chunkSize - playerRadius;
+
+            // 목표 X 위치가 경계를 벗어나면 경계값으로 강제 설정
+            if (targetPosition.x < worldMinX) targetPosition.x = worldMinX;
+            if (targetPosition.x > worldMaxX) targetPosition.x = worldMaxX;
+
+            // 목표 Z 위치가 경계를 벗어나면 경계값으로 강제 설정
+            if (targetPosition.z < worldMinZ) targetPosition.z = worldMinZ;
+            if (targetPosition.z > worldMaxZ) targetPosition.z = worldMaxZ;
+        }
+    
+        Vector3 actualMovement = targetPosition - currentPosition;
+
+        controller.Move(actualMovement);
 
         //조준 모드일경우 이동방향 회전 off
         if (inputDir.sqrMagnitude > 0.01f && !Input.GetMouseButton(1))
@@ -76,14 +100,16 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Raycast 바닥 판정
+    /// Raycast 바닥 판정(디버그용)
     /// </summary>
     void CheckGrounded()
     {
         //레이로 상태 그라운드 상태 확인
         Debug.DrawRay(transform.position, Vector3.down * 0.2f, controller.isGrounded ? Color.green : Color.red);
     }
-
+    /// <summary>
+    /// 조준시 에임 방향으로 캐릭터 회전
+    /// </summary>
     void RotateTowardsAimDirection()
     {
         //조준 모드일 경우 에임위치 따라 케릭터 회전

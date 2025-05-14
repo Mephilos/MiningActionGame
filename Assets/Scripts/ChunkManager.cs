@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor.EditorTools;
 using UnityEngine;
 
 /// <summary>
@@ -15,7 +16,7 @@ public class ChunkManager : MonoBehaviour
     [SerializeField] private Material chunkSharedMaterial;
     
     [Header("World Settings")]
-    [SerializeField] private int chunkSize = 16;
+    [SerializeField] public int chunkSize = 16;
     [SerializeField] private int chunkBuildHeight = 64;   // 청크의 Y축 최대 높이
     [SerializeField] private int worldSeed = 12345;
     [SerializeField] private float noiseScale = 0.05f;      
@@ -26,6 +27,18 @@ public class ChunkManager : MonoBehaviour
 
     private Dictionary<Vector2Int, Chunk> loadedChunks = new Dictionary<Vector2Int, Chunk>();
     private Vector2Int lastPlayerChunkCoord;
+    [Header("월드 경계 설정")]
+    [Tooltip("월드 경계 설정 여부")]
+    public bool useWorldBorder = true;
+    [Tooltip("생성될 청크의 최소 X 좌표")]
+    public int minChunkX = -10;
+    [Tooltip("생성될 청크의 최대 X 좌표")]
+    public int maxChunkX = 10;
+    [Tooltip("생성될 청크의 최소 Z 좌표")]
+    public int minChunkZ = -10; 
+    [Tooltip("생성될 청크의 최대 Z 좌표")]
+    public int maxChunkZ = 10;  
+
     //싱글톤 설정
     private void Awake()
     {
@@ -76,7 +89,17 @@ public class ChunkManager : MonoBehaviour
         {
             for (int zOffset = -viewDistanceInChunks; zOffset <= viewDistanceInChunks; zOffset++)
             {
+                //청크 좌표와 관련된 Vector2Int는 (X,Y)는 청크의 (X,Z)로 사용되는중
                 Vector2Int coord = new Vector2Int(lastPlayerChunkCoord.x + xOffset, lastPlayerChunkCoord.y + zOffset);
+                
+                if (useWorldBorder)
+                {
+                    if (coord.x < minChunkX || coord.x > maxChunkX || coord.y < minChunkZ || coord.y > maxChunkZ)
+                    {
+                        continue; // 월드 한계 밖이면 건너 뛰기
+                    }
+                }
+                
                 requiredChunkCoords.Add(coord);
 
                 // 아직 로드되지 않은 청크라면 새로 생성 또는 풀에서 가져와 로드
@@ -140,7 +163,7 @@ public class ChunkManager : MonoBehaviour
         return new Vector2Int(x, z);
     }
     /// <summary>
-    /// 지정된 월드 좌표의 블록을 파괴합니다.
+    /// 지정된 월드 좌표의 블록을 파괴
     /// </summary>
     /// <param name="worldX">파괴할 블록의 월드 X 좌표</param>
     /// <param name="worldY">파괴할 블록의 월드 Y 좌표</param>
@@ -175,6 +198,12 @@ public class ChunkManager : MonoBehaviour
     /// </summary>
     public void RequestChunkMeshUpdate(Vector2Int chunkCoord)
     {
+         if (useWorldBorder && (chunkCoord.x < minChunkX || chunkCoord.x > maxChunkX || 
+                                chunkCoord.y < minChunkZ || chunkCoord.y > maxChunkZ))
+        {
+            return; // 월드 한계 밖 청크는 업데이트 안 함
+        }
+
         if (loadedChunks.TryGetValue(chunkCoord, out Chunk chunkToUpdate))
         {
             // 해당 청크의 메시를 다시 생성하도록 요청

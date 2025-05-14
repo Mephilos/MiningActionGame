@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -20,8 +19,10 @@ public class Chunk : MonoBehaviour
     private BlockType[,,] blockData;
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
+    [Tooltip("청크 바닥에 사용할 바닥Plane프리팹")]
+    public GameObject waterPlane;
 
-//------------------------메쉬 정점 데이터---------------------------
+    //------------------------메쉬 정점 데이터---------------------------
     private const float AtlasTotalTilesX = 4f; // 가로로 4칸 (1024 / 256 = 4)
     private const float AtlasTotalTilesY = 4f; // 세로로 4칸 (1024 / 256 = 4)
 
@@ -52,8 +53,8 @@ public class Chunk : MonoBehaviour
         FaceVertices_Top, FaceVertices_Bottom, 
         FaceVertices_Left, FaceVertices_Right
     };
-
-//------------------------------메쉬 정점 데이터 끝-----------------------------
+    //------------------------------메쉬 정점 데이터 끝-----------------------------
+    
     /// <summary>
     /// 청크 초기화 및 블록 생성
     /// </summary>
@@ -85,6 +86,8 @@ public class Chunk : MonoBehaviour
         blockData = new BlockType[chunkSize, chunkBuildHeight, chunkSize];
 
         PopulateBlockData();
+
+        CreateBedrockPlane();        
     }
 
     /// <summary>
@@ -285,7 +288,7 @@ public class Chunk : MonoBehaviour
         }
     }
     /// <summary>
-    /// 청크 내의 지정된 로컬 좌표의 블록 타입을 변경하고 메시를 업데이트
+    /// 청크 내의 지정된 로컬 좌표의 블록 타입을 변경하고 메시를 업데이트(맵 파괴시 파괴된 부분 업데이트)
     /// </summary>
     /// <param name="localX">변경할 블록의 청크 내 X 좌표 (0 ~ chunkSize-1)</param>
     /// <param name="localY">변경할 블록의 청크 내 Y 좌표 (0 ~ chunkBuildHeight-1)</param>
@@ -294,7 +297,7 @@ public class Chunk : MonoBehaviour
     /// <returns>변경 성공 여부</returns>
     public bool ChangeBlock(int localX, int localY, int localZ, BlockType newType)
     {
-        // 1. 좌표 유효성 검사
+        // 좌표 유효성 검사
         if (localX < 0 || localX >= chunkSize ||
             localY < 0 || localY >= chunkBuildHeight ||
             localZ < 0 || localZ >= chunkSize)
@@ -346,9 +349,20 @@ public class Chunk : MonoBehaviour
             }
         }
     }
-
-
-
+    /// <summary>
+    /// 청크의 가장 밑바닥에 Plane을 생성
+    /// </summary>
+    private void CreateBedrockPlane()
+    {
+        GameObject bedrockPlane = Instantiate(waterPlane, this.transform);
+        bedrockPlane.name = "WaterPlaneInstance";
+        //청크 가운데에 Plane 위치 시킴
+        bedrockPlane.transform.localPosition = new Vector3(chunkSize / 2.0f, 0f, chunkSize / 2.0f);
+        //청크 크기에 맞춰 조정 (UnityPlane은 1이 = 10유닛임)
+        bedrockPlane.transform.localScale = new Vector3(chunkSize / 10.0f, 1.0f, chunkSize / 10.0f);
+        //최적화 관련 설정
+        bedrockPlane.isStatic = true;
+    }
 
     // /// <summary>
     // /// 청크가 제거될 때 블록을 모두 오브젝트 풀로 반환
