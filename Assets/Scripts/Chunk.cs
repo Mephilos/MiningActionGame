@@ -92,6 +92,9 @@ public class Chunk : MonoBehaviour
         navMeshSurface.collectObjects = CollectObjects.Volume;
         navMeshSurface.useGeometry = NavMeshCollectGeometry.RenderMeshes;
 
+        navMeshSurface.size = new Vector3(this.chunkSize, this.chunkBuildHeight, this.chunkSize);
+        navMeshSurface.center = new Vector3(this.chunkSize / 2.0f, this.chunkBuildHeight / 2.0f, this.chunkSize / 2.0f);
+
         int groundLayer = LayerMask.NameToLayer("Ground");
         
         navMeshSurface.layerMask = 1 << groundLayer;
@@ -353,7 +356,7 @@ public class Chunk : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh(); // NavMesh 생성
-            Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
+    ///     Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
         }
         else
         {

@@ -8,6 +8,8 @@ TagManager:
   - Chunk
   - Item
   - Enemy
+  - Bullet
+  - PlayerTest
   layers:
   - Default
   - TransparentFX
