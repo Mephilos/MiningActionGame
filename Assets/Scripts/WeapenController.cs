@@ -2,12 +2,14 @@ using UnityEngine;
 
 public class WeapenController : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-    public Transform firePoint;
-    public float bulletSpeed = 30f;
-    public float maxFireDistance = 100f;
+    [Header("통상 무기 셋팅")]
+    public WeaponData currentWeaponData;
+    public Transform firePoint; // 발사 위치
+    public float bulletSpeed = 30f; // 발사체 속도
+    public float maxFireDistance = 100f; //최대 사거리
     public bool rotateOwnerToAim = true;
 
+    private PlayerData playerData; // 플레이어 스탯 참조
     private Transform owner; // 사용자 본체
 
     [Header("드릴 셋팅")]
@@ -18,14 +20,24 @@ public class WeapenController : MonoBehaviour
 
     public enum WeaponMode
     {
-        Projectile,
-        Drill
+        Projectile, // 통상무기 모드
+        Drill   // 드릴(채굴) 모드
     }
 
     public WeaponMode currentWeaponMode = WeaponMode.Projectile;
     void Awake()
     {
         owner = transform;
+        playerData = owner.GetComponent<PlayerData>();
+        // 디버그
+        if (currentWeaponData == null && currentWeaponMode == WeaponMode.Projectile)
+        {
+            Debug.LogError($"{gameObject.name} WeaponData가 할당 되지 않음.");
+        }
+        if (playerData == null)
+        {
+            Debug.LogError($"{gameObject.name} PlayerData가 할당 되지 않음.");
+        }
     }
 
     void Update()
@@ -66,6 +78,17 @@ public class WeapenController : MonoBehaviour
 
     public void FireProjectile()
     {
+        // 디버그
+        if (currentWeaponData == null || currentWeaponData.projectilePrefab == null)
+        {
+            Debug.LogError("현재 무기 데이터 또는 발사체 프리팹이 설정되지 않았습니다!");
+            return;
+        }
+        if (playerData == null)
+        {
+            Debug.LogError("PlayerStats 참조가 없습니다. 데미지 계산 불가!");
+            return;
+        }
         //카메라 중심에 Ray 생성
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
         Debug.DrawRay(ray.origin, ray.direction * maxFireDistance, Color.yellow, 1f);
@@ -94,9 +117,16 @@ public class WeapenController : MonoBehaviour
         //미사일 머리 방향 수정
         Quaternion bulletRotation = Quaternion.LookRotation(fireDir) * Quaternion.Euler(90f, 0f, 0f);
         //미사일 인스턴스 생성
-        GameObject bullet = Instantiate(bulletPrefab, firePoint.position, bulletRotation);
+        GameObject bullet = Instantiate(currentWeaponData.projectilePrefab, firePoint.position, bulletRotation);
         bullet.GetComponent<Rigidbody>().linearVelocity = fireDir * bulletSpeed;
-        Debug.Log("발사");
+
+        Projectile projectileScript = bullet.GetComponent<Projectile>();
+        if (projectileScript != null)
+        {
+            float totalDamage = playerData.currentAttackDamage + currentWeaponData.baseDamage;
+            projectileScript.SetDamage(totalDamage);
+        }
+        Debug.Log("발사체 데미지: " + (playerData.currentAttackDamage + currentWeaponData.baseDamage));
     }
 
     void TryUseDrill()

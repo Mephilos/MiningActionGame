@@ -78,7 +78,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
@@ -120,6 +120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89eb79cbb2b4d40f588d324f0f13452a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyBaseData: {fileID: 11400000, guid: 65fbbb1328a1d4b79a33567eb68de1df, type: 2}
   detectionRadius: 15
   moveSpeed: 3.5
   selfDestructDelay: 0

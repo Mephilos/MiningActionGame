@@ -7,6 +7,11 @@ using System.Collections;
 [RequireComponent(typeof(Collider))]     
 public class BasicEnemy : MonoBehaviour
 {
+    [Header("적 스탯 데이터")]
+    public EnemyBaseStatsData enemyBaseData;
+
+    private float currentHealth;
+
     [Header("추적 설정")]
     [Tooltip("플레이어 감지 거리")]
     public float detectionRadius = 15f;
@@ -25,6 +30,19 @@ public class BasicEnemy : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
 
+        if (enemyBaseData == null)
+        {
+            Debug.LogError($"[{gameObject.name}] EnemyBaseStatsData가 할당되지 않았습니다! 기본값을 사용하거나 스크립트가 비활성화될 수 있습니다.");
+            // 기본값으로 초기화하거나, 여기서도 enabled = false; 처리 가능
+            currentHealth = 50f; // 예비용 초기화
+        }
+        else
+        {
+            // ScriptableObject로부터 스탯 초기화
+            currentHealth = enemyBaseData.maxHealth;
+            detectionRadius = enemyBaseData.detectionRadius;
+            moveSpeed = enemyBaseData.moveSpeed;
+        }
         if (navMeshAgent != null)
         {
             navMeshAgent.updateRotation = true; // 이동 방향으로 자동 회전 활성화
@@ -47,10 +65,13 @@ public class BasicEnemy : MonoBehaviour
     }
     void OnEnable()
     {
-        if(!EnemySpawner.activeEnemies.Contains(this))
+        if (!EnemySpawner.activeEnemies.Contains(this))
         {
             EnemySpawner.activeEnemies.Add(this);
         }
+
+        if (enemyBaseData != null) currentHealth = enemyBaseData.maxHealth;
+        else currentHealth = 50f;
     }
 
     void OnDisable()
@@ -75,7 +96,14 @@ public class BasicEnemy : MonoBehaviour
         }
 
         // NavMeshAgent 기본 설정
-        navMeshAgent.speed = moveSpeed;
+        if (enemyBaseData != null)
+        {
+            navMeshAgent.speed = enemyBaseData.moveSpeed; // SO의 moveSpeed 사용
+        }
+        else
+        {
+            navMeshAgent.speed = this.moveSpeed; // SO가 없으면 인스펙터 값 사용
+        }
         navMeshAgent.stoppingDistance = 0.5f; // 플레이어에게 매우 가까이 다가가도록 설정
 
         // NavMeshAgent가 NavMesh 위에 확실히 위치 (동적 생성 환경에서 중요)
@@ -146,7 +174,28 @@ public class BasicEnemy : MonoBehaviour
             DestroySelf();
         }
     }
-    
+    public void TakeDamage(float damageAmount)
+    {
+        if (enemyBaseData == null && currentHealth <= 0) return;
+        currentHealth -= damageAmount;
+        Debug.Log($"{gameObject.name}: {damageAmount}의 데미지 받음 현재 체력: {currentHealth}/{enemyBaseData.maxHealth}");
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    void Die()
+    {
+        PlayerData playerData = FindObjectOfType<PlayerData>();
+        if (playerData != null && enemyBaseData != null)
+        {
+            playerData.GainXP(enemyBaseData.experienceToGive);
+        }
+
+        // TODO: 아이템 드랍 로직
+        DestroySelf();
+    }
     void DestroySelf()
     {
         Debug.Log("DestroySelf 호출됨");

@@ -280,7 +280,7 @@ public class Chunk : MonoBehaviour
             // 기존 메시가 있다면 제거 후 새로 할당 (메시 업데이트 시 중요)
             meshCollider.sharedMesh = null;
             meshCollider.sharedMesh = mesh; // 생성된 메시를 MeshCollider에도 할당
-            Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
+        //    Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
         }
         else
         {
@@ -379,7 +379,7 @@ public class Chunk : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.RemoveData();
-            Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
+        //    Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
         }
     }
     /// <summary>

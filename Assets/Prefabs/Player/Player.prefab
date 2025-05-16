@@ -234,7 +234,7 @@ GameObject:
   - component: {fileID: 8574836379560198047}
   - component: {fileID: 7191034092043520586}
   - component: {fileID: 2742351378637729173}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Smoke
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5648,7 +5648,7 @@ GameObject:
   - component: {fileID: 1032512809875652916}
   - component: {fileID: 4825520286589325488}
   - component: {fileID: 7288445173878819764}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Ripple
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10833,6 +10833,7 @@ GameObject:
   - component: {fileID: -2280788958821354642}
   - component: {fileID: 6883540361478055780}
   - component: {fileID: 6898573589470979714}
+  - component: {fileID: 4472608141841992023}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -10895,9 +10896,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afb699531626c44e0a90fa3eb8b483e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
-  jumpForce: 8
-  gravity: -20
   cameraFollow: {fileID: 0}
 --- !u!114 &6898573589470979714
 MonoBehaviour:
@@ -10911,7 +10909,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletPrefab: {fileID: 1633774235790774350, guid: 9d14358003ad7489ea0162dabce431c1, type: 3}
+  currentWeaponData: {fileID: 11400000, guid: 9f0290dedf1ae4bdca17653d417f261a, type: 2}
   firePoint: {fileID: 5616558153871213032}
   bulletSpeed: 30
   maxFireDistance: 100
@@ -10920,6 +10918,37 @@ MonoBehaviour:
   drillDelay: 0
   drillRange: 2
   currentWeaponMode: 0
+--- !u!114 &4472608141841992023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3469187922386512396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bdc83b965e5648d79cfc0800cca56f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseStatsData: {fileID: 11400000, guid: e4fa13eda78fe4e5d800a16a08179760, type: 2}
+  currentHealth: 0
+  level: 0
+  currentXP: 0
+  xpToNextLevel: 0
+  currentAttackDamage: 0
+  currentMoveSpeed: 0
+  currentJumpForce: 0
+  currentMaxJumpCount: 0
+  jumpCountAvailable: 0
+  currentDashForce: 0
+  currentDashDuration: 0
+  currentDashCooldown: 0
+  dashCooldownTimer: 0
+  currentDashInvincibleDuration: 0
+  isInvincible: 0
+  isDashing: 0
+  currentDrillPower: 0
+  currentDrillRange: 0
 --- !u!1 &3599911416880207941
 GameObject:
   m_ObjectHideFlags: 0
