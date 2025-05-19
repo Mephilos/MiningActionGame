@@ -25,6 +25,9 @@ public class BasicEnemy : MonoBehaviour
     private Rigidbody rb;                 
     private bool isChasing = false;
 
+    public float navMeshSampleRadius = 2.0f;
+
+
     void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -118,18 +121,26 @@ public class BasicEnemy : MonoBehaviour
             yield return null;
         }
 
-        if (navMeshAgent.isOnNavMesh == false && navMeshAgent.enabled)
+        EnsureAgentOnNavMeshLogic();
+    }
+    void EnsureAgentOnNavMeshLogic()
+    {
+        if (navMeshAgent != null && !navMeshAgent.isOnNavMesh && navMeshAgent.enabled)
         {
             NavMeshHit hit;
-            // 현재 위치에서 2.0f 반경 내 가장 가까운 NavMesh 위치 찾기
-            if (NavMesh.SamplePosition(transform.position, out hit, 2.0f, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(transform.position, out hit, navMeshSampleRadius, NavMesh.AllAreas))
             {
-                navMeshAgent.Warp(hit.position); // 찾은 위치로 Warp
+                Debug.LogWarning($"[{gameObject.name}] NavMesh에서 벗어남. {transform.position} -> {hit.position} 위치로 Warp 시도.");
+                navMeshAgent.Warp(hit.position);
+                if (isChasing && playerTransform != null) // Warp 후 다시 목적지 설정
+                {
+                    navMeshAgent.SetDestination(playerTransform.position);
+                }
             }
             else
             {
-                Debug.LogWarning($"[{gameObject.name}] ({transform.position}) 근처에 유효한 NavMesh를 찾을 수 없습니다. 스폰 위치나 NavMesh Bake 상태를 확인하세요.", this);
-                gameObject.SetActive(false);
+                Debug.LogError($"[{gameObject.name}] ({transform.position}) 근처에 유효한 NavMesh를 찾을 수 없어 Warp 실패. 스폰 위치나 NavMesh Bake 상태 확인 필요.", this);
+                // gameObject.SetActive(false); // 유효한 위치를 못 찾으면 비활성화 고려
             }
         }
     }
@@ -139,19 +150,34 @@ public class BasicEnemy : MonoBehaviour
         if (playerTransform == null || !navMeshAgent.enabled || !navMeshAgent.isOnNavMesh)
         {
             // 필요한 요소가 없거나 NavMesh 위에 있지 않으면 아무것도 하지 않음
-            if(navMeshAgent != null && navMeshAgent.hasPath)
+            if (navMeshAgent != null && navMeshAgent.hasPath)
             {
                 navMeshAgent.ResetPath(); // 경로 초기화
             }
+            isChasing = false;
             return;
+        }
+        if (isChasing && !navMeshAgent.isOnNavMesh)
+        {
+            Debug.LogWarning($"[{gameObject.name}] 추적 중 NavMesh 벗어남 감지!");
+            EnsureAgentOnNavMeshLogic();
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         if (distanceToPlayer <= detectionRadius)
         {
-            // 플레이어가 감지 반경 내에 있으면 추적 시작
-            navMeshAgent.SetDestination(playerTransform.position);
+            if (navMeshAgent.isOnNavMesh) // NavMesh 위에 있을 때만 목적지 설정
+            {
+                if (!navMeshAgent.SetDestination(playerTransform.position))
+                {
+                    Debug.LogError($"[{gameObject.name}] SetDestination 실패! 플레이어 위치: {playerTransform.position}");
+                }
+                if (!isChasing) // 추적 시작 로그
+                {
+                    Debug.Log($"[{gameObject.name}] 플레이어 감지, 추적 시작. 거리: {distanceToPlayer}, 목적지: {playerTransform.position}");
+                }
+            }
             isChasing = true;
         }
         else
@@ -187,7 +213,7 @@ public class BasicEnemy : MonoBehaviour
     }
     void Die()
     {
-        PlayerData playerData = FindObjectOfType<PlayerData>();
+        PlayerData playerData = FindFirstObjectByType<PlayerData>();
         if (playerData != null && enemyBaseData != null)
         {
             playerData.GainXP(enemyBaseData.experienceToGive);

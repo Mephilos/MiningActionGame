@@ -14,7 +14,6 @@ public class PlayerController : MonoBehaviour
     private Vector3 inputDir;
     private Vector3 velocity;
 
-    private float lastDashTime = -Mathf.Infinity;
     private Coroutine dashCoroutine;
     private Coroutine invincibilityCoroutine;
 

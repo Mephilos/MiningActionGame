@@ -58,7 +58,7 @@ public class PlayerData : MonoBehaviour
             currentAttackDamage = 10f;
             currentMoveSpeed = 5f;
             currentJumpForce = 8f;
-            currentMaxJumpCount = 1;
+            currentMaxJumpCount = 2;
             currentDashForce = 15f;
             currentDashDuration = 0.2f;
             currentDashCooldown = 1f;
