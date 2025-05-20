@@ -5,7 +5,7 @@ public class Projectile : MonoBehaviour
     //TODO: 충돌시 파괴 효과 추가 요망
     // 수명 설정용
     public float lifeTime = 5f;
-    private float damageAmount;
+    private float _damageAmount;
 
     void Start()
     {
@@ -14,7 +14,7 @@ public class Projectile : MonoBehaviour
     }
     public void SetDamage(float damage)
     {
-        damageAmount = damage;
+        _damageAmount = damage;
     }
     // 물리 충돌이 발생했을 때 호출되는 함수
     void OnTriggerEnter(Collider other)
@@ -23,7 +23,7 @@ public class Projectile : MonoBehaviour
         Debug.Log("발사체 충돌 확인");
         if (enemy != null)
         {
-            enemy.TakeDamage(damageAmount);
+            enemy.TakeDamage(_damageAmount);
         }
         //TODO:다른 오브젝트 판정 추가 가능
         // 발사체 자신은 충돌 후 파괴

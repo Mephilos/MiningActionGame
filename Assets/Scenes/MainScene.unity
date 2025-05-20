@@ -544,64 +544,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &955373695
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 955373697}
-  - component: {fileID: 955373696}
-  m_Layer: 0
-  m_Name: ChunkManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &955373696
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 955373695}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e72eabaff49924e50b6fa977de65dde3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 1919904655}
-  chunkPrefab: {fileID: 2894990324775518276, guid: 31e6a517d903e432d81ff687f1a3433b, type: 3}
-  chunkSharedMaterial: {fileID: 2100000, guid: ccf1580dc67ad450ca972f393f78933a, type: 2}
-  chunkSize: 16
-  chunkBuildHeight: 64
-  worldSeed: 12345
-  noiseScale: 0.04
-  terrainHeightMultiplier: 8
-  viewDistanceInChunks: 4
-  useWorldBorder: 1
-  minChunkX: -5
-  maxChunkX: 5
-  minChunkZ: -5
-  maxChunkZ: 5
---- !u!4 &955373697
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 955373695}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1545946479
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -624,7 +566,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 19
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
       propertyPath: m_LocalPosition.z
@@ -663,6 +605,60 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
+--- !u!1 &1593179335
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1593179336}
+  - component: {fileID: 1593179337}
+  m_Layer: 0
+  m_Name: StageManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1593179336
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593179335}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 17.559168, y: -9.504273, z: 6.345222}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1593179337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593179335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24ab85e465bf84a1ab84f0f4e5359308, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageChunkPrefab: {fileID: 2894990324775518276, guid: 31e6a517d903e432d81ff687f1a3433b, type: 3}
+  stageSharedMaterial: {fileID: 2100000, guid: ccf1580dc67ad450ca972f393f78933a, type: 2}
+  stageSize: 16
+  stageBuildHeight: 32
+  baseWorldSeed: 12345
+  terrainNoiseScale: 0.01
+  terrainHeightMultiplier: 8
+  playerTransform: {fileID: 1919904655}
+  timeToSurvivePerStage: 40
+  delayBeforeNextStage: 3
 --- !u!4 &1919904655 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8412697098108679351, guid: bf8d782af2fe84248a9e562d9e1484ff, type: 3}
@@ -697,12 +693,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c907fcaadbfe4400dbd928482b93d181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 6327733385080820348, guid: 818017082b8274c84b5e36a5533d16f8, type: 3}
-  minSpawnDistance: 10
-  maxSpawnDistance: 25
-  spawnInterval: 5
+  defaultEnemyPrefab: {fileID: 6327733385080820348, guid: 818017082b8274c84b5e36a5533d16f8, type: 3}
   maxEnemiesToSpawnAtOnce: 1
-  maxTotalEnemies: 10
+  minSpawnDistanceFromPlayer: 10
+  maxSpawnDistanceFromPlayer: 25
   spawnPositionAttempts: 10
   navMeshSampleRadius: 2
 --- !u!4 &2043441970
@@ -804,5 +798,5 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 779335494}
-  - {fileID: 955373697}
   - {fileID: 2043441970}
+  - {fileID: 1593179336}

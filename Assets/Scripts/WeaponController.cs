@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class WeapenController : MonoBehaviour
+public class WeaponController : MonoBehaviour
 {
     [Header("통상 무기 셋팅")]
     public WeaponData currentWeaponData;

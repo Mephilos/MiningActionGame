@@ -20,8 +20,8 @@ public class ChunkManager : MonoBehaviour
     [SerializeField] private float noiseScale = 0.05f;      
     [SerializeField] private float terrainHeightMultiplier = 20f; 
 
-    [Header("View Settings")]
-    [SerializeField] private int viewDistanceInChunks = 2;
+    // [Header("View Settings")]
+    // [SerializeField] private int viewDistanceInChunks = 2;
 
     private Dictionary<Vector2Int, Chunk> loadedChunks = new Dictionary<Vector2Int, Chunk>();
     private Vector2Int lastPlayerChunkCoord;
@@ -64,70 +64,73 @@ public class ChunkManager : MonoBehaviour
         {
             Debug.LogError("[ChunkManager] Chunk Shared Material is not assigned!");
         }
-        lastPlayerChunkCoord = GetPlayerChunkCoord();
-        UpdateChunks();
+        LoadChunkAt(Vector2Int.zero);
+        // lastPlayerChunkCoord = GetPlayerChunkCoord();
+        // UpdateChunks();
     }
 
-    private void Update()
-    {
-        Vector2Int currentPlayerChunkCoord = GetPlayerChunkCoord();
-        if (currentPlayerChunkCoord != lastPlayerChunkCoord)
-        {
-            lastPlayerChunkCoord = currentPlayerChunkCoord;
-            UpdateChunks();
-        }
-    }
+    // private void Update()
+    // {
+    //     Vector2Int currentPlayerChunkCoord = GetPlayerChunkCoord();
+    //     if (currentPlayerChunkCoord != lastPlayerChunkCoord)
+    //     {
+    //         lastPlayerChunkCoord = currentPlayerChunkCoord;
+    //         UpdateChunks();
+    //     }
+    // }
 
-    private void UpdateChunks()
-    {
-        HashSet<Vector2Int> requiredChunkCoords = new HashSet<Vector2Int>();
+    // private void UpdateChunks()
+    // {
+    //     HashSet<Vector2Int> requiredChunkCoords = new HashSet<Vector2Int>();
 
-        // 플레이어 주변에 필요한 청크 좌표 계산
-        for (int xOffset = -viewDistanceInChunks; xOffset <= viewDistanceInChunks; xOffset++)
-        {
-            for (int zOffset = -viewDistanceInChunks; zOffset <= viewDistanceInChunks; zOffset++)
-            {
-                //청크 좌표와 관련된 Vector2Int는 (X,Y)는 청크의 (X,Z)로 사용되는중
-                Vector2Int coord = new Vector2Int(lastPlayerChunkCoord.x + xOffset, lastPlayerChunkCoord.y + zOffset);
-                
-                if (useWorldBorder)
-                {
-                    if (coord.x < minChunkX || coord.x > maxChunkX || coord.y < minChunkZ || coord.y > maxChunkZ)
-                    {
-                        continue; // 월드 한계 밖이면 건너 뛰기
-                    }
-                }
-                
-                requiredChunkCoords.Add(coord);
+    //     // 플레이어 주변에 필요한 청크 좌표 계산
+    //     for (int xOffset = -viewDistanceInChunks; xOffset <= viewDistanceInChunks; xOffset++)
+    //     {
+    //         for (int zOffset = -viewDistanceInChunks; zOffset <= viewDistanceInChunks; zOffset++)
+    //         {
+    //             //청크 좌표와 관련된 Vector2Int는 (X,Y)는 청크의 (X,Z)로 사용되는중
+    //             Vector2Int coord = new Vector2Int(lastPlayerChunkCoord.x + xOffset, lastPlayerChunkCoord.y + zOffset);
 
-                // 아직 로드되지 않은 청크라면 새로 생성 또는 풀에서 가져와 로드
-                if (!loadedChunks.ContainsKey(coord))
-                {
-                    LoadChunkAt(coord);
-                }
-            }
-        }
-        // 더 이상 필요 없는 청크(시야에서 벗어난 청크) 언로드
-        List<Vector2Int> chunksToUnloadKeys = new List<Vector2Int>();
-        foreach (var loadedChunkPair in loadedChunks)
-        {
-            if (!requiredChunkCoords.Contains(loadedChunkPair.Key))
-            {
-                chunksToUnloadKeys.Add(loadedChunkPair.Key);
-            }
-        }
+    //             if (useWorldBorder)
+    //             {
+    //                 if (coord.x < minChunkX || coord.x > maxChunkX || coord.y < minChunkZ || coord.y > maxChunkZ)
+    //                 {
+    //                     continue; // 월드 한계 밖이면 건너 뛰기
+    //                 }
+    //             }
 
-        foreach (var coordToUnload in chunksToUnloadKeys)
-        {
-            UnloadChunkAt(coordToUnload);
-        }
-    }
+    //             requiredChunkCoords.Add(coord);
+
+    //             // 아직 로드되지 않은 청크라면 새로 생성 또는 풀에서 가져와 로드
+    //             if (!loadedChunks.ContainsKey(coord))
+    //             {
+    //                 LoadChunkAt(coord);
+    //             }
+    //         }
+    //     }
+    //     // 더 이상 필요 없는 청크(시야에서 벗어난 청크) 언로드
+    //     List<Vector2Int> chunksToUnloadKeys = new List<Vector2Int>();
+    //     foreach (var loadedChunkPair in loadedChunks)
+    //     {
+    //         if (!requiredChunkCoords.Contains(loadedChunkPair.Key))
+    //         {
+    //             chunksToUnloadKeys.Add(loadedChunkPair.Key);
+    //         }
+    //     }
+
+    //     foreach (var coordToUnload in chunksToUnloadKeys)
+    //     {
+    //         UnloadChunkAt(coordToUnload);
+    //     }
+    // }
 
     /// <summary>
     /// 지정된 좌표에 청크를 로드
     /// </summary>
     private void LoadChunkAt(Vector2Int coord)
     {
+        UnloadAllChunks();
+
         Vector3 worldPosition = new Vector3(coord.x * chunkSize, 0f, coord.y * chunkSize);
         GameObject chunkGO = Instantiate(chunkPrefab, worldPosition, Quaternion.identity, this.transform); // 청크 매니저의 자식으로 생성
         Chunk chunkScript = chunkGO.GetComponent<Chunk>();
@@ -137,8 +140,21 @@ public class ChunkManager : MonoBehaviour
         // Chunk 스크립트 초기화
         chunkScript.Initialize(coord, chunkSize, chunkBuildHeight, derivedSeed, noiseScale, terrainHeightMultiplier, chunkSharedMaterial);
         loadedChunks.Add(coord, chunkScript);
+        
+        if (player != null)
+        {
+            player.position = new Vector3(worldPosition.x + chunkSize / 2f, player.position.y, worldPosition.z + chunkSize / 2f);
+        }
     }
-
+    public void UnloadAllChunks()
+    {
+        List<Vector2Int> chunksToUnloadKeys = new List<Vector2Int>(loadedChunks.Keys);
+        foreach (var coordToUnload in chunksToUnloadKeys)
+        {
+            UnloadChunkAt(coordToUnload);
+        }
+        loadedChunks.Clear(); // 딕셔너리도 비워줍니다.
+    }
 
     /// <summary>
     /// 지정된 좌표의 청크를 언로드 (파괴 또는 풀에 반환)

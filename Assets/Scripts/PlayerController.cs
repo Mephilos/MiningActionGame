@@ -50,11 +50,6 @@ public class PlayerController : MonoBehaviour
         HandleJumpInput();
         HandleDashInput();
         RotateTowardsAimDirection();
-
-        if (playerData.dashCooldownTimer > 0)
-        {
-            playerData.dashCooldownTimer -= Time.deltaTime;
-        }
     }
     void FixedUpdate()
     {
@@ -94,31 +89,30 @@ public class PlayerController : MonoBehaviour
         Vector3 intendedDeltaMovement = (horizontalVelocity + Vector3.up * velocity.y) * Time.fixedDeltaTime;
         Vector3 targetPosition = currentPosition + intendedDeltaMovement;
 
-        if(ChunkManager.Instance != null && ChunkManager.Instance.useWorldBorder)
+        if (StageManager.Instance != null)
         {
-            float playerRadius = controller.radius;
+            Vector2Int currentStageCoord = StageManager.Instance.CurrentStageCoord;
+            float sSize = StageManager.Instance.stageSize;
+            float playerRadius = controller.radius; // CharacterController의 반지름
 
-            float worldMinX = ChunkManager.Instance.minChunkX * ChunkManager.Instance.chunkSize + playerRadius;
-            float worldMaxX = (ChunkManager.Instance.maxChunkX + 1) * ChunkManager.Instance.chunkSize - playerRadius;
-            float worldMinZ = ChunkManager.Instance.minChunkZ * ChunkManager.Instance.chunkSize + playerRadius;
-            float worldMaxZ = (ChunkManager.Instance.maxChunkZ + 1) * ChunkManager.Instance.chunkSize - playerRadius;
+            // 현재 스테이지의 월드 좌표 경계 계산
+            float stageWorldMinX = currentStageCoord.x * sSize + playerRadius;
+            float stageWorldMaxX = currentStageCoord.x * sSize + sSize - playerRadius;
+            float stageWorldMinZ = currentStageCoord.y * sSize + playerRadius; // StageManager의 stageCoord.y는 월드 Z축 좌표
+            float stageWorldMaxZ = currentStageCoord.y * sSize + sSize - playerRadius;
 
-            // 목표 X 위치가 경계를 벗어나면 경계값으로 강제 설정
-            if (targetPosition.x < worldMinX) targetPosition.x = worldMinX;
-            if (targetPosition.x > worldMaxX) targetPosition.x = worldMaxX;
-
-            // 목표 Z 위치가 경계를 벗어나면 경계값으로 강제 설정
-            if (targetPosition.z < worldMinZ) targetPosition.z = worldMinZ;
-            if (targetPosition.z > worldMaxZ) targetPosition.z = worldMaxZ;
+            // 목표 위치가 경계를 벗어나면 경계값으로 강제하여 이동 제한
+            targetPosition.x = Mathf.Clamp(targetPosition.x, stageWorldMinX, stageWorldMaxX);
+            targetPosition.z = Mathf.Clamp(targetPosition.z, stageWorldMinZ, stageWorldMaxZ);
         }
-    
+
         Vector3 actualMovement = targetPosition - currentPosition;
 
         controller.Move(actualMovement);
 
         //조준 모드일경우 이동방향 회전 off
         if (inputDir.sqrMagnitude > 0.01f && !Input.GetMouseButton(1))
-        {       
+        {
             Quaternion targetRotation = Quaternion.LookRotation(inputDir);
             transform.rotation = targetRotation;
         }
@@ -153,7 +147,7 @@ public class PlayerController : MonoBehaviour
             velocity.y = playerData.currentJumpForce;
             playerData.jumpCountAvailable--;
 
-            Debug.Log($"점프 상태: { playerData.jumpCountAvailable}/{playerData.currentMaxJumpCount}");
+            Debug.Log($"점프 상태: {playerData.jumpCountAvailable}/{playerData.currentMaxJumpCount}");
         }
     }
 
@@ -224,7 +218,7 @@ public class PlayerController : MonoBehaviour
     void RotateTowardsAimDirection()
     {
         //조준 모드일 경우 에임위치 따라 케릭터 회전
-        if(Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1))
         {
             // 카메라 중심에서 ray 생성
             Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
@@ -248,5 +242,13 @@ public class PlayerController : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
             }
         }
+    }
+    /// <summary>
+    /// 플레이어의 현재 이동 관련 속도(velocity)를 초기화
+    /// 스테이지 변경 등으로 플레이어 위치를 강제 이동시켰을 때 호출
+    /// </summary>
+    public void ResetVelocity()
+    {
+        velocity = Vector3.zero;
     }
 }

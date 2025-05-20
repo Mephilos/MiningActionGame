@@ -16,11 +16,12 @@ public class Chunk : MonoBehaviour
     private Vector2Int chunkCoord;
     private int chunkSize; // X, Z 크기
     private int chunkBuildHeight; //청크의 최대 높이
-    private int seed; 
+    private int seed;
     private float noiseScale;
     private float worldHeightMultiplier;//월드 굴곡 조절
     private NavMeshSurface navMeshSurface;
     private BlockType[,,] blockData;
+    private int[,] surfaceHeights; // 각 (x,z) 위치의 표면 높이를 저장할 배열
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     [Tooltip("청크 바닥에 사용할 바닥Plane프리팹")]
@@ -29,10 +30,11 @@ public class Chunk : MonoBehaviour
     [Tooltip("청크 안에 매설될 프리팹(아이템")]
     public GameObject itemPrefab;
     [Tooltip("청크내에 매설될 확률")]
-    [Range(0f,1f)]
+    [Range(0f, 1f)]
     public float itemSpawnChance = 0.1f;
     public int minItemSpawnY = 1;
     public int maxItemSpawnY = 30;
+
 
 
 
@@ -44,14 +46,14 @@ public class Chunk : MonoBehaviour
     private const float TileU = 1f / AtlasTotalTilesX; // 1 / 4 = 0.25
     private const float TileV = 1f / AtlasTotalTilesY; // 1 / 4 = 0.25
     //메시 생성에 쓰일 타일면의정점 데이터
-    private static readonly Vector3[] FaceVertices_Back = { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 0, 0) }; // Z-
-    private static readonly Vector3[] FaceVertices_Front = { new Vector3(1, 0, 1), new Vector3(1, 1, 1), new Vector3(0, 1, 1), new Vector3(0, 0, 1) }; // Z+
-    private static readonly Vector3[] FaceVertices_Top = { new Vector3(0, 1, 0), new Vector3(0, 1, 1), new Vector3(1, 1, 1), new Vector3(1, 1, 0) }; // Y+
-    private static readonly Vector3[] FaceVertices_Bottom = { new Vector3(1, 0, 0), new Vector3(1, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 0) }; // Y-
-    private static readonly Vector3[] FaceVertices_Left = { new Vector3(0, 0, 1), new Vector3(0, 1, 1), new Vector3(0, 1, 0), new Vector3(0, 0, 0) }; // X-
-    private static readonly Vector3[] FaceVertices_Right = { new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(1, 1, 1), new Vector3(1, 0, 1) }; // X+
+    private static readonly Vector3[] FaceVerticesBack = { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 0, 0) }; // Z-
+    private static readonly Vector3[] FaceVerticesFront = { new Vector3(1, 0, 1), new Vector3(1, 1, 1), new Vector3(0, 1, 1), new Vector3(0, 0, 1) }; // Z+
+    private static readonly Vector3[] FaceVerticesTop = { new Vector3(0, 1, 0), new Vector3(0, 1, 1), new Vector3(1, 1, 1), new Vector3(1, 1, 0) }; // Y+
+    private static readonly Vector3[] FaceVerticesBottom = { new Vector3(1, 0, 0), new Vector3(1, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 0) }; // Y-
+    private static readonly Vector3[] FaceVerticesLeft = { new Vector3(0, 0, 1), new Vector3(0, 1, 1), new Vector3(0, 1, 0), new Vector3(0, 0, 0) }; // X-
+    private static readonly Vector3[] FaceVerticesRight = { new Vector3(1, 0, 0), new Vector3(1, 1, 0), new Vector3(1, 1, 1), new Vector3(1, 0, 1) }; // X+
     //면을 구성하는 삼각형 인덱스
-    private static readonly int[] FaceTriangles = { 0, 1, 2, 0, 2, 3};
+    private static readonly int[] FaceTriangles = { 0, 1, 2, 0, 2, 3 };
     //맞닿은 블록 검사를 위한 오프셋
     private static readonly Vector3Int[] FaceCheckDirections = {
         new Vector3Int(0, 0, -1), // Back
@@ -63,12 +65,12 @@ public class Chunk : MonoBehaviour
     };
     //정점 데이터를 모아놓은 베열
     private static readonly Vector3[][] AllFaceVertices = {
-        FaceVertices_Back, FaceVertices_Front, 
-        FaceVertices_Top, FaceVertices_Bottom, 
-        FaceVertices_Left, FaceVertices_Right
+        FaceVerticesBack, FaceVerticesFront,
+        FaceVerticesTop, FaceVerticesBottom,
+        FaceVerticesLeft, FaceVerticesRight
     };
     //------------------------------메쉬 정점 데이터 끝-----------------------------
-    
+
     /// <summary>
     /// 청크 초기화 및 블록 생성
     /// </summary>
@@ -84,7 +86,7 @@ public class Chunk : MonoBehaviour
 
         //청크 이름
         gameObject.name = $"Chunk_{coord.x}_{coord.y}";
-        
+
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
         navMeshSurface = GetComponent<NavMeshSurface>();
@@ -96,11 +98,11 @@ public class Chunk : MonoBehaviour
         navMeshSurface.center = new Vector3(this.chunkSize / 2.0f, this.chunkBuildHeight / 2.0f, this.chunkSize / 2.0f);
 
         int groundLayer = LayerMask.NameToLayer("Ground");
-        
+
         navMeshSurface.layerMask = 1 << groundLayer;
         gameObject.layer = groundLayer;
 
-        if(chunkMaterial != null)
+        if (chunkMaterial != null)
         {
             meshRenderer.material = chunkMaterial;
         }
@@ -108,7 +110,7 @@ public class Chunk : MonoBehaviour
         {
             Debug.LogError($"[Chunk {gameObject.name}] Material 지정되지 않음");
         }
-
+        this.surfaceHeights = new int[chunkSize, chunkSize];
         blockData = new BlockType[chunkSize, chunkBuildHeight, chunkSize];
 
         PopulateBlockData();
@@ -133,24 +135,25 @@ public class Chunk : MonoBehaviour
                 int worldZ = chunkCoord.y * chunkSize + z;
                 //perlin Noise 적용 지표면 높이 게산
                 float noiseValue = Mathf.PerlinNoise((worldX + seed * 0.7385f) * noiseScale, (worldZ + seed * 0.1934f) * noiseScale);
-                int surfaceheight = Mathf.FloorToInt(noiseValue * worldHeightMultiplier);
+                 int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * worldHeightMultiplier); // 변수 이름 변경 (혼동 방지)
+                calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, chunkBuildHeight - 1);
 
-                surfaceheight = Mathf.Clamp(surfaceheight, 0, chunkBuildHeight - 1);
-
+                // surfaceHeights 배열에 계산된 표면 높이 저장
+                surfaceHeights[x, z] = calculatedSurfaceHeight;
                 // y(지상고?)를 따서 블록 타입 결정
                 for (int y = 0; y < chunkBuildHeight; y++)
                 {
-                    if(y > surfaceheight)
+                    if (y > calculatedSurfaceHeight)
                     {
                         blockData[x, y, z] = BlockType.Air; //지표면 보다 높으면 빈공간
                     }
-                    else if (y == surfaceheight)
+                    else if (y == calculatedSurfaceHeight)
                     {
                         blockData[x, y, z] = BlockType.Grass; //지표면은 풀
                     }
                     else
                     {
-                        blockData[x,y,z] = BlockType.Stone; //아래는 돌
+                        blockData[x, y, z] = BlockType.Stone; //아래는 돌
                     }
                 }
             }
@@ -177,13 +180,13 @@ public class Chunk : MonoBehaviour
         int x = Random.Range(1, chunkSize - 1); // 1 이상 (chunkSize-1) 미만의 정수
         int z = Random.Range(1, chunkSize - 1);
 
-        
+
         // 지정된 Y 범위 안에서 위에서 아래로 스캔하여 Stone 블록이 처음 나오는 위치를 찾아서 해당 좌표에 아이템을 숨김
         int spawnY = -1; // 매설될 Y 좌표 변수
 
         // minItemSpawnY 부터 maxItemSpawnY 까지 반복 탐색
         // (안전하게 chunkBuildHeight 미만으로도 제한)
-        for (int y = Mathf.Clamp(minItemSpawnY, 0, chunkBuildHeight -1) ; y <= Mathf.Clamp(maxItemSpawnY, 0, chunkBuildHeight - 1); y++)
+        for (int y = Mathf.Clamp(minItemSpawnY, 0, chunkBuildHeight - 1); y <= Mathf.Clamp(maxItemSpawnY, 0, chunkBuildHeight - 1); y++)
         {
             // 현재 (x, y, z) 위치의 블록 타입 확인
             if (blockData[x, y, z] == BlockType.Stone) // 만약 돌 블록이라면
@@ -214,20 +217,20 @@ public class Chunk : MonoBehaviour
         List<Vector3> vertices = new List<Vector3>(); //정점
         List<int> triangles = new List<int>(); //면구성 인덱스
         List<Vector2> uvs = new List<Vector2>(); //텍스처 uv값
-    
-        for(int y = 0; y < chunkBuildHeight; y++)
+
+        for (int y = 0; y < chunkBuildHeight; y++)
         {
-            for(int x = 0; x < chunkSize; x++)
+            for (int x = 0; x < chunkSize; x++)
             {
                 for (int z = 0; z < chunkSize; z++)
                 {
                     BlockType currentBlockType = blockData[x, y, z];
                     //블록 위치가 빈공간이라면 메쉬 만들필요 없음
-                    if(currentBlockType == BlockType.Air)
+                    if (currentBlockType == BlockType.Air)
                         continue;
-                    
+
                     //6방향의 이웃 블록을 확인하여 노출된 면만 메쉬 데이터 입력
-                    for(int i = 0; i < 6; i++)//0:Back, 1:Front, 2:Top, 3:Bottom, 4:Left, 5:Right
+                    for (int i = 0; i < 6; i++)//0:Back, 1:Front, 2:Top, 3:Bottom, 4:Left, 5:Right
                     {
                         Vector3Int neighborPos = new Vector3Int(x, y, z) + FaceCheckDirections[i];
 
@@ -259,9 +262,9 @@ public class Chunk : MonoBehaviour
         Mesh mesh = new Mesh();
 
         //유니티는 메시당 65535개의 정점 제한이 있음(16비트), 이보다 많은 정점 사용시 32비트 인덱스 버퍼 사용 명시
-        if(vertices.Count > 65535) //정점이 65535를 넘은 시 32비트 인덱스 포멧 사용
+        if (vertices.Count > 65535) //정점이 65535를 넘은 시 32비트 인덱스 포멧 사용
         {
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; 
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         }
         // 리스트의 데이터를 베열로 변환 하여 Mesh객체에 할당
         mesh.vertices = vertices.ToArray(); //ToArray: List ->Array로 변환
@@ -280,7 +283,7 @@ public class Chunk : MonoBehaviour
             // 기존 메시가 있다면 제거 후 새로 할당 (메시 업데이트 시 중요)
             meshCollider.sharedMesh = null;
             meshCollider.sharedMesh = mesh; // 생성된 메시를 MeshCollider에도 할당
-        //    Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
+                                            //    Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
         }
         else
         {
@@ -302,10 +305,10 @@ public class Chunk : MonoBehaviour
             return true; // 경계 바깥은 항상 노출된 면으로 간주
         }
         // 청크 내부라면 해당 위치의 블록이 Air 타입인지 확인
-        return blockData[localNeighborPos.x, localNeighborPos.y, localNeighborPos.z] 
+        return blockData[localNeighborPos.x, localNeighborPos.y, localNeighborPos.z]
                 == BlockType.Air;
     }
-    // <summary>
+    /// <summary>
     /// 특정 블록 타입과 면 방향에 대한 UV 좌표 배열을 반환(텍스처를 잘라서 면판별)
     /// </summary>
     /// <param name="blockType">현재 블록의 타입</param>
@@ -331,7 +334,7 @@ public class Chunk : MonoBehaviour
             case BlockType.Stone:
                 tileOffset = new Vector2(1, 2); // 아틀라스 (1,2) 위치에 돌 텍스처 (모든 면 동일 가정)
                 break;
-            
+
             default: // 정의되지 않은 블록은 기본 텍스처 또는 에러 텍스처
                 tileOffset = new Vector2(AtlasTotalTilesX - 1, AtlasTotalTilesY - 1);
                 Debug.LogWarning($"GetFaceUVs: Unhandled BlockType '{blockType}'. Using default UVs (Atlas last tile).");
@@ -356,7 +359,7 @@ public class Chunk : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh(); // NavMesh 생성
-    ///     Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
+            ///     Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
         }
         else
         {
@@ -379,7 +382,7 @@ public class Chunk : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.RemoveData();
-        //    Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
+            //    Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
         }
     }
     /// <summary>
@@ -414,7 +417,8 @@ public class Chunk : MonoBehaviour
         CreateChunkMesh(); // 변경된 데이터로 메시를 다시 만듦
 
         // 인접 청크 업데이트 확인
-        CheckAndUpdateNeighborChunks(localX, localY, localZ);
+        // 게임 스펙 변경으로 주석 처리
+        // CheckAndUpdateNeighborChunks(localX, localY, localZ); 
         //TODO: 만약 변경된 블록이 청크 경계에 있다면 인접 청크의 메시도 업데이트해야 할 수 있음(이웃 블록의 노출 여부가 있기 때문)
 
         return true; // 변경 성공
@@ -423,15 +427,15 @@ public class Chunk : MonoBehaviour
     {
         // 변경된 블록이 현재 청크의 경계면에 있는지 확인
         bool needsUpdateN = false, needsUpdateE = false, needsUpdateS = false, needsUpdateW = false;
-
+    
         if (localX == 0) needsUpdateW = true;           // 서쪽 경계
         else if (localX == chunkSize - 1) needsUpdateE = true; // 동쪽 경계
-
+    
         if (localZ == 0) needsUpdateS = true;           // 남쪽 경계
         else if (localZ == chunkSize - 1) needsUpdateN = true; // 북쪽 경계
-
+    
         // Y축 경계는 보통 다른 청크와 맞닿지 않으므로 일반적으로는 고려하지 않음 (필요시 추가)
-
+    
         // 만약 경계면에 있다면, ChunkManager를 통해 해당 방향의 이웃 청크를 찾아 메시 업데이트 요청
         if (needsUpdateN || needsUpdateE || needsUpdateS || needsUpdateW)
         {
@@ -457,6 +461,24 @@ public class Chunk : MonoBehaviour
         bedrockPlane.transform.localScale = new Vector3(chunkSize / 10.0f, 1.0f, chunkSize / 10.0f);
         //최적화 관련 설정
         bedrockPlane.isStatic = true;
+    }
+    
+    /// <summary>
+    /// 청크 내 로컬 x, z 좌표에 해당하는 지표면의 Y 높이를 반환합니다.
+    /// </summary>
+    public int GetSurfaceHeightAt(int localX, int localZ)
+    {
+        if (surfaceHeights == null)
+        {
+            Debug.LogError($"[{gameObject.name}] surfaceHeights 배열이 초기화되지 않았습니다! Chunk.Initialize() 또는 PopulateBlockData()를 확인하세요.");
+            return 0; // 또는 적절한 기본값, 혹은 예외 발생
+        }
+        if (localX >= 0 && localX < chunkSize && localZ >= 0 && localZ < chunkSize)
+        {
+            return surfaceHeights[localX, localZ];
+        }
+        Debug.LogWarning($"GetSurfaceHeightAt: 유효하지 않은 로컬 좌표 ({localX}, {localZ}). 청크 크기: {chunkSize}. 기본 높이 0을 반환합니다.");
+        return 0;
     }
 
     // /// <summary>
