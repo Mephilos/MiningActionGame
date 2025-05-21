@@ -2,11 +2,34 @@ using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+/// <summary>
+/// 메쉬 데이터 구조체
+/// </summary>
+public struct MeshData
+{
+    public List<Vector3> vertices;
+    public List<int> triangles;
+    public List<Vector2> uvs;
+
+    public MeshData(int initialCapacity = 0)
+    {
+        vertices = new List<Vector3>(initialCapacity);
+        triangles = new List<int>(initialCapacity * 2);
+        uvs = new List<Vector2>(initialCapacity);
+    }
+
+    public void Clear()
+    {
+        vertices.Clear();
+        triangles.Clear();
+        uvs.Clear();
+    }
+}
 
 /// <summary>
 /// 하나의 청크(Chunk)를 구성하는 클래스
-/// - Perlin Noise 기반으로 블록을 배치
-/// - 메쉬 결합 사용
+/// Perlin Noise 기반으로 블록을 배치
+/// 메쉬 결합 사용
 /// </summary>
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -29,8 +52,7 @@ public class Chunk : MonoBehaviour
     [Header("아이템 스폰 설정")]
     [Tooltip("청크 안에 매설될 프리팹(아이템")]
     public GameObject itemPrefab;
-    [Tooltip("청크내에 매설될 확률")]
-    [Range(0f, 1f)]
+    [Tooltip("청크내에 매설될 확률")] [Range(0f, 1f)]
     public float itemSpawnChance = 0.1f;
     public int minItemSpawnY = 1;
     public int maxItemSpawnY = 30;
@@ -114,9 +136,7 @@ public class Chunk : MonoBehaviour
         blockData = new BlockType[chunkSize, chunkBuildHeight, chunkSize];
 
         PopulateBlockData();
-
         CreateBedrockPlane();
-
         SpawnItemInChunk();
     }
 
@@ -135,7 +155,7 @@ public class Chunk : MonoBehaviour
                 int worldZ = chunkCoord.y * chunkSize + z;
                 //perlin Noise 적용 지표면 높이 게산
                 float noiseValue = Mathf.PerlinNoise((worldX + seed * 0.7385f) * noiseScale, (worldZ + seed * 0.1934f) * noiseScale);
-                 int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * worldHeightMultiplier); // 변수 이름 변경 (혼동 방지)
+                int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * worldHeightMultiplier); // 변수 이름 변경 (혼동 방지)
                 calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, chunkBuildHeight - 1);
 
                 // surfaceHeights 배열에 계산된 표면 높이 저장
@@ -214,9 +234,7 @@ public class Chunk : MonoBehaviour
     /// </summary>
     public void CreateChunkMesh()
     {
-        List<Vector3> vertices = new List<Vector3>(); //정점
-        List<int> triangles = new List<int>(); //면구성 인덱스
-        List<Vector2> uvs = new List<Vector2>(); //텍스처 uv값
+        MeshData meshData = new MeshData(chunkSize * chunkBuildHeight * chunkSize / 2);
 
         for (int y = 0; y < chunkBuildHeight; y++)
         {
@@ -229,69 +247,100 @@ public class Chunk : MonoBehaviour
                     if (currentBlockType == BlockType.Air)
                         continue;
 
-                    //6방향의 이웃 블록을 확인하여 노출된 면만 메쉬 데이터 입력
-                    for (int i = 0; i < 6; i++)//0:Back, 1:Front, 2:Top, 3:Bottom, 4:Left, 5:Right
-                    {
-                        Vector3Int neighborPos = new Vector3Int(x, y, z) + FaceCheckDirections[i];
-
-                        if (IsNeighborBlockTransparent(neighborPos))
-                        {
-                            // 그릴 면 정점 카운터
-                            int currentVertexCount = vertices.Count;
-
-                            // 면의 정점 4개 추가 (로컬 좌표)
-                            foreach (Vector3 vertexOffset in AllFaceVertices[i])
-                            {
-                                vertices.Add(new Vector3(x, y, z) + vertexOffset);
-                            }
-
-                            // 면의 UV 좌표 추가(아틀라스 기준)
-                            uvs.AddRange(GetFaceUVs(currentBlockType, i));
-
-                            // 면의 삼각형 인덱스 2개 추가
-                            foreach (int triangleIndexOffset in FaceTriangles)
-                            {
-                                triangles.Add(currentVertexCount + triangleIndexOffset);
-                            }
-                        }
-                    }
+                    AddVisibleFacesToMeshData(x, y, z, currentBlockType, ref meshData);
                 }
             }
         }
-
-        Mesh mesh = new Mesh();
-
-        //유니티는 메시당 65535개의 정점 제한이 있음(16비트), 이보다 많은 정점 사용시 32비트 인덱스 버퍼 사용 명시
-        if (vertices.Count > 65535) //정점이 65535를 넘은 시 32비트 인덱스 포멧 사용
+        ApplyMeshDataToFilter(meshData);
+        ApplyMeshToCollider(meshFilter.sharedMesh);
+        BakeNavMesh();
+    }
+    /// <summary>
+    /// 블록의 보이는 면에 대한 메시 데이터를 추가합니다
+    /// </summary>
+    /// <param name="x">블록 로컬 X</param>
+    /// <param name="y">블록 로컬 Y</param>
+    /// <param name="z">블록 로컬 Z</param>
+    /// <param name="blockType">블록의 타입</param>
+    /// <param name="meshData">업데이트 할 MeshData 참조</param>
+    private void AddVisibleFacesToMeshData(int x, int y, int z, BlockType blockType, ref MeshData meshData)
+    {   
+        // 6방향의 이웃 블록을 확인하여 노출된 면만 메쉬 데이터 입력
+        for (int i = 0; i < 6; i++)
         {
-            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            Vector3Int neighborPos = new Vector3Int(x, y, z) + FaceCheckDirections[i];
+
+            if (IsNeighborBlockTransparent(neighborPos))
+            {
+                AddFaceData(new Vector3Int(x, y, z), i, blockType, ref meshData);
+            }
         }
-        // 리스트의 데이터를 베열로 변환 하여 Mesh객체에 할당
-        mesh.vertices = vertices.ToArray(); //ToArray: List ->Array로 변환
-        mesh.triangles = triangles.ToArray();
-        mesh.uv = uvs.ToArray();
+    }
+    /// <summary>
+    /// 단일 면 정점, 삼각형 인덱스, UV 데이터를 meshData에 추가
+    /// </summary>
+    /// <param name="blockLocalPos">블록의 로컬 좌표 (x,y,z)</param>
+    /// <param name="faceIndex">면의 인덱스 6개</param>
+    /// <param name="blockType">블록의 타입</param>
+    /// <param name="meshData">업데이트할 MeshData 참조</param>
+    private void AddFaceData(Vector3Int blockLocalPos, int faceIndex, BlockType blockType, ref MeshData meshData)
+    {
+        int currentVertexCount = meshData.vertices.Count; 
 
-        mesh.RecalculateNormals(); //법선 백터 계산(라이팅에 사용)
-        mesh.RecalculateBounds();   // 메시 경계 계산 (컬링에 사용)
+        // 면의 정점 4개 추가 (로컬 좌표)
+        foreach (Vector3 vertexOffset in AllFaceVertices[faceIndex]) 
+        {
+            meshData.vertices.Add(blockLocalPos + vertexOffset); 
+        }
 
-        //메쉬 필터에 할당.
-        meshFilter.mesh = mesh;
+        // 면의 UV 좌표 추가(아틀라스 기준)
+        meshData.uvs.AddRange(GetFaceUVs(blockType, faceIndex)); 
 
-        MeshCollider meshCollider = GetComponent<MeshCollider>(); // MeshCollider 컴포넌트 가져오기
+        // 면의 삼각형 인덱스 2개 추가
+        foreach (int triangleIndexOffset in FaceTriangles) 
+        {
+            meshData.triangles.Add(currentVertexCount + triangleIndexOffset); 
+        }
+    }
+    /// <summary>
+    /// 수집된 MeshData를 사용, 실제 Mesh 객체를 만들고 MeshFilter에 적용
+    /// </summary>
+    /// <param name="meshData">적용할 메시 데이터</param>
+    private void ApplyMeshDataToFilter(MeshData meshData)
+    {
+        Mesh mesh = new Mesh(); 
+
+        if (meshData.vertices.Count > 65535) 
+        {
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; 
+        }
+
+        mesh.vertices = meshData.vertices.ToArray(); 
+        mesh.triangles = meshData.triangles.ToArray(); 
+        mesh.uv = meshData.uvs.ToArray(); 
+
+        mesh.RecalculateNormals(); 
+        mesh.RecalculateBounds(); 
+
+        meshFilter.mesh = mesh; 
+    }
+    /// <summary>
+    /// 생성된 메시를 MeshCollider에 적용
+    /// </summary>
+    /// <param name="meshToApply">MeshCollider에 적용할 메시</param>
+    private void ApplyMeshToCollider(Mesh meshToApply)
+    {
+        MeshCollider meshCollider = GetComponent<MeshCollider>(); 
         if (meshCollider != null)
         {
-            // 기존 메시가 있다면 제거 후 새로 할당 (메시 업데이트 시 중요)
-            meshCollider.sharedMesh = null;
-            meshCollider.sharedMesh = mesh; // 생성된 메시를 MeshCollider에도 할당
-                                            //    Debug.Log($"[Chunk {gameObject.name}] Mesh assigned to MeshCollider");
+            meshCollider.sharedMesh = null; 
+            meshCollider.sharedMesh = meshToApply; 
         }
         else
         {
-            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found");
+            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found"); //
         }
-        BakeNavMesh();
     }
-
     /// <summary>
     /// 청크 내 로컬 좌표 기준 이웃 블록의 상태를 확인(판별용)
     /// </summary>
@@ -312,7 +361,7 @@ public class Chunk : MonoBehaviour
     /// 특정 블록 타입과 면 방향에 대한 UV 좌표 배열을 반환(텍스처를 잘라서 면판별)
     /// </summary>
     /// <param name="blockType">현재 블록의 타입</param>
-    /// <param name="faceIndex">면의 인덱스 (0:Back, 1:Front, 2:Top, 3:Bottom, 4:Left, 5:Right)</param>
+    /// <param name="faceIndex">면의 인덱스</param>
     /// <returns>해당 면에 적용될 UV 좌표 4개 배열</returns>
     private Vector2[] GetFaceUVs(BlockType blockType, int faceIndex)
     {
@@ -354,16 +403,15 @@ public class Chunk : MonoBehaviour
     ///<summary>
     /// 생성된 청크의 NavMesh를 Bake
     /// </summary>
-    public void BakeNavMesh()
+    private void BakeNavMesh()
     {
         if (navMeshSurface != null)
         {
             navMeshSurface.BuildNavMesh(); // NavMesh 생성
-            ///     Debug.Log($"[Chunk {gameObject.name}] NavMesh baked successfully");
         }
         else
         {
-            Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface component not found for baking");
+            Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface 구워지지 않음");
         }
     }
     /// <summary>
@@ -382,7 +430,6 @@ public class Chunk : MonoBehaviour
         if (navMeshSurface != null)
         {
             navMeshSurface.RemoveData();
-            //    Debug.Log($"[Chunk {gameObject.name}] NavMesh data removed.");
         }
     }
     /// <summary>
@@ -423,31 +470,7 @@ public class Chunk : MonoBehaviour
 
         return true; // 변경 성공
     }
-    private void CheckAndUpdateNeighborChunks(int localX, int localY, int localZ)
-    {
-        // 변경된 블록이 현재 청크의 경계면에 있는지 확인
-        bool needsUpdateN = false, needsUpdateE = false, needsUpdateS = false, needsUpdateW = false;
-    
-        if (localX == 0) needsUpdateW = true;           // 서쪽 경계
-        else if (localX == chunkSize - 1) needsUpdateE = true; // 동쪽 경계
-    
-        if (localZ == 0) needsUpdateS = true;           // 남쪽 경계
-        else if (localZ == chunkSize - 1) needsUpdateN = true; // 북쪽 경계
-    
-        // Y축 경계는 보통 다른 청크와 맞닿지 않으므로 일반적으로는 고려하지 않음 (필요시 추가)
-    
-        // 만약 경계면에 있다면, ChunkManager를 통해 해당 방향의 이웃 청크를 찾아 메시 업데이트 요청
-        if (needsUpdateN || needsUpdateE || needsUpdateS || needsUpdateW)
-        {
-            if (ChunkManager.Instance != null) // ChunkManager 인스턴스가 있는지 확인
-            {
-                if (needsUpdateN) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.up); // 북쪽 청크
-                if (needsUpdateE) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.right); // 동쪽 청크
-                if (needsUpdateS) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.down); // 남쪽 청크
-                if (needsUpdateW) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.left); // 서쪽 청크
-            }
-        }
-    }
+
     /// <summary>
     /// 청크의 가장 밑바닥에 Plane을 생성
     /// </summary>
@@ -462,7 +485,7 @@ public class Chunk : MonoBehaviour
         //최적화 관련 설정
         bedrockPlane.isStatic = true;
     }
-    
+
     /// <summary>
     /// 청크 내 로컬 x, z 좌표에 해당하는 지표면의 Y 높이를 반환합니다.
     /// </summary>
@@ -498,6 +521,31 @@ public class Chunk : MonoBehaviour
     //                 BlockPool.Instance.ReturnBlock(block);
     //                 child.SetParent(null);
     //             }
+    //         }
+    //     }
+    // }
+    // private void CheckAndUpdateNeighborChunks(int localX, int localY, int localZ)
+    // {
+    //     // 변경된 블록이 현재 청크의 경계면에 있는지 확인
+    //     bool needsUpdateN = false, needsUpdateE = false, needsUpdateS = false, needsUpdateW = false;
+    //
+    //     if (localX == 0) needsUpdateW = true;           // 서쪽 경계
+    //     else if (localX == chunkSize - 1) needsUpdateE = true; // 동쪽 경계
+    //
+    //     if (localZ == 0) needsUpdateS = true;           // 남쪽 경계
+    //     else if (localZ == chunkSize - 1) needsUpdateN = true; // 북쪽 경계
+    //
+    //     // Y축 경계는 보통 다른 청크와 맞닿지 않으므로 일반적으로는 고려하지 않음 (필요시 추가)
+    //
+    //     // 만약 경계면에 있다면, ChunkManager를 통해 해당 방향의 이웃 청크를 찾아 메시 업데이트 요청
+    //     if (needsUpdateN || needsUpdateE || needsUpdateS || needsUpdateW)
+    //     {
+    //         if (ChunkManager.Instance != null) // ChunkManager 인스턴스가 있는지 확인
+    //         {
+    //             if (needsUpdateN) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.up); // 북쪽 청크
+    //             if (needsUpdateE) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.right); // 동쪽 청크
+    //             if (needsUpdateS) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.down); // 남쪽 청크
+    //             if (needsUpdateW) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.left); // 서쪽 청크
     //         }
     //     }
     // }

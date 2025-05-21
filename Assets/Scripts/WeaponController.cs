@@ -160,10 +160,10 @@ public class WeaponController : MonoBehaviour
 
                 Debug.Log($"드릴: 블록 감지 ({blockX}, {blockY}, {blockZ}). 파괴 시도");
 
-                if (ChunkManager.Instance != null)
+                if (StageManager.Instance != null)
                 {
                     // 감지된 단일 블록 파괴
-                    bool destroyed = ChunkManager.Instance.DestroyBlockAt(blockX, blockY, blockZ);
+                    bool destroyed = StageManager.Instance.DestroyBlockAt(blockX, blockY, blockZ);
                     if (destroyed)
                     {
                         Debug.Log($"드릴: 블록 파괴 성공 ({blockX}, {blockY}, {blockZ})");

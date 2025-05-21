@@ -63,7 +63,6 @@ public class EnemySpawner : MonoBehaviour
         {
             Debug.LogError("[EnemySpawner] Default Enemy Prefab이 할당되어 있지 않음");
             enabled = false;
-            return;
         }
     }
 
