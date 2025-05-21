@@ -31,7 +31,7 @@ public class Hitbox : MonoBehaviour
         else if (other.CompareTag("Enemy"))
         {
             BasicEnemy enemy = other.GetComponent<BasicEnemy>();
-            if (enemy != null && enemy.enemyBaseData != null)
+            //if (enemy != null && enemy.enemyBaseData != null)
             {
                 
             }

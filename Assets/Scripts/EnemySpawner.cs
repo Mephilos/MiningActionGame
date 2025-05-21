@@ -11,7 +11,7 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Enemy Settings")]
     [Tooltip("스폰할 기본 적 프리팹")]
-    public GameObject defaultEnemyPrefab; // 여러 종류의 적을 사용한다면 List<GameObject> enemyPrefabs; 로 변경 가능
+    public GameObject defaultEnemyPrefab; // 여러 종류의 적을 사용한다면 List로 변경 가능
     [Tooltip("한 번에 스폰할 수 있는 최대 적 숫자 (동시 스폰 수)")]
     public int maxEnemiesToSpawnAtOnce = 1; // 웨이브 방식에서는 한 웨이브당 스폰 수로 해석 가능
     
@@ -27,9 +27,7 @@ public class EnemySpawner : MonoBehaviour
     public float navMeshSampleRadius = 2.0f;
 
     private Transform _playerTransform;
-
     public static List<BasicEnemy> ActiveEnemies = new List<BasicEnemy>(); // 현재 활성화된 적 리스트 (BasicEnemy.cs에서 관리)
-
     private bool _isSpawning; // 현재 스폰 중인지 여부
     private int _currentStageNumberForSpawner; // 현재 스테이지 번호 (StageManager로부터 받음)
     private Coroutine _spawnCoroutine; // 현재 실행 중인 스폰 코루틴
@@ -43,23 +41,30 @@ public class EnemySpawner : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
             _playerTransform = playerObject.transform;
         }
+        Debug.LogWarning($"[EnemySpawner] EnemySpawner.Start() 호출됨! ActiveEnemies 리스트를 초기화합니다. 호출 시간: {Time.time}"); 
+
+        ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
     }
 
     void Start()
     {
+        // Debug.LogWarning($"[EnemySpawner] EnemySpawner.Start() 호출됨! ActiveEnemies 리스트를 초기화합니다. 호출 시간: {Time.time}"); 
+        //
+        // ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
+        
         if (defaultEnemyPrefab == null)
         {
             Debug.LogError("[EnemySpawner] Default Enemy Prefab이 할당되어 있지 않음");
             enabled = false;
             return;
         }
-        ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
     }
 
     /// <summary>
@@ -74,7 +79,6 @@ public class EnemySpawner : MonoBehaviour
             Debug.LogError("[EnemySpawner] 플레이어 또는 적 프리팹이 설정되지 않아 스폰을 시작할 수 없음");
             return;
         }
-
         _currentStageNumberForSpawner = stageNumber;
         _isSpawning = true;
         
@@ -83,18 +87,17 @@ public class EnemySpawner : MonoBehaviour
         {
             StopCoroutine(_spawnCoroutine);
         }
-        // 스테이지 번호에 따라 다른 스폰 로직을 가진 코루틴을 시작할 수 있습니다.
-        // 여기서는 간단히 스테이지 번호에 비례하여 총 스폰할 적의 수를 결정하는 예시를 보여줍니다.
         _spawnCoroutine = StartCoroutine(SpawnEnemiesOverTimeCoroutine());
-        Debug.Log($"[EnemySpawner] 스테이지 {_currentStageNumberForSpawner} 적 스폰 시작.");
+        Debug.Log($"[EnemySpawner] 스테이지 {_currentStageNumberForSpawner} 적 스폰 시작");
     }
 
     /// <summary>
-    /// 현재 진행 중인 모든 적 스폰을 중지하고, 활성화된 모든 적을 제거(또는 비활성화)합니다.
-    /// StageManager에서 다음 스테이지로 넘어가기 전 또는 게임 오버 시 호출됩니다.
+    /// 현재 진행 중인 모든 적 스폰을 중지하고, 활성화된 모든 적을 제거(또는 비활성화)
+    /// StageManager에서 다음 스테이지로 넘어가기 전 또는 게임 오버 시 호출
     /// </summary>
     public void StopAndClearAllEnemies()
     {
+        Debug.Log($"[EnemySpawner] 호출 시점 ActiveEnemies.Count: {ActiveEnemies.Count}");
         _isSpawning = false;
         if (_spawnCoroutine != null)
         {
@@ -104,6 +107,11 @@ public class EnemySpawner : MonoBehaviour
 
         // activeEnemies 리스트를 복사하여 순회 (리스트 변경 중 순회 오류 방지)
         List<BasicEnemy> enemiesToDestroy = new List<BasicEnemy>(ActiveEnemies);
+        Debug.Log($"[EnemySpawner] 파괴할 적 리스트 복사 완료. enemiesToDestroy.Count: {enemiesToDestroy.Count}");
+        if (enemiesToDestroy.Count == 0 && ActiveEnemies.Count > 0)
+        {
+            Debug.LogWarning("[EnemySpawner] enemiesToDestroy는 비었지만 ActiveEnemies에는 적이 남아있습니다. (매우 드문 경우)");
+        }
         foreach (BasicEnemy enemy in enemiesToDestroy)
         {
             if (enemy != null) // 이미 파괴된 경우 대비
@@ -113,11 +121,11 @@ public class EnemySpawner : MonoBehaviour
             }
         }
         ActiveEnemies.Clear(); // 리스트 비우기 (BasicEnemy의 OnDisable에서도 제거하지만, 확실히 하기 위해)
-        Debug.Log("[EnemySpawner] 모든 적 스폰 중지 및 활성 적 제거 완료.");
+        Debug.Log("[EnemySpawner] 모든 적 스폰 중지 및 활성 적 제거 완료");
     }
 
     /// <summary>
-    /// 시간에 걸쳐 또는 웨이브 형태로 적을 스폰하는 코루틴 예시입니다.
+    /// 시간에 걸쳐 또는 웨이브 형태로 적 스폰
     /// </summary>
     private IEnumerator SpawnEnemiesOverTimeCoroutine()
     {
@@ -130,7 +138,7 @@ public class EnemySpawner : MonoBehaviour
 
         while (_isSpawning && enemiesSpawnedSoFar < totalEnemiesToSpawnForThisStage)
         {
-            // 현재 활성화된 적의 수가 너무 많으면 잠시 대기 (선택적 제한)
+            // 현재 활성화된 적의 수가 너무 많으면 잠시 대기
             // if (activeEnemies.Count >= 15) // 예: 동시에 최대 15마리까지만
             // {
             //     yield return new WaitForSeconds(1.0f);
@@ -146,7 +154,12 @@ public class EnemySpawner : MonoBehaviour
 
                 for (int attempt = 0; attempt < spawnPositionAttempts; attempt++)
                 {
-                    if (_playerTransform == null) yield break; // 플레이어 없어지면 중단
+                    if (_playerTransform == null)
+                    {
+                        Debug.LogError("[EnemySpawner] 플레레이어 참조 없음");
+                        _isSpawning = false;
+                        yield break; // 플레이어 없어지면 중단
+                    }
 
                     Vector2 randomCircle = Random.insideUnitCircle.normalized * Random.Range(minSpawnDistanceFromPlayer, maxSpawnDistanceFromPlayer);
                     Vector3 randomDirection = new Vector3(randomCircle.x, 0, randomCircle.y);
@@ -160,16 +173,28 @@ public class EnemySpawner : MonoBehaviour
                     NavMeshHit hit;
                     if (NavMesh.SamplePosition(potentialSpawnPoint, out hit, navMeshSampleRadius, NavMesh.AllAreas))
                     {
-                        spawnPosition = hit.position;
-                        positionFound = true;
-                        break;
+                        if (IsPositionWithinCurrentStageBounds(hit.position))
+                        {
+                            spawnPosition = hit.position;
+                            positionFound = true;
+                            break;
+                        }
                     }
                 }
 
                 if (positionFound)
                 {
-                    Instantiate(defaultEnemyPrefab, spawnPosition, Quaternion.identity);
-                    enemiesSpawnedSoFar++;
+                    if (defaultEnemyPrefab != null)
+                    {
+                        Instantiate(defaultEnemyPrefab, spawnPosition, Quaternion.identity);
+                        enemiesSpawnedSoFar++;
+                    }
+                    else
+                    {
+                        Debug.LogError("[EnemySpawner] 적 프리팹이 없습니다 스폰 불가");
+                        _isSpawning = false;
+                        yield break;
+                    }
                 }
                 else
                 {
@@ -192,6 +217,28 @@ public class EnemySpawner : MonoBehaviour
         _spawnCoroutine = null; // 코루틴 종료 시 참조 해제
     }
 
+    private bool IsPositionWithinCurrentStageBounds(Vector3 position)
+    {
+        if (StageManager.Instance == null)
+        {
+            Debug.LogError("[EnemySpawner] StageManager 인스턴스 찾을수 없음");
+            return false;
+        }
+        Vector2Int currentStageCoord = StageManager.Instance.CurrentStageCoord;
+        float sSize = StageManager.Instance.stageSize; // stageSize;
+        
+        float stageWorldMinX = currentStageCoord.x * sSize;
+        float stageWorldMaxX = currentStageCoord.x * sSize + sSize;
+        float stageWorldMinZ = currentStageCoord.y * sSize; // StageManager의 stageCoord.y는 월드 Z
+        float stageWorldMaxZ = currentStageCoord.y * sSize + sSize;
+
+        if (position.x >= stageWorldMinX && position.x <= stageWorldMaxX &&
+            position.z >= stageWorldMinZ && position.z <= stageWorldMaxZ)
+        {
+            return true;
+        }
+        return false;
+    }
 
     // 감지 반경 표시는 플레이어 중심이므로 그대로 사용 가능
     void OnDrawGizmosSelected()
