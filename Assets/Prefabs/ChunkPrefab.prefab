@@ -49,13 +49,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23cf6ea2efbf249759bcacbe433c5b4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enableWideTrapHoles: 0
+  trapHoleNoiseScale: 0.01
+  trapHoleThreshold: 0.01
+  trapHoleSeedOffset: 3000
   terrainExistenceThreshold: 0.2
-  voidColumnChance: 0.01
   waterPlane: {fileID: 8077179443502685105, guid: c1b43fbd7ee134c3b8c6014478b9ac29, type: 3}
   itemPrefab: {fileID: 5817702000151847086, guid: 5912b9f907b2d4943a419d1e9dd5d48a, type: 3}
-  itemSpawnChance: 0.1
+  itemSpawnChance: 0.2
   minItemSpawnY: 1
-  maxItemSpawnY: 30
+  maxItemSpawnY: 16
 --- !u!33 &8510989005687022258
 MeshFilter:
   m_ObjectHideFlags: 0

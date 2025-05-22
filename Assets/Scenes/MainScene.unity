@@ -1688,7 +1688,7 @@ MonoBehaviour:
   minNoiseScale: 0.04
   maxNoiseScale: 0.08
   minHeightMultiplier: 0
-  maxHeightMultiplier: 11
+  maxHeightMultiplier: 16
   seedMultiplier: 100
 --- !u!1 &1605669641
 GameObject:

@@ -48,12 +48,19 @@ public class Chunk : MonoBehaviour
     private int[,] _surfaceHeights; // 각 (x,z) 위치의 표면 높이를 저장할 배열
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
+
+    [Header("청크 형태, 아이템 매몰 설정")] [Tooltip("함정 설정")]
+    public bool enableWideTrapHoles = false;
+    [Tooltip("함정 구멍 크기")]
+    public float trapHoleNoiseScale = 0.02f;
+    [Tooltip("함정 구멍 생성 빈도")]
+    [Range(0f, 1f)]
+    public float trapHoleThreshold = 0.45f;
+    public int trapHoleSeedOffset = 3000;
     [Tooltip("청크 바닥 설정")]
     public float terrainExistenceThreshold = 0.2f; // 노이즈 값에 따라 지형이 생성되지 않는 부분 생기게
-    public float voidColumnChance = 0.0f; // 함정 관련 변수
     public GameObject waterPlane;
-    [Header("아이템 스폰 설정")]
-    [Tooltip("청크 안에 매설될 프리팹(아이템")]
+    [Tooltip("청크 안에 매설될 프리팹")]
     public GameObject itemPrefab;
     [Tooltip("청크내에 매설될 확률")] [Range(0f, 1f)]
     public float itemSpawnChance = 0.1f;
@@ -154,53 +161,61 @@ public class Chunk : MonoBehaviour
         {
             for (int z = 0; z < _chunkSize; z++)
             {
-                // 특정확률로 빈칸 (함정 파이듯)
-                if (voidColumnChance > 0f && Random.value < voidColumnChance)
+                //월드 좌표 (노이즈 계산시에 사용)
+                int worldX = _chunkCoordinates.x * _chunkSize + x;
+                int worldZ = _chunkCoordinates.y * _chunkSize + z;
+                
+                bool createTrapHole = false;
+                if (enableWideTrapHoles)
                 {
-                    _surfaceHeights[x, z] = -1;
+                    // 함정 구멍용 Perlin Noise 값 계산
+                    // 지형 높이 노이즈와 다른 시드 오프셋 및 스케일 사용
+                    float trapNoiseVal = Mathf.PerlinNoise(
+                        (worldX + (_seed + trapHoleSeedOffset) * 0.4f) * trapHoleNoiseScale, // 시드 조합 및 스케일 적용
+                        (worldZ + (_seed + trapHoleSeedOffset) * 0.7f) * trapHoleNoiseScale  // 다른 축에도 적용
+                    );
 
+                    if (trapNoiseVal < trapHoleThreshold)
+                    {
+                        createTrapHole = true;
+                    }
+                }
+
+                if (createTrapHole) // 넓은 함정 구멍을 생성해야 한다면, 이 열은 전부 공기
+                {
+                    _surfaceHeights[x, z] = -1; // 표면 없음으로 표시
                     for (int y = 0; y < _chunkHeight; y++)
                     {
                         _blockData[x, y, z] = BlockType.Air;
                     }
                     continue;
                 }
-                //월드 좌표 (노이즈 계산시에 사용)
-                int worldX = _chunkCoordinates.x * _chunkSize + x;
-                int worldZ = _chunkCoordinates.y * _chunkSize + z;
-                //perlin Noise 적용 지표면 높이 게산
-                float noiseValue = Mathf.PerlinNoise((worldX + _seed * 0.7385f) * _noiseScale, (worldZ + _seed * 0.1934f) * _noiseScale);
+                // 지형 높이 및 존재 여부를 위한 Perlin Noise 값 계산
+                float heightNoiseValue = Mathf.PerlinNoise(
+                    (worldX + _seed * 0.7385f) * _noiseScale, // 기존 _noiseScale 사용 (지형 높이용)
+                    (worldZ + _seed * 0.1934f) * _noiseScale  
+                );
 
-                if (noiseValue < terrainExistenceThreshold)
+                // 지형 높이 노이즈 값이 terrainExistenceThreshold보다 낮은 경우, 해당 (x,z) 열은 전부 공기 (자연스러운 물가/저지대)
+                if (heightNoiseValue < terrainExistenceThreshold) 
                 {
-                    _surfaceHeights[x, z] = -1;
+                    _surfaceHeights[x, z] = -1; 
                     for (int y = 0; y < _chunkHeight; y++)
                     {
-                        _blockData[x, y, z] = BlockType.Air;
+                        _blockData[x, y, z] = BlockType.Air; 
                     }
                 }
-                else
+                else // 지형 생성
                 {
-                    int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * _heightMultiplier); // 변수 이름 변경 (혼동 방지)
-                    calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, _chunkHeight - 1);
+                    int calculatedSurfaceHeight = Mathf.FloorToInt(heightNoiseValue * _heightMultiplier); 
+                    calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, _chunkHeight - 1); 
+                    _surfaceHeights[x, z] = calculatedSurfaceHeight; 
 
-                    // surfaceHeights 배열에 계산된 표면 높이 저장
-                    _surfaceHeights[x, z] = calculatedSurfaceHeight;
-                    // y(지상고?)를 따서 블록 타입 결정
-                    for (int y = 0; y < _chunkHeight; y++)
+                    for (int y = 0; y < _chunkHeight; y++) 
                     {
-                        if (y > calculatedSurfaceHeight)
-                        {
-                            _blockData[x, y, z] = BlockType.Air; //지표면 보다 높으면 빈공간
-                        }
-                        else if (y == calculatedSurfaceHeight)
-                        {
-                            _blockData[x, y, z] = BlockType.Grass; //지표면은 풀
-                        }
-                        else
-                        {
-                            _blockData[x, y, z] = BlockType.Stone; //아래는 돌
-                        }
+                        if (y > calculatedSurfaceHeight) _blockData[x, y, z] = BlockType.Air; 
+                        else if (y == calculatedSurfaceHeight) _blockData[x, y, z] = BlockType.Grass; 
+                        else _blockData[x, y, z] = BlockType.Stone; 
                     }
                 }
             }
@@ -222,7 +237,7 @@ public class Chunk : MonoBehaviour
         {
             return; // 확률에 당첨되지 않으면 실행 중단
         }
-
+        
         // 아이템을 매설할 랜덤한 청크 내부 X, Z 좌표 선택
         int x = Random.Range(1, _chunkSize - 1); // 1 이상 (chunkSize-1) 미만의 정수
         int z = Random.Range(1, _chunkSize - 1);
@@ -253,6 +268,7 @@ public class Chunk : MonoBehaviour
             GameObject spawnedItem = Instantiate(itemPrefab, this.transform); // 청크의 자식으로 생성
             spawnedItem.transform.localPosition = itemPosition; // 로컬 위치 설정
             spawnedItem.name = $"{itemPrefab.name}_({_chunkCoordinates.x * _chunkSize + x},{spawnY},{_chunkCoordinates.y * _chunkSize + z})"; // 월드 좌표로 이름 설정
+            Debug.Log($"아이템 생성{spawnedItem.name}");
         }
     }
 
