@@ -14,7 +14,7 @@ public class StageManager : MonoBehaviour
     // public List<StageConfig> stageProgression; // 스테이지 진행 순서 및 설정 리스트
     
     public static StageManager Instance { get; private set; }
-
+    
     [Header("Stage (Chunk) Settings")]
     [SerializeField] private GameObject stageChunkPrefab;
     [SerializeField] private Material stageSharedMaterial;
@@ -34,9 +34,9 @@ public class StageManager : MonoBehaviour
     [Tooltip("스테이지별 노이즈 최대 스케일")]
     [SerializeField] private float maxNoiseScale = 0.04f;
     [Tooltip("스테이지별 최소 지형 높이")]
-    [SerializeField] private float minHeightMultiplier = 10f;
+    [SerializeField] private float minHeightMultiplier = 5f;
     [Tooltip("스테이지별 최대 지형 높이")]
-    [SerializeField] private float maxHeightMultiplier = 20f;
+    [SerializeField] private float maxHeightMultiplier = 10f;
     [Tooltip("스테이지 시드 값 계수")]
     [SerializeField] private int seedMultiplier = 100;
     
@@ -229,9 +229,17 @@ public class StageManager : MonoBehaviour
             ? _currentLoadedStageChunk.GetSurfaceHeightAt(spawnLocalX, spawnLocalZ) : 0;
 
         float spawnYPosition = surfaceY + 4.0f;
-        
         float playerHeight = playerCharacterController != null ? playerCharacterController.height : 2.0f;
-        spawnYPosition = Mathf.Clamp(spawnYPosition, 1.0f, stageBuildHeight - playerCharacterController.height);
+        
+        if (this.stageBuildHeight > 0)
+        {
+            spawnYPosition = Mathf.Clamp(spawnYPosition, 1.0f, 
+                stageBuildHeight - (playerCharacterController != null ? playerCharacterController.height : playerHeight));
+        }
+        else
+        {
+            spawnYPosition = Mathf.Max(1.0f, spawnYPosition);
+        }
 
 
         Vector3 spawnPosition = new Vector3(

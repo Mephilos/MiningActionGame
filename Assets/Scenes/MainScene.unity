@@ -1683,8 +1683,8 @@ MonoBehaviour:
   timeToSurvivePerStage: 20
   minNoiseScale: 0.02
   maxNoiseScale: 0.04
-  minHeightMultiplier: 10
-  maxHeightMultiplier: 20
+  minHeightMultiplier: 0
+  maxHeightMultiplier: 0
   seedMultiplier: 100
 --- !u!1 &1605669641
 GameObject:
