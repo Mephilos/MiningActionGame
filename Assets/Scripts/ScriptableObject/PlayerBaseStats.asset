@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03505dc9b5d64b03961ef4fccbaf825, type: 3}
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 10000
   initialXpToNextLevel: 100
   xpLevelUpMultiplier: 1.5
   baseAttackDamage: 10

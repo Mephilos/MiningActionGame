@@ -8,7 +8,6 @@ public class StageManager : MonoBehaviour
     // [System.Serializable]
     // public class StageConfig
     // {
-    //     public Vector2Int stageCoordinate; // 이 좌표의 청크를 사용
     //     public float timeToSurvive;
     //     // public int enemySpawnConfigId; // 적 스폰 설정 ID 등 추가 가능
     // }
@@ -22,9 +21,7 @@ public class StageManager : MonoBehaviour
     [SerializeField] public int stageSize = 16;
     [SerializeField] private int stageBuildHeight = 64;
     [SerializeField] private int baseWorldSeed = 12345;
-    // [SerializeField] private float terrainNoiseScale = 0.05f;
-    // [SerializeField] private float terrainHeightMultiplier = 20f;
-
+    
     [Header("Player Reference")]
     [SerializeField] private Transform playerTransform;
 
@@ -49,7 +46,9 @@ public class StageManager : MonoBehaviour
     private bool _isLoadingNextStage;// 다음 스테이지 로딩 중인지 여부 (중복 호출 방지)
     private bool _isWaitingForPlayerToProceed;
     private bool _isGameOver; 
-    public Vector2Int CurrentStageCoord { get; private set; }
+    
+    private readonly Vector2Int _fixedStageCoordinate = Vector2Int.zero;
+    public Vector2Int CurrentStageCoord => _fixedStageCoordinate;
     
     private void Awake()
     {
@@ -101,7 +100,7 @@ public class StageManager : MonoBehaviour
             UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
             UIManager.Instance.HideStageClearScreen();
         }
-        LoadStageAndStartTimer(Vector2Int.zero);
+        LoadStageAndStartTimer(_fixedStageCoordinate);
         Debug.Log("게임 시작 스테이지: " + _currentStageNumber);
     }
     private void Update()
@@ -225,10 +224,13 @@ public class StageManager : MonoBehaviour
         int spawnLocalX = stageSize / 2;
         int spawnLocalZ = stageSize / 2;
 
-        int surfaceY = _currentLoadedStageChunk.GetSurfaceHeightAt(spawnLocalX, spawnLocalZ);
+        // _currentLoadedStageChunk가 null이 아닐 때만 표면 높이 계산
+        int surfaceY = _currentLoadedStageChunk != null 
+            ? _currentLoadedStageChunk.GetSurfaceHeightAt(spawnLocalX, spawnLocalZ) : 0;
 
         float spawnYPosition = surfaceY + 4.0f;
         
+        float playerHeight = playerCharacterController != null ? playerCharacterController.height : 2.0f;
         spawnYPosition = Mathf.Clamp(spawnYPosition, 1.0f, stageBuildHeight - playerCharacterController.height);
 
 
@@ -272,9 +274,7 @@ public class StageManager : MonoBehaviour
         }
 
         _currentStageNumber++;
-        Vector2Int nextStageCoord = new Vector2Int(CurrentStageCoord.x + 
-            _currentStageNumber - 1, CurrentStageCoord.y); // (0,0) -> (1,0) -> (2,0) ...
-        LoadStageAndStartTimer(nextStageCoord);
+        LoadStageAndStartTimer(_fixedStageCoordinate);
     }
 
     /// <summary>
@@ -292,6 +292,7 @@ public class StageManager : MonoBehaviour
         if (_currentLoadedStageChunk != null)
         {
             Destroy(_currentLoadedStageChunk.gameObject);
+            _currentLoadedStageChunk = null;
         }
 
         Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
@@ -305,19 +306,16 @@ public class StageManager : MonoBehaviour
             return;
         }
 
-        float currentNoiseScale;
-        float currentHeightMultiplier;
-        
-        currentNoiseScale = Random.Range(minNoiseScale, maxNoiseScale);
-        currentHeightMultiplier = Random.Range(minHeightMultiplier, maxHeightMultiplier);
-        
-        int derivedSeed = baseWorldSeed + stageCoord.x * 8264 + stageCoord.y * 9357;
+        float currentNoiseScale = Random.Range(minNoiseScale, maxNoiseScale);
+        float currentHeightMultiplier = Random.Range(minHeightMultiplier, maxHeightMultiplier);
+
+        int derivedSeed = baseWorldSeed + (_currentStageNumber * seedMultiplier);
         
         chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed, 
                                currentNoiseScale, currentHeightMultiplier, stageSharedMaterial);
         
         _currentLoadedStageChunk = chunkScript;
-        CurrentStageCoord = stageCoord; // CurrentStageCoord 업데이트
+        
         Debug.Log($"스테이지 {_currentStageNumber} ({stageCoord}) 로드 완료 타이머 시작");
         MovePlayerToStageCenter(stageWorldPosition); // 플레이어 이동
 
@@ -386,14 +384,6 @@ public class StageManager : MonoBehaviour
         {
             Debug.LogWarning("[StageManager] 이미 인스턴스가 존재합니다");
             Destroy(gameObject);
-            return;
-        }
-
-        if (playerTransform == null)
-        {
-            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null) playerTransform = playerObj.transform;
-            else Debug.LogError("[StageManager] Player Transform을 찾을 수 없습니다");
         }
     }
 

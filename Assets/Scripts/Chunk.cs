@@ -60,7 +60,7 @@ public class Chunk : MonoBehaviour
 
 
 
-    //------------------------메쉬 정점 데이터---------------------------
+    //------------------------------메쉬 정점 데이터-----------------------------
     private const float AtlasTotalTilesX = 4f; // 가로로 4칸 (1024 / 256 = 4)
     private const float AtlasTotalTilesY = 4f; // 세로로 4칸 (1024 / 256 = 4)
 
@@ -107,7 +107,7 @@ public class Chunk : MonoBehaviour
         this.worldHeightMultiplier = heightMultiplier;
 
         //청크 이름
-        gameObject.name = $"Chunk_{coord.x}_{coord.y}";
+        gameObject.name = $"StageChunk";
 
         meshFilter = GetComponent<MeshFilter>();
         meshRenderer = GetComponent<MeshRenderer>();
