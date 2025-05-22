@@ -24,7 +24,12 @@ public class StageManager : MonoBehaviour
     
     [Header("Player Reference")]
     [SerializeField] private Transform playerTransform;
-
+    private PlayerData _playerData; // PlayerData 참조
+    
+    [Header("System References")] // 다른 매니저들 참조
+    [SerializeField] private UIManager uiManager;
+    [SerializeField] private EnemySpawner enemySpawner;
+    
     [Header("Stage Progression Settings")] [Tooltip("각 스테이지에서 버텨야 하는 시간")]
     [SerializeField] private float timeToSurvivePerStage = 60f;
 
@@ -49,12 +54,14 @@ public class StageManager : MonoBehaviour
     
     private readonly Vector2Int _fixedStageCoordinate = Vector2Int.zero;
     public Vector2Int CurrentStageCoord => _fixedStageCoordinate;
+    public int GetCurrentStageNumber() => _currentStageNumber;
     
     
     private void Awake()
     {
         InitializeSingleton();
-        InitializePlayerObj();
+        if (uiManager == null) uiManager = UIManager.Instance;
+        if (enemySpawner == null) enemySpawner = EnemySpawner.Instance;
     }
 
     private void Start()
@@ -65,13 +72,77 @@ public class StageManager : MonoBehaviour
             enabled = false;
             return;
         }
-        if (playerTransform == null)
+        if (!InitializePlayerAndDependencies()) // PlayerData 및 의존성 설정 확인
         {
-            Debug.LogError("[StageManager] Player Transform이 없어 게임을 시작할 수 없습니다");
+            Debug.LogError("[StageManager] 플레이어 및 의존성 초기화 실패");
             enabled = false;
             return;
         }
-        StartNewGame(); // 새 게임 시작 또는 첫 스테이지 로드
+        StartNewGame();
+    }
+
+    private bool InitializePlayerAndDependencies()
+    {
+        if (playerTransform == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                playerTransform = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogError("[StageManager] Player 태그를 찾을 수 없습니다");
+                return false;
+            }
+        }
+        
+        _playerData = playerTransform.GetComponent<PlayerData>();
+        if (_playerData == null)
+        {
+            Debug.LogError("[StageManager] Player 오브젝트에서 PlayerData 컴포넌트를 찾을 수 없습니다");
+            return false;
+        }
+        // UIManager에 PlayerData 주입
+        if (uiManager != null)
+        {
+            uiManager.Initialize(_playerData);
+        }
+        else
+        {
+            Debug.LogWarning("[StageManager] UIManager 참조가 없어 PlayerData를 주입할 수 없습니다.");
+        }
+
+        // EnemySpawner에 PlayerData와 PlayerTransform 주입
+        if (enemySpawner != null)
+        {
+            enemySpawner.Initialize(_playerData, playerTransform);
+        }
+        else
+        {
+            Debug.LogWarning("[StageManager] EnemySpawner 참조가 없어 PlayerData를 주입할 수 없습니다.");
+        }
+        return true;
+    }
+
+    private void Update()
+    {
+        if (_isGameOver || _isLoadingNextStage || (uiManager != null && uiManager.stageClearPanel &&uiManager.shopPanel != null && uiManager.shopPanel.activeSelf) )
+        {
+            if (_isGameOver && Input.GetKeyDown(KeyCode.R)) RestartGame();
+            return;
+        }
+
+        _currentStageTimer += Time.deltaTime;
+        if (uiManager != null)
+        {
+            float timeLeft = timeToSurvivePerStage - _currentStageTimer;
+            uiManager.UpdateStageTimerUI(timeLeft > 0 ? timeLeft : 0f);
+        }
+        if (_currentStageTimer >= timeToSurvivePerStage)
+        {
+            InitiateStageClearSequence();
+        }
     }
 
     /// <summary>
@@ -86,51 +157,28 @@ public class StageManager : MonoBehaviour
         _isGameOver = false;    // 게임 오버 상태 초기화
         Time.timeScale = 1f;    // 게임 시간 정상화
 
-        if (playerTransform != null)
+        if (_playerData != null) // PlayerData가 초기화된 후 호출
         {
-            PlayerData playerData = playerTransform.GetComponent<PlayerData>();
-            if (playerData != null)
-            {
-                playerData.ReviveAndReset();
-            }
+            _playerData.ReviveAndReset();
+        }
+        else
+        {
+            Debug.LogError("[StageManager] StartNewGame: PlayerData가 null입니다. ReviveAndReset 호출 불가.");
+            // 게임 진행이 어려우므로 추가 처리 필요 가능성
         }
 
-        if (UIManager.Instance != null)
+
+        if (uiManager != null)
         {
-            UIManager.Instance.HideGameOverScreem();
-            UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
-            UIManager.Instance.HideStageClearScreen();
-            UIManager.Instance.HideShopPanel();
+            uiManager.HideGameOverScreem();
+            uiManager.UpdateStageNumberUI(_currentStageNumber);
+            uiManager.HideShopPanel();
+            if(_playerData != null) uiManager.UpdateResourceDisplayUI(_playerData.currentResources); // 초기 자원 표시
         }
         LoadStageAndStartTimer(_fixedStageCoordinate);
         Debug.Log("게임 시작 스테이지: " + _currentStageNumber);
     }
-    private void Update()
-    {
-        if (_isGameOver || _isLoadingNextStage || _isWaitingForPlayerToProceed)
-        {
-            //즉시 재시작 기능 (임시)
-            if (_isGameOver && Input.GetKeyDown(KeyCode.R))
-            {
-                Debug.Log("[StageManager] R키 입력 게임 재시작");
-                RestartGame();
-            }
-            return;
-        }
 
-        // 현재 스테이지 타이머 업데이트
-        _currentStageTimer += Time.deltaTime;
-        if (UIManager.Instance != null)
-        {
-            float timeLeft = timeToSurvivePerStage - _currentStageTimer;
-            UIManager.Instance.UpdateStageTimerUI(timeLeft > 0 ? timeLeft : 0f);
-        }
-        // 버티기 시간 충족 시 다음 스테이지로
-        if (_currentStageTimer >= timeToSurvivePerStage)
-        {
-            ProceedToNextStage();
-        }
-    }
     /// <summary>
     /// 플레이어 죽음 처리 (EnemySpawner Instance 사용)
     /// </summary>
@@ -181,7 +229,27 @@ public class StageManager : MonoBehaviour
         }
         StartNewGame();
     }
+    
+    private void InitiateStageClearSequence()
+    {
+        _isLoadingNextStage = true;
+        _isWaitingForPlayerToProceed = true;
+        _currentStageTimer = 0f;
+        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어");
+        if (enemySpawner != null)
+        {
+            enemySpawner.StopAndClearAllEnemies();
+        }
+        else
+        {
+            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적을 정리할 수 없음");
+        }
 
+        if (uiManager != null)
+        {
+            uiManager.ShowStageClearScreen();
+        }
+    }
     /// <summary>
     /// 다음 스테이지로 진행하는 로직을 시작합니다
     /// </summary>
@@ -191,7 +259,7 @@ public class StageManager : MonoBehaviour
         _isWaitingForPlayerToProceed = true;
         _currentStageTimer = 0f; // 타이머 리셋
 
-        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어 버튼을 눌러 스테이지로 이동");
+        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어");
         
         if (EnemySpawner.Instance != null)
         {
@@ -202,7 +270,7 @@ public class StageManager : MonoBehaviour
             Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적을 정리할 수 없음");
         }
 
-        if (UIManager.Instance != null)
+        if (uiManager != null)
         {
             UIManager.Instance.ShowStageClearScreen(); // 스테이지 클리어 UI 표시
         }
@@ -217,10 +285,10 @@ public class StageManager : MonoBehaviour
             return;
         }
         
-        if (UIManager.Instance != null)
+        if (uiManager != null)
         {
-            UIManager.Instance.HideStageClearScreen();
-            UIManager.Instance.ShowShopPanel();
+            uiManager.HideStageClearScreen();
+            uiManager.ShowShopPanel();
         }
     }
 
@@ -404,20 +472,21 @@ public class StageManager : MonoBehaviour
         }
     }
 
-    private void InitializePlayerObj()
-    {
-        if (playerTransform != null) return;
-        
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            playerTransform = playerObj.transform;
-        }
-        else
-        {
-            Debug.LogError("[StageManager] Player 오브젝트가 씬에 존재하지 않습니다.");
-        }
-    }
+    
+    // private void InitializePlayerObj()
+    // {
+    //     if (playerTransform != null) return;
+    //     
+    //     GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+    //     if (playerObj != null)
+    //     {
+    //         playerTransform = playerObj.transform;
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("[StageManager] Player 오브젝트가 씬에 존재하지 않습니다.");
+    //     }
+    // }
     
     // /// <summary>
     // /// 잠시 대기 후 다음 스테이지를 로드하는 코루틴

@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
   maxHealth: 10000
-  initialXpToNextLevel: 100
-  xpLevelUpMultiplier: 1.5
   baseAttackDamage: 10
+  initialResources: 100000
   moveSpeed: 5
   jumpForce: 8
   initialMaxJumpCount: 1

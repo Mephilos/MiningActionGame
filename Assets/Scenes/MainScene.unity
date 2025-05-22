@@ -2376,6 +2376,8 @@ MonoBehaviour:
   stageBuildHeight: 32
   baseWorldSeed: 12345
   playerTransform: {fileID: 1919904655}
+  uiManager: {fileID: 1123934153}
+  enemySpawner: {fileID: 2043441969}
   timeToSurvivePerStage: 60
   minNoiseScale: 0.02
   maxNoiseScale: 0.06
@@ -2746,7 +2748,7 @@ GameObject:
   - component: {fileID: 1816891035}
   - component: {fileID: 1816891034}
   m_Layer: 5
-  m_Name: UpgradButton
+  m_Name: UpgradeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

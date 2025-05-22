@@ -1,5 +1,3 @@
-// EnemySpawner.cs
-
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
@@ -27,6 +25,7 @@ public class EnemySpawner : MonoBehaviour
     public float navMeshSampleRadius = 2.0f;
 
     private Transform _playerTransform;
+    private PlayerData _playerData; // PlayerData 주입
     public static List<BasicEnemy> ActiveEnemies = new List<BasicEnemy>(); // 현재 활성화된 적 리스트 (BasicEnemy.cs에서 관리)
     private bool _isSpawning; // 현재 스폰 중인지 여부
     private int _currentStageNumberForSpawner; // 현재 스테이지 번호 (StageManager로부터 받음)
@@ -51,12 +50,22 @@ public class EnemySpawner : MonoBehaviour
         ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
     }
 
+    public void Initialize(PlayerData playerData, Transform playerTransform)
+    {
+        _playerData = playerData;
+        _playerTransform = playerTransform;
+    }
     void Start()
     {
         if (defaultEnemyPrefab == null)
         {
             Debug.LogError("[EnemySpawner] Default Enemy Prefab이 할당되어 있지 않음");
             enabled = false;
+        }
+        if (_playerTransform == null && _playerData == null) // 둘 다 없다면 문제
+        {
+            Debug.LogWarning("[EnemySpawner] PlayerData 또는 PlayerTransform이 초기화되지 않았습니다 " +
+                             "StageManager에서 Initialize 호출을 확인하세요.");
         }
     }
 
@@ -67,7 +76,7 @@ public class EnemySpawner : MonoBehaviour
     /// <param name="stageNumber">현재 시작하는 스테이지 번호</param>
     public void StartSpawningForStage(int stageNumber)
     {
-        if (_playerTransform == null || defaultEnemyPrefab == null)
+        if (_playerTransform == null || defaultEnemyPrefab == null || _playerData == null)
         {
             Debug.LogError("[EnemySpawner] 플레이어 또는 적 프리팹이 설정되지 않아 스폰을 시작할 수 없음");
             return;
@@ -98,22 +107,21 @@ public class EnemySpawner : MonoBehaviour
             _spawnCoroutine = null;
         }
 
-        // activeEnemies 리스트를 복사하여 순회 (리스트 변경 중 순회 오류 방지)
+        // activeEnemies 리스트를 복사하여 순회 
         List<BasicEnemy> enemiesToDestroy = new List<BasicEnemy>(ActiveEnemies);
-        Debug.Log($"[EnemySpawner] 파괴할 적 리스트 복사 완료. enemiesToDestroy.Count: {enemiesToDestroy.Count}");
+        Debug.Log($"[EnemySpawner] 파괴할 적 리스트 복사 enemiesToDestroy.Count: {enemiesToDestroy.Count}");
         if (enemiesToDestroy.Count == 0 && ActiveEnemies.Count > 0)
         {
-            Debug.LogWarning("[EnemySpawner] enemiesToDestroy는 비었지만 ActiveEnemies에는 적이 남아있습니다. (매우 드문 경우)");
+            Debug.LogWarning("[EnemySpawner] enemiesToDestroy는 비었지만 ActiveEnemies에는 적이 남아있습니다");
         }
         foreach (BasicEnemy enemy in enemiesToDestroy)
         {
             if (enemy != null) // 이미 파괴된 경우 대비
             {
-                // enemy.gameObject.SetActive(false); // 오브젝트 풀링을 사용한다면 비활성화
-                Destroy(enemy.gameObject); // 즉시 파괴
+                Destroy(enemy.gameObject);
             }
         }
-        ActiveEnemies.Clear(); // 리스트 비우기 (BasicEnemy의 OnDisable에서도 제거하지만, 확실히 하기 위해)
+        ActiveEnemies.Clear();
         Debug.Log("[EnemySpawner] 모든 적 스폰 중지 및 활성 적 제거 완료");
     }
 
@@ -131,12 +139,12 @@ public class EnemySpawner : MonoBehaviour
 
         while (_isSpawning && enemiesSpawnedSoFar < totalEnemiesToSpawnForThisStage)
         {
-            // 현재 활성화된 적의 수가 너무 많으면 잠시 대기
-            // if (activeEnemies.Count >= 15) // 예: 동시에 최대 15마리까지만
-            // {
-            //     yield return new WaitForSeconds(1.0f);
-            //     continue;
-            // }
+            if (_playerTransform == null || _playerData == null)
+            {
+                Debug.LogError("[EnemySpawner] 플레이어 참조 또는 PlayerData 없음 스폰 중단");
+                _isSpawning = false;
+                yield break;
+            }
 
             for (int i = 0; i < maxEnemiesToSpawnAtOnce; i++) // 한 번에 여러 마리 스폰 시도
             {
@@ -147,21 +155,9 @@ public class EnemySpawner : MonoBehaviour
 
                 for (int attempt = 0; attempt < spawnPositionAttempts; attempt++)
                 {
-                    if (_playerTransform == null)
-                    {
-                        Debug.LogError("[EnemySpawner] 플레레이어 참조 없음");
-                        _isSpawning = false;
-                        yield break; // 플레이어 없어지면 중단
-                    }
-
                     Vector2 randomCircle = Random.insideUnitCircle.normalized * Random.Range(minSpawnDistanceFromPlayer, maxSpawnDistanceFromPlayer);
                     Vector3 randomDirection = new Vector3(randomCircle.x, 0, randomCircle.y);
                     Vector3 potentialSpawnPoint = _playerTransform.position + randomDirection;
-
-                    // 현재 스테이지(청크) 경계 내에서 스폰 위치를 찾도록 추가 검증이 필요할 수 있습니다.
-                    // StageManager.Instance.CurrentStageCoord 와 StageManager.Instance.stageSize 를 사용
-                    // 여기서는 일단 플레이어 주변 NavMesh 위로 단순화합니다.
-                    // TODO: 스폰 위치가 현재 활성화된 스테이지 경계 내인지 확인하는 로직 추가
 
                     NavMeshHit hit;
                     if (NavMesh.SamplePosition(potentialSpawnPoint, out hit, navMeshSampleRadius, NavMesh.AllAreas))
@@ -179,7 +175,13 @@ public class EnemySpawner : MonoBehaviour
                 {
                     if (defaultEnemyPrefab != null)
                     {
-                        Instantiate(defaultEnemyPrefab, spawnPosition, Quaternion.identity);
+                        GameObject enemyGO = Instantiate(defaultEnemyPrefab, spawnPosition, Quaternion.identity);
+                        BasicEnemy basicEnemyScript = enemyGO.GetComponent<BasicEnemy>();
+                        if (basicEnemyScript != null)
+                        {
+                            // PlayerData와 Player의 Transform을 BasicEnemy에 주입
+                            basicEnemyScript.Initialize(_playerData, _playerTransform);
+                        }
                         enemiesSpawnedSoFar++;
                     }
                     else
@@ -189,23 +191,15 @@ public class EnemySpawner : MonoBehaviour
                         yield break;
                     }
                 }
-                else
-                {
-                    // Debug.LogWarning("[EnemySpawner] 유효한 스폰 위치를 찾지 못했습니다. (시도 횟수 초과)");
-                }
             }
-            
             if (_isSpawning) // 스폰 중지 명령이 없었을 때만 대기
             {
                 yield return new WaitForSeconds(spawnDelayBetweenEnemies);
             }
         }
-
-        if (_isSpawning) // 모든 적을 스폰했으나, 스폰 중지 명령이 없었을 경우
+        if (_isSpawning) // 모든 적을 스폰했으나, 스폰 중지 명령이 없었을 경우 스폰 완료 확인 
         {
             Debug.Log($"[EnemySpawner] 스테이지 {_currentStageNumberForSpawner} 목표 적 스폰 완료 ({enemiesSpawnedSoFar}마리).");
-            // 여기서 isSpawning = false; 를 할 수도 있고, StageManager가 명시적으로 Stop하기 전까지 계속 대기할 수도 있습니다.
-            // 현재는 StageManager가 시간을 기준으로 클리어하므로, isSpawning은 계속 true로 둘 수 있습니다.
         }
         _spawnCoroutine = null; // 코루틴 종료 시 참조 해제
     }
@@ -225,12 +219,8 @@ public class EnemySpawner : MonoBehaviour
         float stageWorldMinZ = currentStageCoord.y * sSize; // StageManager의 stageCoord.y는 월드 Z
         float stageWorldMaxZ = currentStageCoord.y * sSize + sSize;
 
-        if (position.x >= stageWorldMinX && position.x <= stageWorldMaxX &&
-            position.z >= stageWorldMinZ && position.z <= stageWorldMaxZ)
-        {
-            return true;
-        }
-        return false;
+        return position.x >= stageWorldMinX && position.x <= stageWorldMaxX &&
+               position.z >= stageWorldMinZ && position.z <= stageWorldMaxZ;
     }
 
     // 감지 반경 표시는 플레이어 중심이므로 그대로 사용 가능

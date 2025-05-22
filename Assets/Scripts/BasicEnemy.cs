@@ -20,13 +20,29 @@ public class BasicEnemy : MonoBehaviour
     [Tooltip("자폭대기 시간")]
     public float selfDestructDelay; 
 
-    private Transform _playerTransform;    
+    private Transform _playerTransform;
+    private PlayerData _playerData;
     private NavMeshAgent _navMeshAgent;    
     private Rigidbody _rb;                 
     private bool _isChasing;
 
     public float navMeshSampleRadius = 2.0f;
 
+    // EnemySpawner가 호출하여 PlayerData와 PlayerTransform을 주입합니다.
+    public void Initialize(PlayerData playerData, Transform playerTransform)
+    {
+        _playerData = playerData;
+        _playerTransform = playerTransform;
+
+        if (_playerData == null)
+        {
+            Debug.LogError($"[{gameObject.name}] Initialize: PlayerData가 null입니다!");
+        }
+        if (_playerTransform == null)
+        {
+            Debug.LogError($"[{gameObject.name}] Initialize: PlayerTransform이 null입니다!");
+        }
+    }
     void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
@@ -40,8 +56,8 @@ public class BasicEnemy : MonoBehaviour
         else
         {
             _currentHealth = enemyBaseData.maxHealth;
-            detectionRadius = enemyBaseData.detectionRadius;
-            moveSpeed = enemyBaseData.moveSpeed;
+            this.detectionRadius = enemyBaseData.detectionRadius;
+            this.moveSpeed = enemyBaseData.moveSpeed;
         }
         
         if (_navMeshAgent != null)
@@ -94,23 +110,20 @@ public class BasicEnemy : MonoBehaviour
 
     void OnDisable()
     {
-        EnemySpawner.ActiveEnemies.Remove(this);
+        // ActiveEnemies는 static
+        if (EnemySpawner.ActiveEnemies != null)
+        {
+            EnemySpawner.ActiveEnemies.Remove(this);
+        }
     }
 
     void Start()
     {
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
+        if (_playerTransform == null || _playerData == null)
         {
-            _playerTransform = playerObject.transform;
+            Debug.LogWarning($"[{gameObject.name}] PlayerData 또는 PlayerTransform이 초기화되지 않았습니다 " +
+                             $"EnemySpawner에서 Initialize 호출을 확인하세요");
         }
-        else
-        {
-            Debug.LogError($"[{gameObject.name}] 'Player' 태그를 가진 오브젝트를 찾을 수 없습니다.");
-            enabled = false;
-            return;
-        }
-
         if (enemyBaseData != null)
         {
             _navMeshAgent.speed = enemyBaseData.moveSpeed;
@@ -130,7 +143,6 @@ public class BasicEnemy : MonoBehaviour
         {
             yield return null;
         }
-
         EnsureAgentOnNavMeshLogic();
     }
 
@@ -195,10 +207,13 @@ public class BasicEnemy : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            PlayerData playerData = other.GetComponent<PlayerData>();
-            if (playerData != null && enemyBaseData != null)
+            if (_playerData != null && enemyBaseData != null)
             {
-                playerData.TakeDamage(enemyBaseData.selfDestructDamage);
+                _playerData.TakeDamage(enemyBaseData.selfDestructDamage);
+            }
+            else if (_playerData != null)
+            {
+                Debug.LogWarning("[Basic Enemy] PlayerData 참조가 null 입니다");
             }
             DestroySelf();
         }
@@ -206,7 +221,7 @@ public class BasicEnemy : MonoBehaviour
 
     public void TakeDamage(float damageAmount)
     {
-        if (enemyBaseData == null && _currentHealth <= 0 && damageAmount > 0) return;
+        if (_currentHealth <= 0 && damageAmount > 0) return;
         
         _currentHealth -= damageAmount;
 
@@ -218,10 +233,13 @@ public class BasicEnemy : MonoBehaviour
 
     void Die()
     {
-        PlayerData playerData = FindFirstObjectByType<PlayerData>();
-        if (playerData != null && enemyBaseData != null)
+        if (_playerData != null && enemyBaseData != null)
         {
-            playerData.GainResources(enemyBaseData.resourcesToGive);
+            _playerData.GainResources(enemyBaseData.resourcesToGive);
+        }
+        else if (_playerData != null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] PlayerData 참조가 null입니다");
         }
 
         DestroySelf();
@@ -234,7 +252,7 @@ public class BasicEnemy : MonoBehaviour
             _navMeshAgent.isStopped = true;
             _navMeshAgent.ResetPath();
         }
-        Destroy(gameObject, selfDestructDelay);
+        Destroy(gameObject, selfDestructDelay > 0 ? selfDestructDelay : 0.5f);
     }
 
     void OnDrawGizmosSelected()

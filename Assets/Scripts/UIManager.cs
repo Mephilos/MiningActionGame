@@ -37,7 +37,7 @@ public class UIManager : MonoBehaviour
     private int _attackDamageUpgradeCost = 15;
     private float _attackDamageUpgradeAmount = 2f;
 
-    private PlayerData _playerDataCache;
+    private PlayerData _playerData; // 의존성 주입 방식
     
     
     private void Awake()
@@ -51,20 +51,22 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    public void Initialize(PlayerData playerData)
+    {
+        _playerData = playerData;
+        if (_playerData == null)
+        {
+            Debug.LogError("[UIManager] Initialize: PlayerData가 null입니다!");
+        }
+        // PlayerData가 설정된 후 관련 UI 초기 업데이트
+        if (_playerData != null)
+        {
+            UpdateResourceDisplayUI(_playerData.currentResources);
+            UpdateShopStatsUI(); // 상점 스탯 UI도 PlayerData 참조 후 업데이트
+        }
+    }
     void Start()
     {
-        // TODO: PlayerData 리펙토링
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            _playerDataCache = playerObj.GetComponent<PlayerData>();
-        }
-        else
-        {
-            Debug.LogError("[UIManager] Player 오브젝트를 찾을 수 없습니다. 상점 기능이 제대로 작동하지 않을 수 있습니다.");
-        }
-        
         // 게임 시작시 게임 오버 패널 setActive로 꺼버림
         if (gameOverPanel != null)
         {
@@ -160,9 +162,9 @@ public class UIManager : MonoBehaviour
             shopPanel.SetActive(true);
             Time.timeScale = 0f; // 상점 열리면 시간 정지
             UpdateShopStatsUI(); // 상점 열 때 스탯 정보 업데이트
-            if (_playerDataCache != null)
+            if (_playerData != null)
             {
-                 UpdateResourceDisplayUI(_playerDataCache.currentResources); // 상점 내 자원 텍스트 업데이트
+                 UpdateResourceDisplayUI(_playerData.currentResources); // 상점 내 자원 텍스트 업데이트
             }
         }
         if (stageClearPanel != null) stageClearPanel.SetActive(false); 
@@ -182,32 +184,32 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void UpdateShopStatsUI()
     {
-        if (_playerDataCache == null) return;
+        if (_playerData == null) return;
 
         if (moveSpeedStatText != null)
         {
-            moveSpeedStatText.text = $"이동 속도: {_playerDataCache.currentMoveSpeed:F1}\n(비용: {_moveSpeedUpgradeCost} / 증가량: +{_moveSpeedUpgradeAmount:F1})";
+            moveSpeedStatText.text = $"이동 속도: {_playerData.currentMoveSpeed:F1}\n(비용: {_moveSpeedUpgradeCost} / 증가량: +{_moveSpeedUpgradeAmount:F1})";
         }
         if (attackDamageStatText != null)
         {
-            attackDamageStatText.text = $"공격력: {_playerDataCache.currentAttackDamage:F1}\n(비용: {_attackDamageUpgradeCost} / 증가량: +{_attackDamageUpgradeAmount:F1})";
+            attackDamageStatText.text = $"공격력: {_playerData.currentAttackDamage:F1}\n(비용: {_attackDamageUpgradeCost} / 증가량: +{_attackDamageUpgradeAmount:F1})";
         }
         
         // 버튼 활성화/비활성화 (자원 부족 시)
         if (upgradeMoveSpeedButton != null)
         {
-            upgradeMoveSpeedButton.interactable = _playerDataCache.currentResources >= _moveSpeedUpgradeCost;
+            upgradeMoveSpeedButton.interactable = _playerData.currentResources >= _moveSpeedUpgradeCost;
         }
 
         if (upgradeAttackDamageButton != null)
         {
-            upgradeAttackDamageButton.interactable = _playerDataCache.currentResources >= _attackDamageUpgradeCost;
+            upgradeAttackDamageButton.interactable = _playerData.currentResources >= _attackDamageUpgradeCost;
         }
 
         // 상점 내 자원도 여기서 한번 더 갱신
         if (shopResourceText != null)
         {
-            shopResourceText.text = $"현재 자원: {_playerDataCache.currentResources}";
+            shopResourceText.text = $"현재 자원: {_playerData.currentResources}";
         }
     }
 
@@ -215,28 +217,21 @@ public class UIManager : MonoBehaviour
     // 업그레이드 버튼 핸들러들
     public void OnUpgradeMoveSpeedButtonPressed()
     {
-        if (_playerDataCache != null && _playerDataCache.SpendResources(_moveSpeedUpgradeCost))
+        if (_playerData != null && _playerData.SpendResources(_moveSpeedUpgradeCost))
         {
-            _playerDataCache.IncreaseMoveSpeed(_moveSpeedUpgradeAmount);
-            //UpdateShopStatsUI(); // PlayerData의 Increase 메서드에서 호출하도록 변경
-            // 비용 증가 로직 
-            // _moveSpeedUpgradeCost = Mathf.CeilToInt(_moveSpeedUpgradeCost * 1.2f);
+            _playerData.IncreaseMoveSpeed(_moveSpeedUpgradeAmount);
         }
         else
         {
             Debug.Log("이동 속도 업그레이드 실패: 자원 부족 또는 PlayerData 없음");
-            // 자원 부족 알림 UI 표시 가능
         }
     }
 
     public void OnUpgradeAttackDamageButtonPressed()
     {
-        if (_playerDataCache != null && _playerDataCache.SpendResources(_attackDamageUpgradeCost))
+        if (_playerData != null && _playerData.SpendResources(_attackDamageUpgradeCost))
         {
-            _playerDataCache.IncreaseAttackDamage(_attackDamageUpgradeAmount);
-            //UpdateShopStatsUI(); // PlayerData의 Increase 메서드에서 호출하도록 변경
-            // 비용 증가 로직
-            // _attackDamageUpgradeCost = Mathf.CeilToInt(_attackDamageUpgradeCost * 1.2f);
+            _playerData.IncreaseAttackDamage(_attackDamageUpgradeAmount);
         }
         else
         {
@@ -255,8 +250,6 @@ public class UIManager : MonoBehaviour
             stageClearText.text = $"{stageNum} Stage\nClear!";
         }
     }
-
-
     /// <summary>
     /// 게임 오버화면 표시
     /// </summary>
@@ -326,6 +319,7 @@ public class UIManager : MonoBehaviour
     public void OnRestartButtonPressed()
     {
         Debug.Log("재시작 버튼 클릭");
+        Time.timeScale = 1f;
         if (StageManager.Instance != null)
         {
             StageManager.Instance.RestartGame();
