@@ -11,7 +11,7 @@ public class PlayerData : MonoBehaviour
     public bool isDead;
     
     // 자원
-    public int currentResource;
+    public int currentResources;
 
     // 전투력
     public float currentAttackDamage;
@@ -55,7 +55,7 @@ public class PlayerData : MonoBehaviour
             //기본값으로 초기화
             _maxHealth = 100f;
             currentHealth = _maxHealth;
-            currentResource = 0;
+            currentResources = 0;
             currentAttackDamage = 10f;
             currentMoveSpeed = 5f;
             currentJumpForce = 8f;
@@ -72,7 +72,7 @@ public class PlayerData : MonoBehaviour
         {
             // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
             _maxHealth = baseStatsData.maxHealth;
-            currentResource = 0;
+            currentResources = baseStatsData.initialResources;
             currentAttackDamage = baseStatsData.baseAttackDamage;
             currentMoveSpeed = baseStatsData.moveSpeed;
             currentJumpForce = baseStatsData.jumpForce;
@@ -98,7 +98,7 @@ public class PlayerData : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
-            UIManager.Instance.UpdateResourceDisplayUI(currentResource);
+            UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
 
         isDead = false;
@@ -214,13 +214,53 @@ public class PlayerData : MonoBehaviour
     {
         if(isDead) return;
         
-        currentResource += amount;
-        Debug.Log($"[PlayerData] 자원획득 {amount}, 현재 자원 {currentResource}");
+        currentResources += amount;
+        Debug.Log($"[PlayerData] 자원획득 {amount}, 현재 자원 {currentResources}");
 
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdateResourceDisplayUI(currentResource);
+            UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
+    }
+    /// <summary>
+    /// 자원 소비 시도. 성공하면 true, 실패(자원 부족)하면 false 반환.
+    /// </summary>
+    public bool SpendResources(int amountToSpend)
+    {
+        if (currentResources >= amountToSpend)
+        {
+            currentResources -= amountToSpend;
+            Debug.Log($"[PlayerData] 자원 소비: {amountToSpend} / 남은 자원: {currentResources}");
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.UpdateResourceDisplayUI(currentResources); // UI 업데이트
+            }
+            return true;
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerData] 자원 부족! 필요 자원: {amountToSpend}, 현재 자원: {currentResources}");
+            return false;
+        }
+    }
+    /// <summary>
+    /// 이동 속도 증가
+    /// </summary>
+    public void IncreaseMoveSpeed(float additionalSpeed)
+    {
+        currentMoveSpeed += additionalSpeed;
+        Debug.Log($"[PlayerData] 이동 속도 증가! 현재 이동 속도: {currentMoveSpeed}");
+        // 필요하다면 UIManager를 통해 변경된 스탯을 UI에 표시할 수 있습니다.
+        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
+    }
+    /// <summary>
+    /// 공격력 증가
+    /// </summary>
+    public void IncreaseAttackDamage(float additionalDamage)
+    {
+        currentAttackDamage += additionalDamage;
+        Debug.Log($"[PlayerData] 공격력 증가! 현재 공격력: {currentAttackDamage}");
+        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
     public void IncreaseMaxJumpCount(int amount)
     {

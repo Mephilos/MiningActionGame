@@ -50,6 +50,7 @@ public class StageManager : MonoBehaviour
     private readonly Vector2Int _fixedStageCoordinate = Vector2Int.zero;
     public Vector2Int CurrentStageCoord => _fixedStageCoordinate;
     
+    
     private void Awake()
     {
         InitializeSingleton();
@@ -99,6 +100,7 @@ public class StageManager : MonoBehaviour
             UIManager.Instance.HideGameOverScreem();
             UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
             UIManager.Instance.HideStageClearScreen();
+            UIManager.Instance.HideShopPanel();
         }
         LoadStageAndStartTimer(_fixedStageCoordinate);
         Debug.Log("게임 시작 스테이지: " + _currentStageNumber);
@@ -161,6 +163,7 @@ public class StageManager : MonoBehaviour
             Debug.LogWarning("[StageManager] UIManager Instance를 찾을 수 없음");
         }
     }
+
     /// <summary>
     /// 게임 재시작
     /// </summary>
@@ -178,6 +181,7 @@ public class StageManager : MonoBehaviour
         }
         StartNewGame();
     }
+
     /// <summary>
     /// 다음 스테이지로 진행하는 로직을 시작합니다
     /// </summary>
@@ -204,6 +208,93 @@ public class StageManager : MonoBehaviour
         }
     }
 
+
+    public void PlayerConfirmedShop()
+    {
+        if (!_isWaitingForPlayerToProceed) // 진행중, 대기 상태 확인
+        {
+            Debug.LogWarning("[StageManager] 대기 상태가 아닙니다");
+            return;
+        }
+        
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideStageClearScreen();
+            UIManager.Instance.ShowShopPanel();
+        }
+    }
+
+    public void PlayerConfirmedNextStage()
+    {
+        if (!_isWaitingForPlayerToProceed) return;
+        _isWaitingForPlayerToProceed = false;
+
+        _currentStageNumber++;
+        _isLoadingNextStage = true;
+        LoadStageAndStartTimer(_fixedStageCoordinate);
+
+    }
+
+    /// <summary>
+    /// 지정된 좌표에 스테이지를 로드하고 타이머를 시작
+    /// 스테이지 번호 표시
+    /// </summary>
+    private void LoadStageAndStartTimer(Vector2Int stageCoord)
+    {
+        if (UIManager.Instance != null && UIManager.Instance.stageClearPanel != null 
+                                       && UIManager.Instance.shopPanel != null && UIManager.Instance.shopPanel.activeSelf)
+        {
+            UIManager.Instance.HideShopPanel();
+        }
+        // 이전 스테이지 언로드 및 새 스테이지 로드
+        if (_currentLoadedStageChunk != null)
+        {
+            Destroy(_currentLoadedStageChunk.gameObject);
+            _currentLoadedStageChunk = null;
+        }
+
+        Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
+        GameObject stageGO = Instantiate(stageChunkPrefab, stageWorldPosition, Quaternion.identity, this.transform);
+        Chunk chunkScript = stageGO.GetComponent<Chunk>();
+        if (chunkScript == null) 
+        {
+            Debug.LogError($"[StageManager] 생성된 스테이지 청크에 Chunk 스크립트가 없음");
+            _isLoadingNextStage = false; 
+            _isWaitingForPlayerToProceed = false; 
+            return;
+        }
+
+        float currentNoiseScale = Random.Range(minNoiseScale, maxNoiseScale);
+        float currentHeightMultiplier = Random.Range(minHeightMultiplier, maxHeightMultiplier);
+
+        int derivedSeed = baseWorldSeed + (_currentStageNumber * seedMultiplier);
+        
+        chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed, 
+                               currentNoiseScale, currentHeightMultiplier, stageSharedMaterial);
+        
+        _currentLoadedStageChunk = chunkScript;
+        
+        Debug.Log($"스테이지 {_currentStageNumber} ({stageCoord}) 로드 완료 타이머 시작");
+        MovePlayerToStageCenter(stageWorldPosition); // 플레이어 이동
+
+        _currentStageTimer = 0f; // 새 스테이지 시작 시 타이머 리셋
+        _isLoadingNextStage = false; // 로딩 완료 플래그
+        
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
+            UIManager.Instance.UpdateStageClearUI(_currentStageNumber);
+        }
+        
+        if (EnemySpawner.Instance != null)
+        {
+            EnemySpawner.Instance.StartSpawningForStage(_currentStageNumber);
+        }
+        else
+        {
+            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없음. 적스폰 불가느");
+        }
+    }
 
     private void MovePlayerToStageCenter(Vector3 stageBaseWorldPosition)
     {
@@ -262,88 +353,6 @@ public class StageManager : MonoBehaviour
             pc.ResetVelocity();
         }
         Debug.Log($"플레이어를 스테이지 중앙 (로컬: {spawnLocalX},{spawnLocalZ}), 지표면높이: {surfaceY}, 최종스폰높이: {spawnYPosition} (월드좌표: {spawnPosition}) 로 이동 완료");
-    }
-
-    public void PlayerConfirmedNextStage()
-    {
-        if (!_isWaitingForPlayerToProceed) // 진행중, 대기 상태 확인
-        {
-            Debug.LogWarning("[StageManager] 대기 상태가 아닙니다");
-            return;
-        }
-
-        _isWaitingForPlayerToProceed = false;
-        
-        Debug.Log("다음 스테이지 로딩 시작");
-        
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.HideStageClearScreen();
-        }
-
-        _currentStageNumber++;
-        LoadStageAndStartTimer(_fixedStageCoordinate);
-    }
-
-    /// <summary>
-    /// 지정된 좌표에 스테이지를 로드하고 타이머를 시작
-    /// 스테이지 번호 표시
-    /// </summary>
-    private void LoadStageAndStartTimer(Vector2Int stageCoord)
-    {
-        if (UIManager.Instance != null && UIManager.Instance.stageClearPanel != null 
-                                       && UIManager.Instance.stageClearPanel.activeSelf)
-        {
-            UIManager.Instance.HideStageClearScreen();
-        }
-        // 이전 스테이지 언로드 및 새 스테이지 로드
-        if (_currentLoadedStageChunk != null)
-        {
-            Destroy(_currentLoadedStageChunk.gameObject);
-            _currentLoadedStageChunk = null;
-        }
-
-        Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
-        GameObject stageGO = Instantiate(stageChunkPrefab, stageWorldPosition, Quaternion.identity, this.transform);
-        Chunk chunkScript = stageGO.GetComponent<Chunk>();
-        if (chunkScript == null) 
-        {
-            Debug.LogError($"[StageManager] 생성된 스테이지 청크에 Chunk 스크립트가 없음");
-            _isLoadingNextStage = false; 
-            _isWaitingForPlayerToProceed = false; 
-            return;
-        }
-
-        float currentNoiseScale = Random.Range(minNoiseScale, maxNoiseScale);
-        float currentHeightMultiplier = Random.Range(minHeightMultiplier, maxHeightMultiplier);
-
-        int derivedSeed = baseWorldSeed + (_currentStageNumber * seedMultiplier);
-        
-        chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed, 
-                               currentNoiseScale, currentHeightMultiplier, stageSharedMaterial);
-        
-        _currentLoadedStageChunk = chunkScript;
-        
-        Debug.Log($"스테이지 {_currentStageNumber} ({stageCoord}) 로드 완료 타이머 시작");
-        MovePlayerToStageCenter(stageWorldPosition); // 플레이어 이동
-
-        _currentStageTimer = 0f; // 새 스테이지 시작 시 타이머 리셋
-        _isLoadingNextStage = false; // 로딩 완료 플래그
-        
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
-            UIManager.Instance.UpdateStageClearUI(_currentStageNumber);
-        }
-        
-        if (EnemySpawner.Instance != null)
-        {
-            EnemySpawner.Instance.StartSpawningForStage(_currentStageNumber);
-        }
-        else
-        {
-            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없음. 적스폰 불가느");
-        }
     }
 
     /// <summary>

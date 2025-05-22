@@ -8,7 +8,8 @@ public class PlayerBaseStatsData : ScriptableObject // MonoBehaviour 대신 Scri
     
     [Header("기본 전투 능력치")]
     public float baseAttackDamage = 10f;
-
+    [Header("자원 관련")]
+    public int initialResources = 10;
     [Header("기본 이동 및 액션 관련")]
     public float moveSpeed = 5f;
     public float jumpForce = 8f;
