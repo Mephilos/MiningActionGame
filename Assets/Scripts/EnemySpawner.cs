@@ -48,17 +48,11 @@ public class EnemySpawner : MonoBehaviour
         {
             _playerTransform = playerObject.transform;
         }
-        Debug.LogWarning($"[EnemySpawner] EnemySpawner.Start() 호출됨! ActiveEnemies 리스트를 초기화합니다. 호출 시간: {Time.time}"); 
-
         ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
     }
 
     void Start()
     {
-        // Debug.LogWarning($"[EnemySpawner] EnemySpawner.Start() 호출됨! ActiveEnemies 리스트를 초기화합니다. 호출 시간: {Time.time}"); 
-        //
-        // ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
-        
         if (defaultEnemyPrefab == null)
         {
             Debug.LogError("[EnemySpawner] Default Enemy Prefab이 할당되어 있지 않음");

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+
 /// <summary>
 /// 메쉬 데이터 구조체
 /// </summary>
@@ -47,7 +48,9 @@ public class Chunk : MonoBehaviour
     private int[,] _surfaceHeights; // 각 (x,z) 위치의 표면 높이를 저장할 배열
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
-    [Tooltip("청크 바닥에 사용할 바닥Plane프리팹")]
+    [Tooltip("청크 바닥 설정")]
+    public float terrainExistenceThreshold = 0.2f; // 노이즈 값에 따라 지형이 생성되지 않는 부분 생기게
+    public float voidColumnChance = 0.0f; // 함정 관련 변수
     public GameObject waterPlane;
     [Header("아이템 스폰 설정")]
     [Tooltip("청크 안에 매설될 프리팹(아이템")]
@@ -56,6 +59,7 @@ public class Chunk : MonoBehaviour
     public float itemSpawnChance = 0.1f;
     public int minItemSpawnY = 1;
     public int maxItemSpawnY = 30;
+    
 
 
 
@@ -150,30 +154,53 @@ public class Chunk : MonoBehaviour
         {
             for (int z = 0; z < _chunkSize; z++)
             {
+                // 특정확률로 빈칸 (함정 파이듯)
+                if (voidColumnChance > 0f && Random.value < voidColumnChance)
+                {
+                    _surfaceHeights[x, z] = -1;
+
+                    for (int y = 0; y < _chunkHeight; y++)
+                    {
+                        _blockData[x, y, z] = BlockType.Air;
+                    }
+                    continue;
+                }
                 //월드 좌표 (노이즈 계산시에 사용)
                 int worldX = _chunkCoordinates.x * _chunkSize + x;
                 int worldZ = _chunkCoordinates.y * _chunkSize + z;
                 //perlin Noise 적용 지표면 높이 게산
                 float noiseValue = Mathf.PerlinNoise((worldX + _seed * 0.7385f) * _noiseScale, (worldZ + _seed * 0.1934f) * _noiseScale);
-                int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * _heightMultiplier); // 변수 이름 변경 (혼동 방지)
-                calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, _chunkHeight - 1);
 
-                // surfaceHeights 배열에 계산된 표면 높이 저장
-                _surfaceHeights[x, z] = calculatedSurfaceHeight;
-                // y(지상고?)를 따서 블록 타입 결정
-                for (int y = 0; y < _chunkHeight; y++)
+                if (noiseValue < terrainExistenceThreshold)
                 {
-                    if (y > calculatedSurfaceHeight)
+                    _surfaceHeights[x, z] = -1;
+                    for (int y = 0; y < _chunkHeight; y++)
                     {
-                        _blockData[x, y, z] = BlockType.Air; //지표면 보다 높으면 빈공간
+                        _blockData[x, y, z] = BlockType.Air;
                     }
-                    else if (y == calculatedSurfaceHeight)
+                }
+                else
+                {
+                    int calculatedSurfaceHeight = Mathf.FloorToInt(noiseValue * _heightMultiplier); // 변수 이름 변경 (혼동 방지)
+                    calculatedSurfaceHeight = Mathf.Clamp(calculatedSurfaceHeight, 0, _chunkHeight - 1);
+
+                    // surfaceHeights 배열에 계산된 표면 높이 저장
+                    _surfaceHeights[x, z] = calculatedSurfaceHeight;
+                    // y(지상고?)를 따서 블록 타입 결정
+                    for (int y = 0; y < _chunkHeight; y++)
                     {
-                        _blockData[x, y, z] = BlockType.Grass; //지표면은 풀
-                    }
-                    else
-                    {
-                        _blockData[x, y, z] = BlockType.Stone; //아래는 돌
+                        if (y > calculatedSurfaceHeight)
+                        {
+                            _blockData[x, y, z] = BlockType.Air; //지표면 보다 높으면 빈공간
+                        }
+                        else if (y == calculatedSurfaceHeight)
+                        {
+                            _blockData[x, y, z] = BlockType.Grass; //지표면은 풀
+                        }
+                        else
+                        {
+                            _blockData[x, y, z] = BlockType.Stone; //아래는 돌
+                        }
                     }
                 }
             }
