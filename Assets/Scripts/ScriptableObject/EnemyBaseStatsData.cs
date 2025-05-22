@@ -19,8 +19,8 @@ public class EnemyBaseStatsData : ScriptableObject
     public float detectionRadius = 15f; // BasicEnemy의 detectionRadius와 연동
     // public float selfDestructDelay = 0f; // BasicEnemy의 selfDestructDelay와 연동 (이미 BasicEnemy에 있음)
 
-    [Header("경험치")]
-    public float experienceToGive = 10f; // 처치 시 플레이어에게 줄 경험치
-    // public GameObject itemDropPrefab; // 처치 시 드랍할 아이템 (확률 기반)
-    // public float itemDropChance = 0f;
+    [Header("보상")] 
+    public int resourcesToGive = 10;
+    // TODO: 자원 더 주는 오브젝트 드랍(확률 기반)
+
 }

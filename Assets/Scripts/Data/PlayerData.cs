@@ -9,10 +9,10 @@ public class PlayerData : MonoBehaviour
     public float currentHealth;
     private float _maxHealth;
     public bool isDead;
-    // 레벨 경험치
-    public int level;
-    public float currentXP;
-    public float xpToNextLevel;
+    
+    // 자원
+    public int currentResource;
+
     // 전투력
     public float currentAttackDamage;
     // 이동기
@@ -55,9 +55,7 @@ public class PlayerData : MonoBehaviour
             //기본값으로 초기화
             _maxHealth = 100f;
             currentHealth = _maxHealth;
-            level = 1;
-            currentXP = 0f;
-            xpToNextLevel = 100f;
+            currentResource = 0;
             currentAttackDamage = 10f;
             currentMoveSpeed = 5f;
             currentJumpForce = 8f;
@@ -74,7 +72,7 @@ public class PlayerData : MonoBehaviour
         {
             // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
             _maxHealth = baseStatsData.maxHealth;
-            xpToNextLevel = baseStatsData.initialXpToNextLevel;
+            currentResource = 0;
             currentAttackDamage = baseStatsData.baseAttackDamage;
             currentMoveSpeed = baseStatsData.moveSpeed;
             currentJumpForce = baseStatsData.jumpForce;
@@ -89,8 +87,6 @@ public class PlayerData : MonoBehaviour
 
         // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
         currentHealth = _maxHealth; // 시작 시 체력은 최대로
-        level = 1; // 시작 레벨
-        currentXP = 0f;
 
         // 기타 초기화
         jumpCountAvailable = currentMaxJumpCount;
@@ -102,6 +98,7 @@ public class PlayerData : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
+            UIManager.Instance.UpdateResourceDisplayUI(currentResource);
         }
 
         isDead = false;
@@ -179,7 +176,9 @@ public class PlayerData : MonoBehaviour
             Time.timeScale = 0f;
         }
     }
-
+    /// <summary>
+    /// 부활 , 스탯 초기화 (재시작시 사용)
+    /// </summary>
     public void ReviveAndReset()
     {
         Debug.Log("[PlayerData] 플레이어 부활 및 스탯 초기화");
@@ -207,33 +206,21 @@ public class PlayerData : MonoBehaviour
             Debug.LogWarning("[PlayerData] PlayerController를 찾을 수 없음");
         }
     }
-
-
-    public void GainXP(float amount)
+    /// <summary>
+    /// 자원 획득 로직
+    /// </summary>
+    /// <param name="amount">획득한 자원</param>
+    public void GainResources(int amount)
     {
-        currentXP += amount;
-        Debug.Log($"[PlayerData] 경험치 획득: {amount} / 현재 XP: {currentXP}/{xpToNextLevel}");
-        CheckLevelUp();
-    }
-    void CheckLevelUp()
-    {
-        if (currentXP >= xpToNextLevel)
+        if(isDead) return;
+        
+        currentResource += amount;
+        Debug.Log($"[PlayerData] 자원획득 {amount}, 현재 자원 {currentResource}");
+
+        if (UIManager.Instance != null)
         {
-            level++;
-            currentXP -= xpToNextLevel; // 남은 경험치는 다음 레벨로 이월
-            xpToNextLevel *= (baseStatsData != null ? baseStatsData.xpLevelUpMultiplier : 1.5f); // 다음 필요 경험치 증가
-
-            // 레벨업 시 스탯 증가
-            _maxHealth += 10; 
-            currentHealth = _maxHealth; 
-            currentAttackDamage += 2; 
-
-            Debug.Log($"[PlayerData] 레벨 업 레벨: {level}, 공격력: {currentAttackDamage}, 최대체력: {_maxHealth}. 다음 레벨 XP: {xpToNextLevel}");
-
-            // 레벨업 후에도 남은 경험치가 여전히 다음 필요 경험치보다 많으면 다시 체크
-            if (currentXP >= xpToNextLevel) CheckLevelUp();
+            UIManager.Instance.UpdateResourceDisplayUI(currentResource);
         }
-
     }
     public void IncreaseMaxJumpCount(int amount)
     {

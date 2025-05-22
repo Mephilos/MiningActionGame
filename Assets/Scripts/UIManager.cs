@@ -9,6 +9,7 @@ public class UIManager : MonoBehaviour
     public TMP_Text stageTimerText;
     public TMP_Text stageNumberText;
     public TMP_Text stageClearText;
+    public TMP_Text playerResourceDisplayText;
     [Header("게임 오버 UI")] [Tooltip("게임 오버 시 활성화")]
     public GameObject gameOverPanel;
     
@@ -84,6 +85,14 @@ public class UIManager : MonoBehaviour
         if (stageClearText != null)
         {
             stageClearText.text = $"{stageNum} Stage\nClear!";
+        }
+    }
+
+    public void UpdateResourceDisplayUI(int currentResource)
+    {
+        if (playerResourceDisplayText != null)
+        {
+            playerResourceDisplayText.text = $"Resource: {currentResource} ";
         }
     }
     /// <summary>

@@ -221,7 +221,7 @@ public class BasicEnemy : MonoBehaviour
         PlayerData playerData = FindFirstObjectByType<PlayerData>();
         if (playerData != null && enemyBaseData != null)
         {
-            playerData.GainXP(enemyBaseData.experienceToGive);
+            playerData.GainResources(enemyBaseData.resourcesToGive);
         }
 
         DestroySelf();
