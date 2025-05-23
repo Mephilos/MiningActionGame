@@ -252,11 +252,18 @@ public class StageManager : MonoBehaviour
         {
             Debug.Log($"[StageManager] 이전 청크 ({_currentLoadedStageChunk.name}) 파괴 시도");
             Destroy(_currentLoadedStageChunk.gameObject);
-            
             _currentLoadedStageChunk = null;
             
-            NavMesh.RemoveAllNavMeshData();
-            Debug.Log("[StageManager] NavMesh.RemoveAllNavMeshData() 호출 완료.");
+            if (NavMeshManager.Instance != null)
+            {
+                NavMeshManager.Instance.ClearAllNavMeshData();
+                Debug.Log("[StageManager] NavMeshManager를 통해 NavMesh 데이터 제거");
+            }
+            else
+            {
+                Debug.LogWarning("[StageManager] NavMeshManager 인스턴스를 찾을 수 없어 NavMesh 데이터를 제거할 수 없습니다.");
+                // NavMesh.RemoveAllNavMeshData();
+            }
         }
         if (uiManager != null)
         {
@@ -292,7 +299,11 @@ public class StageManager : MonoBehaviour
             Destroy(_currentLoadedStageChunk.gameObject);
             _currentLoadedStageChunk = null;
         }
-        
+        if (NavMeshManager.Instance != null)
+        {
+            NavMeshManager.Instance.ClearAllNavMeshData(); // 새 스테이지 로드 전 이전 데이터 확실히 제거
+        }
+
         Debug.Log("[StageManager] LoadStageAndStartTimer NavMesh.RemoveAllNavMeshData() 호출 완료.");
         Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
         GameObject stageGO = Instantiate(stageChunkPrefab, stageWorldPosition, Quaternion.identity, this.transform);

@@ -298,7 +298,24 @@ public class Chunk : MonoBehaviour
         }
         ApplyMeshDataToFilter(meshData);
         ApplyMeshToCollider(_meshFilter.sharedMesh);
-        BakeNavMesh();
+        
+        // NavMeshManager를 통해 NavMesh 빌드/리빌드 요청
+        if (NavMeshManager.Instance != null)
+        {
+            if (_navMeshSurface != null)
+            {
+                // Chunk가 생성/업데이트될 때마다 NavMeshManager에 등록하고 빌드를 요청
+                NavMeshManager.Instance.RegisterAndBakeSurface(_navMeshSurface);
+            }
+            else
+            {
+                Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface가 할당되지 않아 NavMesh를 빌드할 수 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[Chunk {gameObject.name}] NavMeshManager 인스턴스를 찾을 수 없어 NavMesh 빌드 요청을 스킵합니다.");
+        }
     }
     /// <summary>
     /// 블록의 보이는 면에 대한 메시 데이터를 추가합니다
@@ -444,21 +461,7 @@ public class Chunk : MonoBehaviour
 
         return uvs;
     }
-
-    ///<summary>
-    /// 생성된 청크의 NavMesh를 Bake
-    /// </summary>
-    private void BakeNavMesh()
-    {
-        if (_navMeshSurface != null)
-        {
-            _navMeshSurface.BuildNavMesh(); // NavMesh 생성
-        }
-        else
-        {
-            Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface 구워지지 않음");
-        }
-    }
+    
     /// <summary>
     /// 청크가 파괴될 때 메시를 명시적으로 파괴하여 메모리 누수를 방지
     /// </summary>

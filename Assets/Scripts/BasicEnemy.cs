@@ -150,18 +150,22 @@ public class BasicEnemy : MonoBehaviour
     {
         if (_navMeshAgent != null && !_navMeshAgent.isOnNavMesh && _navMeshAgent.enabled)
         {
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(transform.position, out hit, navMeshSampleRadius, NavMesh.AllAreas))
+            Vector3 sampledPosition;
+            // NavMeshManager를 사용하여 유효한 위치 검색
+            if (NavMeshManager.Instance != null &&
+                NavMeshManager.Instance.FindValidPositionOnNavMesh(transform.position, navMeshSampleRadius, out sampledPosition))
             {
-                _navMeshAgent.Warp(hit.position);
+                _navMeshAgent.Warp(sampledPosition);
                 if (_isChasing && _playerTransform != null)
                 {
-                    _navMeshAgent.SetDestination(_playerTransform.position);
+                    // Warp 후 목적지 재설정 필요 시
+                    if(_navMeshAgent.isOnNavMesh) _navMeshAgent.SetDestination(_playerTransform.position);
                 }
             }
             else
             {
-                Debug.LogError($"[{gameObject.name}] ({transform.position}) 근처에 유효한 NavMesh를 찾을 수 없습니다.", this);
+                Debug.LogError($"[{gameObject.name}] ({transform.position}) 근처에 유효한 NavMesh를 찾을 수 없습니다. NavMeshManager 사용 결과.");
+                DestroySelf();
             }
         }
     }

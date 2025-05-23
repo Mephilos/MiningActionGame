@@ -159,14 +159,32 @@ public class EnemySpawner : MonoBehaviour
                     Vector3 randomDirection = new Vector3(randomCircle.x, 0, randomCircle.y);
                     Vector3 potentialSpawnPoint = _playerTransform.position + randomDirection;
 
-                    NavMeshHit hit;
-                    if (NavMesh.SamplePosition(potentialSpawnPoint, out hit, navMeshSampleRadius, NavMesh.AllAreas))
+                    if (NavMeshManager.Instance != null)
                     {
-                        if (IsPositionWithinCurrentStageBounds(hit.position))
+                        if (NavMeshManager.Instance.FindValidPositionOnNavMesh(potentialSpawnPoint, navMeshSampleRadius, out Vector3 sampledPosition))
                         {
-                            spawnPosition = hit.position;
-                            positionFound = true;
-                            break;
+                            if (IsPositionWithinCurrentStageBounds(sampledPosition)) // 샘플링된 위치가 스테이지 범위 내인지 추가 확인
+                            {
+                                spawnPosition = sampledPosition;
+                                positionFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[EnemySpawner] NavMeshManager 인스턴스를 찾을 수 없습니다");
+                        
+                        
+                        NavMeshHit hit;
+                        if (NavMesh.SamplePosition(potentialSpawnPoint, out hit, navMeshSampleRadius, NavMesh.AllAreas))
+                        {
+                            if (IsPositionWithinCurrentStageBounds(hit.position))
+                            {
+                                spawnPosition = hit.position;
+                                positionFound = true;
+                                break;
+                            }
                         }
                     }
                 }
