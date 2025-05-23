@@ -15,6 +15,7 @@ public class PlayerData : MonoBehaviour
 
     // 전투력
     public float currentAttackDamage;
+    public float currentAttackSpeed;
     // 이동기
     public float currentMoveSpeed;
     public float currentJumpForce;
@@ -51,12 +52,13 @@ public class PlayerData : MonoBehaviour
     {
         if (baseStatsData == null)
         {
-            Debug.LogError("[PlayerData] PlayerBaseStatsData가 PlayerStats 컴포넌트에 할당되지 않았습니다. 임시 값으로 초기화 합니다");
+            Debug.LogError("[PlayerData] PlayerBaseStatsData가 PlayerStats 컴포넌트에 할당되지 않음 임시 값으로 초기화");
             //기본값으로 초기화
             _maxHealth = 100f;
             currentHealth = _maxHealth;
             currentResources = 0;
             currentAttackDamage = 10f;
+            currentAttackSpeed = 0.5f;
             currentMoveSpeed = 5f;
             currentJumpForce = 8f;
             currentMaxJumpCount = 2;
@@ -73,7 +75,8 @@ public class PlayerData : MonoBehaviour
             // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
             _maxHealth = baseStatsData.maxHealth;
             currentResources = baseStatsData.initialResources;
-            currentAttackDamage = baseStatsData.baseAttackDamage;
+            currentAttackDamage = baseStatsData.initialAttackDamage;
+            currentAttackSpeed = baseStatsData.initialAttackSpeed;
             currentMoveSpeed = baseStatsData.moveSpeed;
             currentJumpForce = baseStatsData.jumpForce;
             currentMaxJumpCount = baseStatsData.initialMaxJumpCount;
@@ -262,6 +265,26 @@ public class PlayerData : MonoBehaviour
         Debug.Log($"[PlayerData] 공격력 증가! 현재 공격력: {currentAttackDamage}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
+
+    public void IncreaseAttackSpeed(float additionalAttackSpeed, float AttackSpeedCap = 5f)
+    {
+        currentAttackSpeed -= additionalAttackSpeed;
+        if (currentAttackSpeed < AttackSpeedCap)
+        {
+            currentAttackSpeed = AttackSpeedCap;
+        }
+        Debug.Log($"[{gameObject.name}] 공격 쿨다운 감소. 현재 공격 쿨다운 {currentAttackSpeed}");
+        // 상점 ui 스텟 정보 업데이트
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateShopStatsUI();
+        }
+    }
+    
+    /// <summary>
+    /// 점프 횟수 증가
+    /// </summary>
+    /// <param name="amount">최대 점프 횟수</param>
     public void IncreaseMaxJumpCount(int amount)
     {
         currentMaxJumpCount += amount;

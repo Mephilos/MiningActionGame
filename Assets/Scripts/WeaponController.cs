@@ -9,14 +9,15 @@ public class WeaponController : MonoBehaviour
     public float maxFireDistance = 100f; //최대 사거리
     public bool rotateOwnerToAim = true;
 
-    private PlayerData playerData; // 플레이어 스탯 참조
-    private Transform owner; // 사용자 본체
+    private PlayerData _playerData; // 플레이어 스탯 참조
+    private Transform _ownerTransform; // 사용자 본체
+    private float _nextFireTime = 0f;
 
     [Header("드릴 셋팅")]
     public float drillDamage = 1f;
     public float drillDelay = 0.5f;
     public float drillRange = 3f;
-    private float lastDrillTime = 0f;
+    private float _lastDrillTime = 0f;
 
     public enum WeaponMode
     {
@@ -27,14 +28,14 @@ public class WeaponController : MonoBehaviour
     public WeaponMode currentWeaponMode = WeaponMode.Projectile;
     void Awake()
     {
-        owner = transform;
-        playerData = owner.GetComponent<PlayerData>();
+        _ownerTransform = transform;
+        _playerData = _ownerTransform.GetComponent<PlayerData>();
         // 디버그
         if (currentWeaponData == null && currentWeaponMode == WeaponMode.Projectile)
         {
             Debug.LogError($"{gameObject.name} WeaponData가 할당 되지 않음.");
         }
-        if (playerData == null)
+        if (_playerData == null)
         {
             Debug.LogError($"{gameObject.name} PlayerData가 할당 되지 않음.");
         }
@@ -46,9 +47,9 @@ public class WeaponController : MonoBehaviour
 
         if (currentWeaponMode == WeaponMode.Projectile)
         {
-            if (Input.GetMouseButtonDown(0)) // 마우스 왼쪽 버튼 클릭 시 발사
+            if (Input.GetMouseButton(0)) // 마우스 왼쪽 버튼 클릭 시 발사
             {
-                FireProjectile();
+                TryFireProjectile();
             }
         }
         else if (currentWeaponMode == WeaponMode.Drill)
@@ -76,17 +77,23 @@ public class WeaponController : MonoBehaviour
         }
     }
 
+    void TryFireProjectile()
+    {
+        if (_playerData == null) return;
+
+        if (Time.time >= _nextFireTime)
+        {
+            FireProjectile();
+            _nextFireTime = Time.time + _playerData.currentAttackSpeed;
+            Debug.Log($"공격 속도: {Time.time - _nextFireTime}");
+        }
+    }
     public void FireProjectile()
     {
         // 디버그
         if (currentWeaponData == null || currentWeaponData.projectilePrefab == null)
         {
-            Debug.LogError("현재 무기 데이터 또는 발사체 프리팹이 설정되지 않았습니다!");
-            return;
-        }
-        if (playerData == null)
-        {
-            Debug.LogError("PlayerStats 참조가 없습니다. 데미지 계산 불가!");
+            Debug.LogError("현재 무기 데이터 또는 발사체 프리팹이 설정되지 않았습니다");
             return;
         }
         //카메라 중심에 Ray 생성
@@ -104,12 +111,12 @@ public class WeaponController : MonoBehaviour
         }
         if (rotateOwnerToAim)
         {
-            Vector3 lookDir = targetPoint - owner.position;
+            Vector3 lookDir = targetPoint - _ownerTransform.position;
             lookDir.y = 0;
 
             if (lookDir.sqrMagnitude > 0.01f)
             {
-                owner.rotation = Quaternion.LookRotation(lookDir);
+                _ownerTransform.rotation = Quaternion.LookRotation(lookDir);
             }
         }
         // 발사체 생성
@@ -123,18 +130,18 @@ public class WeaponController : MonoBehaviour
         Projectile projectileScript = bullet.GetComponent<Projectile>();
         if (projectileScript != null)
         {
-            float totalDamage = playerData.currentAttackDamage + currentWeaponData.baseDamage;
+            float totalDamage = _playerData.currentAttackDamage + currentWeaponData.baseDamage;
             projectileScript.SetDamage(totalDamage);
         }
-        Debug.Log("발사체 데미지: " + (playerData.currentAttackDamage + currentWeaponData.baseDamage));
+        Debug.Log("발사체 데미지: " + (_playerData.currentAttackDamage + currentWeaponData.baseDamage));
     }
 
     void TryUseDrill()
     {
-        if (Time.time >= lastDrillTime + drillDelay) // 공격 딜레이 확인
+        if (Time.time >= _lastDrillTime + drillDelay) // 공격 딜레이 확인
         {
             UseDrill();
-            lastDrillTime = Time.time; // 마지막 공격 시간 갱신
+            _lastDrillTime = Time.time; // 마지막 공격 시간 갱신
         }
     }
     void UseDrill()

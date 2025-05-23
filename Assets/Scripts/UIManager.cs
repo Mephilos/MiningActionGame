@@ -24,9 +24,11 @@ public class UIManager : MonoBehaviour
     // 능력치 업그레이드 버튼
     public Button upgradeMoveSpeedButton;
     public Button upgradeAttackDamageButton;
+    public Button upgradeAttackSpeedButton;
     // 능력치 현재 값 및 비용 표시 텍스트
     public TMP_Text moveSpeedStatText;
     public TMP_Text attackDamageStatText;
+    public TMP_Text attackSpeedStatText;
     // 다음 스테이지 진행 버튼 (상점 ui용)
     public Button proceedToNextStageButtonFromShop;
     
@@ -36,6 +38,9 @@ public class UIManager : MonoBehaviour
     private float _moveSpeedUpgradeAmount = 0.5f;
     private int _attackDamageUpgradeCost = 15;
     private float _attackDamageUpgradeAmount = 2f;
+    private int _attackSpeedUpgradeCost = 20;
+    private float _attackSpeedAmount = 0.05f;
+    private float _attackSpeedCap = 0.1f;
 
     private PlayerData _playerData; // 의존성 주입 방식
     
@@ -92,6 +97,12 @@ public class UIManager : MonoBehaviour
         {
             upgradeAttackDamageButton.onClick.AddListener(OnUpgradeAttackDamageButtonPressed);
         }
+
+        if (upgradeAttackSpeedButton != null)
+        {
+            upgradeAttackSpeedButton.onClick.AddListener(OnUpgradeAttackSpeedButtonPressed);
+        }
+        // 상점에서 게임 시작 버튼
         if (proceedToNextStageButtonFromShop != null)
         {
             proceedToNextStageButtonFromShop.onClick.AddListener(OnNextStageButtonPressed);
@@ -194,6 +205,12 @@ public class UIManager : MonoBehaviour
         {
             attackDamageStatText.text = $"공격력: {_playerData.currentAttackDamage:F1}\n(비용: {_attackDamageUpgradeCost} / 증가량: +{_attackDamageUpgradeAmount:F1})";
         }
+        if (attackSpeedStatText != null)
+        {
+            // 쿨다운을 초당 공격 횟수로 변환하여 표시할 수도 있습니다. (예: 1f / _playerData.currentAttackCooldown)
+            // 여기서는 쿨다운 시간을 직접 표시합니다.
+            attackSpeedStatText.text = $"공격 딜레이: { 1f/_playerData.currentAttackSpeed:F2}초\n(비용: {_attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}초)";
+        }
         
         // 버튼 활성화/비활성화 (자원 부족 시)
         if (upgradeMoveSpeedButton != null)
@@ -204,6 +221,18 @@ public class UIManager : MonoBehaviour
         if (upgradeAttackDamageButton != null)
         {
             upgradeAttackDamageButton.interactable = _playerData.currentResources >= _attackDamageUpgradeCost;
+        }
+        if(upgradeAttackSpeedButton != null)
+        {
+            // 이미 최소 쿨다운에 도달했으면 더 이상 업그레이드 불가
+            bool canUpgrade = _playerData.currentResources >= _attackSpeedUpgradeCost 
+                              && _playerData.currentAttackSpeed > _attackSpeedCap;
+            
+            upgradeAttackSpeedButton.interactable = canUpgrade;
+            if (_playerData.currentAttackSpeed <= _attackSpeedCap && attackSpeedStatText != null)
+            {
+                attackSpeedStatText.text += "\n(최대 속도 도달)";
+            }
         }
 
         // 상점 내 자원도 여기서 한번 더 갱신
@@ -236,6 +265,16 @@ public class UIManager : MonoBehaviour
         else
         {
             Debug.Log("공격력 업그레이드 실패: 자원 부족 또는 PlayerData 없음");
+        }
+    }
+
+    public void OnUpgradeAttackSpeedButtonPressed()
+    {
+        if (_playerData != null &&
+            _playerData.currentAttackSpeed > _attackSpeedCap &&
+            _playerData.SpendResources(_attackSpeedUpgradeCost))
+        {
+            _playerData.IncreaseAttackSpeed(_attackSpeedAmount, _attackSpeedCap);
         }
     }
 

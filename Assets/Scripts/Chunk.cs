@@ -467,12 +467,19 @@ public class Chunk : MonoBehaviour
             if (Application.isPlaying)
             {
                 Destroy(_meshFilter.sharedMesh);
+                Debug.Log($"[Chunk {gameObject.name}] Shared mesh destroyed.");
             }
         }
         // 이 청크와 관련된 NavMesh 데이터 제거
         if (_navMeshSurface != null)
         {
+            Debug.Log($"[Chunk {gameObject.name}] OnDestroy: Attempting to remove NavMesh data.");
             _navMeshSurface.RemoveData();
+            Debug.Log($"[Chunk {gameObject.name}] OnDestroy: NavMesh data removal called.");
+        }
+        else
+        {
+            Debug.LogWarning($"[Chunk {gameObject.name}] OnDestroy: NavMeshSurface component was null. Cannot remove data.");
         }
     }
     /// <summary>
@@ -505,10 +512,7 @@ public class Chunk : MonoBehaviour
 
         // 메시 재생성 요청
         CreateChunkMesh(); // 변경된 데이터로 메시를 다시 만듦
-
-        // 인접 청크 업데이트 확인
-        // 게임 스펙 변경으로 주석 처리
-        // CheckAndUpdateNeighborChunks(localX, localY, localZ); 
+        
         //TODO: 만약 변경된 블록이 청크 경계에 있다면 인접 청크의 메시도 업데이트해야 할 수 있음(이웃 블록의 노출 여부가 있기 때문)
 
         return true; // 변경 성공

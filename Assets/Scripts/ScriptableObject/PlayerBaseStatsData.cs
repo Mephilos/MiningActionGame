@@ -7,7 +7,8 @@ public class PlayerBaseStatsData : ScriptableObject // MonoBehaviour 대신 Scri
     public float maxHealth = 100f;
     
     [Header("기본 전투 능력치")]
-    public float baseAttackDamage = 10f;
+    public float initialAttackDamage = 10f;
+    public float initialAttackSpeed = 0.5f;
     [Header("자원 관련")]
     public int initialResources = 10;
     [Header("기본 이동 및 액션 관련")]
