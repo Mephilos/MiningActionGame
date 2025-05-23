@@ -1,18 +1,9 @@
 using UnityEngine;
-using System.Collections; 
+using UnityEngine.AI;
 
 
 public class StageManager : MonoBehaviour
 {
-    // TODO:스테이지 셋팅
-    // [System.Serializable]
-    // public class StageConfig
-    // {
-    //     public float timeToSurvive;
-    //     // public int enemySpawnConfigId; // 적 스폰 설정 ID 등 추가 가능
-    // }
-    // public List<StageConfig> stageProgression; // 스테이지 진행 순서 및 설정 리스트
-    
     public static StageManager Instance { get; private set; }
     
     [Header("Stage (Chunk) Settings")]
@@ -191,9 +182,9 @@ public class StageManager : MonoBehaviour
         
         Debug.Log("[StageManager] 플레이어 사망처리 시작]");
 
-        if (EnemySpawner.Instance != null)
+        if (enemySpawner != null)
         {
-            EnemySpawner.Instance.StopAndClearAllEnemies();
+            enemySpawner.StopAndClearAllEnemies();
         }
         else
         {
@@ -202,9 +193,9 @@ public class StageManager : MonoBehaviour
         
         Time.timeScale = 0f;
         Debug.Log("GameOver");
-        if (UIManager.Instance != null)
+        if (enemySpawner != null)
         {
-            UIManager.Instance.ShowGameOverScreem();
+            uiManager.ShowGameOverScreem();
         }
         else
         {
@@ -223,9 +214,9 @@ public class StageManager : MonoBehaviour
             Destroy(_currentLoadedStageChunk.gameObject);
             _currentLoadedStageChunk = null;
         }
-        if (EnemySpawner.Instance != null)
+        if (enemySpawner != null)
         {
-            EnemySpawner.Instance.StopAndClearAllEnemies();
+            enemySpawner.StopAndClearAllEnemies();
         }
         StartNewGame();
     }
@@ -244,39 +235,12 @@ public class StageManager : MonoBehaviour
         {
             Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적을 정리할 수 없음");
         }
-
+       
         if (uiManager != null)
         {
             uiManager.ShowStageClearScreen();
         }
     }
-    /// <summary>
-    /// 다음 스테이지로 진행하는 로직을 시작합니다
-    /// </summary>
-    private void ProceedToNextStage()
-    {
-        _isLoadingNextStage = true;
-        _isWaitingForPlayerToProceed = true;
-        _currentStageTimer = 0f; // 타이머 리셋
-
-        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어");
-        
-        if (EnemySpawner.Instance != null)
-        {
-            EnemySpawner.Instance.StopAndClearAllEnemies(); // 현재 스테이지의 적들 정리
-        }
-        else
-        {
-            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적을 정리할 수 없음");
-        }
-
-        if (uiManager != null)
-        {
-            UIManager.Instance.ShowStageClearScreen(); // 스테이지 클리어 UI 표시
-        }
-    }
-
-
     public void PlayerConfirmedShop()
     {
         if (!_isWaitingForPlayerToProceed) // 진행중, 대기 상태 확인
@@ -284,23 +248,31 @@ public class StageManager : MonoBehaviour
             Debug.LogWarning("[StageManager] 대기 상태가 아닙니다");
             return;
         }
-        
+        if (_currentLoadedStageChunk != null)
+        {
+            Debug.Log($"[StageManager] 이전 청크 ({_currentLoadedStageChunk.name}) 파괴 시도");
+            Destroy(_currentLoadedStageChunk.gameObject);
+            
+            _currentLoadedStageChunk = null;
+            
+            NavMesh.RemoveAllNavMeshData();
+            Debug.Log("[StageManager] NavMesh.RemoveAllNavMeshData() 호출 완료.");
+        }
         if (uiManager != null)
         {
             uiManager.HideStageClearScreen();
             uiManager.ShowShopPanel();
         }
     }
-
     public void PlayerConfirmedNextStage()
     {
         if (!_isWaitingForPlayerToProceed) return;
         _isWaitingForPlayerToProceed = false;
-
+        
         _currentStageNumber++;
         _isLoadingNextStage = true;
         LoadStageAndStartTimer(_fixedStageCoordinate);
-
+        
     }
 
     /// <summary>
@@ -309,18 +281,19 @@ public class StageManager : MonoBehaviour
     /// </summary>
     private void LoadStageAndStartTimer(Vector2Int stageCoord)
     {
-        if (UIManager.Instance != null && UIManager.Instance.stageClearPanel != null 
-                                       && UIManager.Instance.shopPanel != null && UIManager.Instance.shopPanel.activeSelf)
+        if (uiManager != null && uiManager.shopPanel != null && uiManager.shopPanel.activeSelf)
         {
-            UIManager.Instance.HideShopPanel();
+            uiManager.HideShopPanel();
         }
+
         // 이전 스테이지 언로드 및 새 스테이지 로드
         if (_currentLoadedStageChunk != null)
         {
             Destroy(_currentLoadedStageChunk.gameObject);
             _currentLoadedStageChunk = null;
         }
-
+        
+        Debug.Log("[StageManager] LoadStageAndStartTimer NavMesh.RemoveAllNavMeshData() 호출 완료.");
         Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
         GameObject stageGO = Instantiate(stageChunkPrefab, stageWorldPosition, Quaternion.identity, this.transform);
         Chunk chunkScript = stageGO.GetComponent<Chunk>();
@@ -339,7 +312,6 @@ public class StageManager : MonoBehaviour
         
         chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed, 
                                currentNoiseScale, currentHeightMultiplier, stageSharedMaterial);
-        
         _currentLoadedStageChunk = chunkScript;
         
         Debug.Log($"스테이지 {_currentStageNumber} ({stageCoord}) 로드 완료 타이머 시작");
@@ -348,15 +320,15 @@ public class StageManager : MonoBehaviour
         _currentStageTimer = 0f; // 새 스테이지 시작 시 타이머 리셋
         _isLoadingNextStage = false; // 로딩 완료 플래그
         
-        if (UIManager.Instance != null)
+        if (uiManager != null)
         {
-            UIManager.Instance.UpdateStageNumberUI(_currentStageNumber);
-            UIManager.Instance.UpdateStageClearUI(_currentStageNumber);
+            uiManager.UpdateStageNumberUI(_currentStageNumber);
+            uiManager.UpdateStageClearUI(_currentStageNumber);
         }
         
-        if (EnemySpawner.Instance != null)
+        if (enemySpawner != null)
         {
-            EnemySpawner.Instance.StartSpawningForStage(_currentStageNumber);
+            enemySpawner.StartSpawningForStage(_currentStageNumber);
         }
         else
         {
@@ -458,7 +430,7 @@ public class StageManager : MonoBehaviour
             _currentLoadedStageChunk.CreateChunkMesh();
         }
     }
-    
+
     private void InitializeSingleton()
     {
         if (Instance == null)
@@ -471,35 +443,4 @@ public class StageManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    
-    // private void InitializePlayerObj()
-    // {
-    //     if (playerTransform != null) return;
-    //     
-    //     GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-    //     if (playerObj != null)
-    //     {
-    //         playerTransform = playerObj.transform;
-    //     }
-    //     else
-    //     {
-    //         Debug.LogError("[StageManager] Player 오브젝트가 씬에 존재하지 않습니다.");
-    //     }
-    // }
-    
-    // /// <summary>
-    // /// 잠시 대기 후 다음 스테이지를 로드하는 코루틴
-    // /// </summary>
-    // private IEnumerator LoadNextStageCoroutine()
-    // {
-    //     yield return new WaitForSeconds(delayBeforeNextStage);
-    //
-    //     _currentStageNumber++;
-    //
-    //     Vector2Int nextStageCoord = new Vector2Int(CurrentStageCoord.x + _currentStageNumber -1, CurrentStageCoord.y); // (0,0) -> (1,0) -> (2,0) ...
-    //
-    //     Debug.Log($"다음 스테이지 ({_currentStageNumber}) 로딩 시작: 좌표 {nextStageCoord}");
-    //     LoadStageAndStartTimer(nextStageCoord);
-    // }
 }

@@ -43,11 +43,12 @@ public class Chunk : MonoBehaviour
     private int _seed;
     private float _noiseScale;
     private float _heightMultiplier;//월드 굴곡 조절
-    private NavMeshSurface _navMeshSurface;
     private BlockType[,,] _blockData;
     private int[,] _surfaceHeights; // 각 (x,z) 위치의 표면 높이를 저장할 배열
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
+    
+    private NavMeshSurface _navMeshSurface; // 네비메쉬 컴포넌트 참조
 
     [Header("청크 형태, 아이템 매몰 설정")] [Tooltip("함정 설정")]
     public bool enableWideTrapHoles = false;
@@ -133,6 +134,7 @@ public class Chunk : MonoBehaviour
         int groundLayer = LayerMask.NameToLayer("Ground");
 
         _navMeshSurface.layerMask = 1 << groundLayer;
+        
         gameObject.layer = groundLayer;
 
         if (chunkMaterial != null)
@@ -469,17 +471,6 @@ public class Chunk : MonoBehaviour
                 Destroy(_meshFilter.sharedMesh);
                 Debug.Log($"[Chunk {gameObject.name}] Shared mesh destroyed.");
             }
-        }
-        // 이 청크와 관련된 NavMesh 데이터 제거
-        if (_navMeshSurface != null)
-        {
-            Debug.Log($"[Chunk {gameObject.name}] OnDestroy: Attempting to remove NavMesh data.");
-            _navMeshSurface.RemoveData();
-            Debug.Log($"[Chunk {gameObject.name}] OnDestroy: NavMesh data removal called.");
-        }
-        else
-        {
-            Debug.LogWarning($"[Chunk {gameObject.name}] OnDestroy: NavMeshSurface component was null. Cannot remove data.");
         }
     }
     /// <summary>
