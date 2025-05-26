@@ -14,13 +14,16 @@ public class PlayerController : MonoBehaviour
     private float _currentSpeed = 0;
     private Vector3 _verticalVelocity = Vector3.zero;
 
-    private float _shiftKeyDownTime = 0f; 
-    private bool _shiftKeyHeld = false;   
+    private float _shiftKeyDownTime = 0f;
+    private bool _shiftKeyHeld = false;
 
     private Coroutine _dashCoroutine;
     private Coroutine _invincibilityCoroutine;
 
     public bool IsAiming { get; private set; }
+
+    private Vector3 _aimingDirection;
+    private bool _applyAimRotationInFixedUpdate = false;
 
     void Awake()
     {
@@ -52,15 +55,16 @@ public class PlayerController : MonoBehaviour
         if (_playerData == null || _playerData.isDead) return;
 
         HandleInput();
-        HandleRotation(); // 회전 로직은 매 프레임 호출
+        // HandleRotation(); // 회전 로직은 매 프레임 호출
     }
 
     void FixedUpdate()
     {
         if (_playerData == null || _playerData.isDead) return;
         if (_playerData.isDashing) return; // 대쉬 중에는 이동 로직 건너뜀
-     
+
         HandleMovement();
+        ApplyRotationFixedUpdate();
         ApplyGravity();
         ApplyFinalMovement();
     }
@@ -80,13 +84,14 @@ public class PlayerController : MonoBehaviour
         {
             _worldTargetDirection = Vector3.zero; // 이동 입력 없으면 0벡터
         }
-
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
         // Shift 키 (대쉬/부스트)
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             _shiftKeyDownTime = Time.time;
             _shiftKeyHeld = true;
         }
+
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
             _shiftKeyHeld = false;
@@ -101,67 +106,59 @@ public class PlayerController : MonoBehaviour
         {
             TryJump();
         }
-
+#endif
         // 마우스 우클릭 (조준 상태)
         IsAiming = Input.GetMouseButton(1);
-    }
+        _applyAimRotationInFixedUpdate = false;
 
-    void HandleRotation()
-    {
         if (IsAiming)
         {
             if (Camera.main != null)
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Debug.DrawRay(ray.origin, ray.direction * 100f, Color.cyan);
-                
-                Plane groundPlane = new Plane(Vector3.up, transform.position); 
-                
-                Debug.Log($"[PlaneDebug] Player Y for plane: {transform.position.y}. Plane defined with normal: {groundPlane.normal}, distance: {groundPlane.distance}");
-
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); // 마우스 위치는 Update에서 샘플링하는 것이 좋음
+                Plane groundPlane = new Plane(Vector3.up, transform.position);
 
                 if (groundPlane.Raycast(ray, out float rayDistance))
                 {
                     Vector3 targetPoint = ray.GetPoint(rayDistance);
-                    Debug.DrawLine(transform.position, targetPoint, Color.magenta);
-
-                    
-                    Debug.Log($"[AimingCheck] TargetPoint: {targetPoint}, PlayerPos: {transform.position}");
-
                     Vector3 directionToTarget = targetPoint - transform.position;
-                
-                    Debug.Log($"[Aiming] MousePos: {Input.mousePosition}, RayDistance: {rayDistance}, RawDirectionToTarget: {directionToTarget}");
-
 
                     if (directionToTarget.sqrMagnitude > 0.01f)
                     {
                         directionToTarget.y = 0;
-                        Debug.Log($"[Aiming] FlattenedDirectionToTarget: {directionToTarget}");
-                        transform.rotation = Quaternion.LookRotation(directionToTarget, Vector3.up);
-                        Debug.Log($"[Aiming] New Rotation Euler: {transform.rotation.eulerAngles}");
+                        _aimingDirection = directionToTarget.normalized; // 정규화된 조준 방향 저장
+                        _applyAimRotationInFixedUpdate = true; // FixedUpdate에서 이 방향을 사용하도록 플래그 설정
                     }
-                    else
-                    {
-                        Debug.LogWarning("[Aiming] directionToTarget is too small. No rotation applied.");
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning($"[Aiming] Raycast to ground plane failed. Mouse Position: {Input.mousePosition}. Character will hold current rotation.");
                 }
             }
         }
-        else // 조준 중이 아닐 때
+    }
+
+    void ApplyRotationFixedUpdate()
+    {
+        if (IsAiming && _applyAimRotationInFixedUpdate)
         {
+            // _aimingDirection은 HandleInput (Update)에서 계산됨
+            if (_aimingDirection.sqrMagnitude > 0.01f)
+            {
+                transform.rotation = Quaternion.LookRotation(_aimingDirection, Vector3.up);
+            }
+        }
+        else if (!IsAiming) // 조준 중이 아닐 때
+        {
+            // _worldTargetDirection은 HandleInput (Update)에서 계산됨
             if (_worldTargetDirection.sqrMagnitude > 0.01f)
             {
                 Vector3 lookDir = _worldTargetDirection;
                 lookDir.y = 0;
                 Quaternion targetRotation = Quaternion.LookRotation(lookDir);
-                float rotationStep = _playerData.currentRotationSpeed * Time.deltaTime;
+                // Time.fixedDeltaTime을 사용하여 회전 속도 조절
+                float rotationStep = _playerData.currentRotationSpeed * Time.fixedDeltaTime;
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
             }
         }
+
+        _applyAimRotationInFixedUpdate = false; // 사용 후 플래그 리셋
     }
 
     void HandleMovement()
@@ -169,26 +166,41 @@ public class PlayerController : MonoBehaviour
         float actualMaxSpeed = _playerData.currentMaxSpeed;
         float actualAcceleration = _playerData.currentAcceleration;
 
-     
+
         if (_shiftKeyHeld && (Time.time - _shiftKeyDownTime >= shortPressThreshold) && !_playerData.isDashing)
         {
             actualMaxSpeed *= _playerData.currentBoostFactor;
-            actualAcceleration *= _playerData.currentBoostFactor; 
+            actualAcceleration *= _playerData.currentBoostFactor;
         }
 
 
-        if (_worldTargetDirection.sqrMagnitude > 0.01f) 
+        if (_worldTargetDirection.sqrMagnitude > 0.01f || IsAiming)
         {
             _currentSpeed += actualAcceleration * Time.fixedDeltaTime;
             _currentSpeed = Mathf.Clamp(_currentSpeed, 0, actualMaxSpeed);
+        }
+        else if (!IsAiming) 
+        { 
+            // 조준 중이 아니고 이동 입력도 없을 때만 감속
+            _currentSpeed -= _playerData.currentDeceleration * Time.fixedDeltaTime;
+            _currentSpeed = Mathf.Max(0, _currentSpeed);
         }
         else 
         {
             _currentSpeed -= _playerData.currentDeceleration * Time.fixedDeltaTime; 
             _currentSpeed = Mathf.Max(0, _currentSpeed); 
         }
-
-        _currentVelocity = _worldTargetDirection * _currentSpeed;
+        _currentVelocity = (IsAiming && _worldTargetDirection.sqrMagnitude < 0.01f) 
+            ? transform.forward * _currentSpeed : _worldTargetDirection * _currentSpeed;
+        
+        if (IsAiming && _worldTargetDirection.sqrMagnitude < 0.01f && _aimingDirection.sqrMagnitude < 0.01f) // 조준 중이고 키보드 이동 입력이 없을 때
+        {
+            _currentVelocity = transform.forward * _currentSpeed; 
+        } 
+        else 
+        {
+            _currentVelocity = _worldTargetDirection * _currentSpeed;
+        }
     }
 
     void ApplyGravity()
@@ -323,6 +335,86 @@ public class PlayerController : MonoBehaviour
         _currentVelocity = Vector3.zero;
         _verticalVelocity = Vector3.zero;
         _currentSpeed = 0f;
-        // _worldTargetDirection = transform.forward; // 또는 Vector3.zero로 설정
+    }
+    
+    /// <summary>
+    /// 모바일 조작 위한 ui버튼 설정 메서드들
+    /// </summary>
+    public void OnJumpButtonPressed()
+    {
+        if (_playerData == null || _playerData.isDead) return;
+        Debug.Log("Jump Button Pressed"); // 버튼 클릭 로그 확인용
+        TryJump();
+    }
+    public void OnDashButtonPressed()
+    {
+        if (_playerData == null || _playerData.isDead) return;
+        Debug.Log("Dash Button Pressed"); // 버튼 클릭 로그 확인용
+        TryDash();
     }
 }
+
+
+
+
+
+
+
+
+// void HandleRotation()
+    // {
+    //     if (IsAiming)
+    //     {
+    //         if (Camera.main != null)
+    //         {
+    //             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //             Debug.DrawRay(ray.origin, ray.direction * 100f, Color.cyan);
+    //             
+    //             Plane groundPlane = new Plane(Vector3.up, transform.position); 
+    //             
+    //             Debug.Log($"[PlaneDebug] Player Y for plane: {transform.position.y}. Plane defined with normal: {groundPlane.normal}, distance: {groundPlane.distance}");
+    //
+    //
+    //             if (groundPlane.Raycast(ray, out float rayDistance))
+    //             {
+    //                 Vector3 targetPoint = ray.GetPoint(rayDistance);
+    //                 Debug.DrawLine(transform.position, targetPoint, Color.magenta);
+    //
+    //                 
+    //                 Debug.Log($"[AimingCheck] TargetPoint: {targetPoint}, PlayerPos: {transform.position}");
+    //
+    //                 Vector3 directionToTarget = targetPoint - transform.position;
+    //             
+    //                 Debug.Log($"[Aiming] MousePos: {Input.mousePosition}, RayDistance: {rayDistance}, RawDirectionToTarget: {directionToTarget}");
+    //
+    //
+    //                 if (directionToTarget.sqrMagnitude > 0.01f)
+    //                 {
+    //                     directionToTarget.y = 0;
+    //                     Debug.Log($"[Aiming] FlattenedDirectionToTarget: {directionToTarget}");
+    //                     transform.rotation = Quaternion.LookRotation(directionToTarget, Vector3.up);
+    //                     Debug.Log($"[Aiming] New Rotation Euler: {transform.rotation.eulerAngles}");
+    //                 }
+    //                 else
+    //                 {
+    //                     Debug.LogWarning("[Aiming] directionToTarget is too small. No rotation applied.");
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 Debug.LogWarning($"[Aiming] Raycast to ground plane failed. Mouse Position: {Input.mousePosition}. Character will hold current rotation.");
+    //             }
+    //         }
+    //     }
+    //     else // 조준 중이 아닐 때
+    //     {
+    //         if (_worldTargetDirection.sqrMagnitude > 0.01f)
+    //         {
+    //             Vector3 lookDir = _worldTargetDirection;
+    //             lookDir.y = 0;
+    //             Quaternion targetRotation = Quaternion.LookRotation(lookDir);
+    //             float rotationStep = _playerData.currentRotationSpeed * Time.deltaTime;
+    //             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
+    //         }
+    //     }
+    // }

@@ -52,7 +52,7 @@ public class DynamicCamera : MonoBehaviour
         }
     }
 
-    void LateUpdate()
+    void FixedUpdate()
     {
         if (target == null) return;
 
