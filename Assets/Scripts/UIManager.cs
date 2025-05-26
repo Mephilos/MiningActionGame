@@ -199,7 +199,7 @@ public class UIManager : MonoBehaviour
 
         if (moveSpeedStatText != null)
         {
-            moveSpeedStatText.text = $"이동 속도: {_playerData.currentMoveSpeed:F1}\n(비용: {_moveSpeedUpgradeCost} / 증가량: +{_moveSpeedUpgradeAmount:F1})";
+            moveSpeedStatText.text = $"이동 속도: {_playerData.currentMaxSpeed:F1}\n(비용: {_moveSpeedUpgradeCost} / 증가량: +{_moveSpeedUpgradeAmount:F1})";
         }
         if (attackDamageStatText != null)
         {

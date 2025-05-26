@@ -17,7 +17,11 @@ public class PlayerData : MonoBehaviour
     public float currentAttackDamage;
     public float currentAttackSpeed;
     // 이동기
-    public float currentMoveSpeed;
+    public float currentMaxSpeed;
+    public float currentRotationSpeed;
+    public float currentAcceleration;
+    public float currentDeceleration;
+    public float currentBoostFactor;
     public float currentJumpForce;
     public int currentMaxJumpCount;
     public int jumpCountAvailable;
@@ -29,11 +33,6 @@ public class PlayerData : MonoBehaviour
     public bool isInvincible;
     public bool isDashing;
     
-    
-    // 드릴 능력치
-    public float currentDrillPower;
-    public float currentDrillRange;
-
     //TODO:아이템은 나중에 추가 (리스트 사용 예정)
 
     void Awake()
@@ -59,15 +58,20 @@ public class PlayerData : MonoBehaviour
             currentResources = 0;
             currentAttackDamage = 10f;
             currentAttackSpeed = 0.5f;
-            currentMoveSpeed = 5f;
+            
+            currentMaxSpeed = 7f;
+            currentRotationSpeed = 360f;
+            currentAcceleration = 10f;
+            currentDeceleration = 10f;
+            currentBoostFactor = 1.5f;
+            
             currentJumpForce = 8f;
             currentMaxJumpCount = 2;
             currentDashForce = 15f;
             currentDashDuration = 0.2f;
             currentDashCooldown = 1f;
             currentDashInvincibleDuration = 0.1f;
-            currentDrillPower = 1f;
-            currentDrillRange = 3f;
+            
             return;
         }
         else
@@ -77,15 +81,19 @@ public class PlayerData : MonoBehaviour
             currentResources = baseStatsData.initialResources;
             currentAttackDamage = baseStatsData.initialAttackDamage;
             currentAttackSpeed = baseStatsData.initialAttackSpeed;
-            currentMoveSpeed = baseStatsData.moveSpeed;
+            
+            currentMaxSpeed = baseStatsData.maxSpeed;
+            currentRotationSpeed = baseStatsData.rotationSpeed;
+            currentAcceleration = baseStatsData.acceleration;
+            currentDeceleration = baseStatsData.deceleration;
+            currentBoostFactor = baseStatsData.boostFactor;
+            
             currentJumpForce = baseStatsData.jumpForce;
             currentMaxJumpCount = baseStatsData.initialMaxJumpCount;
             currentDashForce = baseStatsData.dashForce;
             currentDashDuration = baseStatsData.dashDuration;
             currentDashCooldown = baseStatsData.dashCooldown;
             currentDashInvincibleDuration = baseStatsData.dashInvincibleDuration;
-            currentDrillPower = baseStatsData.drillPower;
-            currentDrillRange = baseStatsData.drillRange;
         }
 
         // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
@@ -96,7 +104,7 @@ public class PlayerData : MonoBehaviour
         dashCooldownTimer = 0f;
         isInvincible = false;
         isDashing = false;
-        Debug.Log("[PlayerData] PlayerStats가 PlayerBaseStatsData로부터 초기화되었습니다.");
+        Debug.Log($"[{gameObject.name}] PlayerStats가 PlayerBaseStatsData로부터 초기화되었습니다.");
         
         if (UIManager.Instance != null)
         {
@@ -251,8 +259,8 @@ public class PlayerData : MonoBehaviour
     /// </summary>
     public void IncreaseMoveSpeed(float additionalSpeed)
     {
-        currentMoveSpeed += additionalSpeed;
-        Debug.Log($"[PlayerData] 이동 속도 증가! 현재 이동 속도: {currentMoveSpeed}");
+        currentMaxSpeed += additionalSpeed;
+        Debug.Log($"[PlayerData] 이동 속도 증가! 현재 이동 속도: {currentMaxSpeed}");
         // 필요하다면 UIManager를 통해 변경된 스탯을 UI에 표시할 수 있습니다.
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
@@ -279,6 +287,18 @@ public class PlayerData : MonoBehaviour
         {
             UIManager.Instance.UpdateShopStatsUI();
         }
+    }
+    public void IncreaseMaxSpeed(float additionalMaxSpeed)
+    {
+        currentMaxSpeed += additionalMaxSpeed;
+        Debug.Log($"[PlayerData] 최고 속도 증가. 현재 최고 속도: {currentMaxSpeed}");
+        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
+    }
+    public void IncreaseAcceleration(float additionalAcceleration)
+    {
+        currentAcceleration += additionalAcceleration;
+        Debug.Log($"[PlayerData] 가속도 증가. 현재 가속도: {currentAcceleration}");
+        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
     
     /// <summary>

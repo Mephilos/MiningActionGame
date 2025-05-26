@@ -16,4 +16,4 @@ MonoBehaviour:
   baseDamage: 15
   attackSpeed: 1
   range: 100
-  projectilePrefab: {fileID: 1633774235790774350, guid: 9d14358003ad7489ea0162dabce431c1, type: 3}
+  projectilePrefab: {fileID: 5074241160671123787, guid: 379de5bda06e3436fb42ce65a1bf07b8, type: 3}

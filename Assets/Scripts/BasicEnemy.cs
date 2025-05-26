@@ -145,7 +145,6 @@ public class BasicEnemy : MonoBehaviour
         }
         EnsureAgentOnNavMeshLogic();
     }
-
     void EnsureAgentOnNavMeshLogic()
     {
         if (_navMeshAgent != null && !_navMeshAgent.isOnNavMesh && _navMeshAgent.enabled)

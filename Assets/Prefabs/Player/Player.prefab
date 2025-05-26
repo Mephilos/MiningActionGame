@@ -10878,7 +10878,7 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 1.8
-  m_Radius: 0.4
+  m_Radius: 0.3
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
@@ -10896,7 +10896,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afb699531626c44e0a90fa3eb8b483e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraFollow: {fileID: 0}
+  isometricCameraAngleY: 45
+  shortPressThreshold: 0.2
 --- !u!114 &6898573589470979714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10913,11 +10914,9 @@ MonoBehaviour:
   firePoint: {fileID: 5616558153871213032}
   bulletSpeed: 30
   maxFireDistance: 100
-  rotateOwnerToAim: 1
-  drillDamage: 1
-  drillDelay: 0
-  drillRange: 2
-  currentWeaponMode: 0
+  aimLayerMask:
+    serializedVersion: 2
+    m_Bits: 62
 --- !u!114 &4472608141841992023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10932,11 +10931,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseStatsData: {fileID: 11400000, guid: e4fa13eda78fe4e5d800a16a08179760, type: 2}
   currentHealth: 0
-  level: 0
-  currentXP: 0
-  xpToNextLevel: 0
+  isDead: 0
+  currentResources: 0
   currentAttackDamage: 0
-  currentMoveSpeed: 0
+  currentAttackSpeed: 0
+  currentMaxSpeed: 0
+  currentRotationSpeed: 0
+  currentAcceleration: 0
+  currentDeceleration: 0
+  currentBoostFactor: 0
   currentJumpForce: 0
   currentMaxJumpCount: 0
   jumpCountAvailable: 0
@@ -10947,8 +10950,6 @@ MonoBehaviour:
   currentDashInvincibleDuration: 0
   isInvincible: 0
   isDashing: 0
-  currentDrillPower: 0
-  currentDrillRange: 0
 --- !u!1 &3599911416880207941
 GameObject:
   m_ObjectHideFlags: 0

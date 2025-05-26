@@ -12,7 +12,12 @@ public class PlayerBaseStatsData : ScriptableObject // MonoBehaviour 대신 Scri
     [Header("자원 관련")]
     public int initialResources = 10;
     [Header("기본 이동 및 액션 관련")]
-    public float moveSpeed = 5f;
+    public float maxSpeed = 7f;
+    public float rotationSpeed = 360f;
+    public float acceleration = 10f;
+    public float deceleration = 10f;
+    public float boostFactor = 1.5f;
+    
     public float jumpForce = 8f;
     public int initialMaxJumpCount = 1; // 기본 점프 횟수
 
@@ -20,8 +25,4 @@ public class PlayerBaseStatsData : ScriptableObject // MonoBehaviour 대신 Scri
     public float dashDuration = 0.2f;
     public float dashCooldown = 1f;
     public float dashInvincibleDuration = 0.1f;
-
-    [Header("기본 자원 채집 (드릴)")]
-    public float drillPower = 1f;
-    public float drillRange = 3f;
 }
