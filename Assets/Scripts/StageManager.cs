@@ -50,6 +50,7 @@ public class StageManager : MonoBehaviour
     
     private void Awake()
     {
+        Application.targetFrameRate = 60;
         InitializeSingleton();
         if (uiManager == null) uiManager = UIManager.Instance;
         if (enemySpawner == null) enemySpawner = EnemySpawner.Instance;

@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 _aimingDirection;
     private bool _applyAimRotationInFixedUpdate = false;
+    
+    [Header("Mobile Controls")]
+    public Joystick movementJoystick;
 
     void Awake()
     {
@@ -71,20 +74,36 @@ public class PlayerController : MonoBehaviour
 
     void HandleInput()
     {
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveZ = Input.GetAxisRaw("Vertical");
-        Vector3 rawInputDir = new Vector3(moveX, 0, moveZ);
+        float moveX = 0f;
+        float moveZ = 0f;
 
+#if UNITY_IOS || UNITY_ANDROID// 모바일 플랫폼
+        
+        if (movementJoystick != null && movementJoystick.Direction.sqrMagnitude > 0.01f) // 조이스틱이 할당되어 있고, 입력이 있을 때
+        { 
+            moveX = movementJoystick.Horizontal; // 조이스틱의 Horizontal 값 사용
+            moveZ = movementJoystick.Vertical;   // 조이스틱의 Vertical 값 사용
+        }
+#endif 
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+        // pc
+        moveX = Input.GetAxisRaw("Horizontal");
+        moveZ = Input.GetAxisRaw("Vertical");
+#endif
+        Vector3 rawInputDir = new Vector3(moveX, 0, moveZ);
+        
         // 이동 입력 방향 계산 (카메라 각도 고려)
         if (rawInputDir.sqrMagnitude > 0.01f)
         {
             _worldTargetDirection = Quaternion.Euler(0, isometricCameraAngleY, 0) * rawInputDir.normalized;
         }
-        else
+        else 
         {
             _worldTargetDirection = Vector3.zero; // 이동 입력 없으면 0벡터
         }
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
+#if !(UNITY_IOS || UNITY_ANDROID) // PC 환경
+        
         // Shift 키 (대쉬/부스트)
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -107,6 +126,8 @@ public class PlayerController : MonoBehaviour
             TryJump();
         }
 #endif
+        
+#if UNITY_EDITOR || UNITY_STANDALONE
         // 마우스 우클릭 (조준 상태)
         IsAiming = Input.GetMouseButton(1);
         _applyAimRotationInFixedUpdate = false;
@@ -132,6 +153,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+#endif
     }
 
     void ApplyRotationFixedUpdate()

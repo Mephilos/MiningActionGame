@@ -52,10 +52,12 @@ public class WeaponController : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX || UNITY_STANDALONE_LINUX
         if (Input.GetMouseButton(0)) // 마우스 왼쪽 버튼 클릭 시 발사
         {
             TryFireProjectile();
         }
+#endif
     }
 
     void TryFireProjectile()
@@ -100,5 +102,14 @@ public class WeaponController : MonoBehaviour
         }
         // 캐릭터가 바라보는 방향(월드 좌표) 로그 추가
         Debug.Log($"발사체 데미지: {(_playerData.currentAttackDamage + currentWeaponData.baseDamage)}");
+    }
+    
+    /// <summary>
+    /// 모바일용 ui
+    /// </summary>
+    public void OnAttackButtonPressed()
+    {
+        Debug.Log($"[{gameObject.name}]Attack Button Pressed"); 
+        TryFireProjectile();
     }
 }
