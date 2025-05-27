@@ -82,10 +82,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.45
+  m_Radius: 0.52107275
   m_Height: 1.6361489
   m_Direction: 2
-  m_Center: {x: 0, y: 0, z: -0.091715574}
+  m_Center: {x: 0, y: 0.18879724, z: -0.091715574}
 --- !u!195 &6167432306451821085
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -124,6 +124,7 @@ MonoBehaviour:
   detectionRadius: 15
   moveSpeed: 3.5
   selfDestructDelay: 0
+  navMeshSampleRadius: 2
 --- !u!1001 &4472349531518333114
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -142,7 +143,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5558045049889857575, guid: cd9634b6c35fe4f79bb9431fa53d2493, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 5558045049889857575, guid: cd9634b6c35fe4f79bb9431fa53d2493, type: 3}
       propertyPath: m_LocalPosition.z

@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController _characterController;
     private PlayerData _playerData;
+    private Animator _animator;
 
     private Vector3 _worldTargetDirection = Vector3.forward;
     private Vector3 _currentVelocity = Vector3.zero;
@@ -32,6 +33,7 @@ public class PlayerController : MonoBehaviour
     {
         _characterController = GetComponent<CharacterController>();
         _playerData = GetComponent<PlayerData>();
+        _animator = GetComponent<Animator>();
 
         if (_playerData == null)
         {
@@ -40,7 +42,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // 초기 바라보는 방향 설정 (카메라 각도 고려)
+        if (_animator == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] 플레이어에 Animator가 없음");
+        }
+
+        // 초기 바라보는 방향 설정
         _worldTargetDirection = Quaternion.Euler(0, isometricCameraAngleY, 0) * Vector3.forward;
         transform.rotation = Quaternion.LookRotation(_worldTargetDirection);
     }
@@ -55,8 +62,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (_playerData == null || _playerData.isDead) return;
-
+        if (_playerData == null || _playerData.isDead)
+        {
+            return;
+        }
+    
         HandleInput();
         // HandleRotation(); // 회전 로직은 매 프레임 호출
     }
@@ -64,8 +74,11 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         if (_playerData == null || _playerData.isDead) return;
-        if (_playerData.isDashing) return; // 대쉬 중에는 이동 로직 건너뜀
-
+        if (_playerData.isDashing)
+        {
+            ApplyFinalMovement();
+            return; // 대쉬 중에는 이동 로직 건너뜀
+        }
         HandleMovement();
         ApplyRotationFixedUpdate();
         ApplyGravity();
@@ -284,12 +297,14 @@ public class PlayerController : MonoBehaviour
         if (_characterController.isGrounded) 
         {
             _verticalVelocity.y = _playerData.currentJumpForce;
-            _playerData.jumpCountAvailable = _playerData.currentMaxJumpCount - 1; 
+            _playerData.jumpCountAvailable = _playerData.currentMaxJumpCount - 1;
+            _animator.SetBool("IsJumping", true);
         }
         else if (_playerData.jumpCountAvailable > 0) 
         {
             _verticalVelocity.y = _playerData.currentJumpForce; 
             _playerData.jumpCountAvailable--;
+            _animator.SetBool("IsJumping", true);
         }
     }
 
@@ -311,6 +326,7 @@ public class PlayerController : MonoBehaviour
         if (_playerData == null) yield break;
 
         _playerData.isDashing = true;
+        _animator.SetBool("IsDashing", true);
         _playerData.dashCooldownTimer = _playerData.currentDashCooldown; // 쿨다운 시작
         _currentSpeed = 0; // 대쉬 시작 시 현재 이동 속도 초기화
 
@@ -338,7 +354,37 @@ public class PlayerController : MonoBehaviour
         }
 
         _playerData.isDashing = false;
+        _animator.SetBool("IsDashing", false);
         _dashCoroutine = null; // 코루틴 참조 해제
+    }
+
+    void UpdateAnimations()
+    {
+        if (_animator == null || _playerData == null) return;
+
+        if (_playerData.isDead)
+        {
+            _animator.SetBool("IsDead", true);
+            return;
+        }
+        
+        Vector3 horizontalVelocity = new Vector3(_characterController.velocity.x, 0, _characterController.velocity.z);
+        float actualSpeed = horizontalVelocity.magnitude;
+        _animator.SetFloat("Speed", actualSpeed);
+        
+        _animator.SetBool("Grounded", _characterController.isGrounded);
+
+        if (!_characterController.isGrounded && _verticalVelocity.y > 0.1f)
+        {
+            _animator.SetBool("IsJumping", true);
+        }
+        else if (_characterController.isGrounded)
+        {
+            _animator.SetBool("IsJumping", false);
+        }
+        
+        _animator.SetBool("IsDashing", _playerData.isDashing);
+        _animator.SetBool("IsAiming", IsAiming);
     }
 
     private IEnumerator InvincibilityCoroutine(float duration)
