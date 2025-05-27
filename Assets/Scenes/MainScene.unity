@@ -3673,7 +3673,7 @@ MonoBehaviour:
   stageSize: 32
   stageBuildHeight: 32
   baseWorldSeed: 12345
-  playerTransform: {fileID: 0}
+  playerTransform: {fileID: 7604694941761129493}
   uiManager: {fileID: 1123934153}
   enemySpawner: {fileID: 2043441969}
   timeToSurvivePerStage: 500
@@ -5104,18 +5104,6 @@ PrefabInstance:
       propertyPath: movementJoystick
       value: 
       objectReference: {fileID: 562415767}
-    - target: {fileID: 3562947133331125915, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
-      propertyPath: aimLayerMask.m_Bits
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 5194388175690836229, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 9910
-      objectReference: {fileID: 0}
-    - target: {fileID: 7081957097522606014, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 01801c21c49f549a1b9f68498bf108cb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

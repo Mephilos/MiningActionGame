@@ -131,7 +131,7 @@ public class EnemySpawner : MonoBehaviour
     private IEnumerator SpawnEnemiesOverTimeCoroutine()
     {
         // 예시: 스테이지 번호에 따라 총 스폰할 적의 수와 간격을 다르게 설정
-        int totalEnemiesToSpawnForThisStage = 5 + (_currentStageNumberForSpawner * 2); // 스테이지가 높아질수록 더 많이 스폰
+        int totalEnemiesToSpawnForThisStage = 5 + (_currentStageNumberForSpawner * 5); // 스테이지가 높아질수록 더 많이 스폰
         int enemiesSpawnedSoFar = 0;
         float spawnDelayBetweenEnemies = Mathf.Max(0.5f, 3.0f - (_currentStageNumberForSpawner * 0.2f)); // 스테이지가 높아질수록 더 빨리 스폰
 

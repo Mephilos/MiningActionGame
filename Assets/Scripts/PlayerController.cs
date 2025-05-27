@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private static readonly int Speed = Animator.StringToHash("Speed");
+    private static readonly int Grounded = Animator.StringToHash("Grounded");
+    private static readonly int IsJumping = Animator.StringToHash("IsJumping");
+    private static readonly int IsDead = Animator.StringToHash("IsDead");
+    private static readonly int IsDashing = Animator.StringToHash("IsDashing");
+    private static readonly int Aiming = Animator.StringToHash("IsAiming");
+    private static readonly int JumpTrigger = Animator.StringToHash("JumpTrigger");
     [SerializeField] private float isometricCameraAngleY = 45f;
     [SerializeField] private float shortPressThreshold = 0.2f;
 
@@ -68,7 +75,7 @@ public class PlayerController : MonoBehaviour
         }
     
         HandleInput();
-        // HandleRotation(); // 회전 로직은 매 프레임 호출
+        UpdateAnimations();
     }
 
     void FixedUpdate()
@@ -200,6 +207,7 @@ public class PlayerController : MonoBehaviour
     {
         float actualMaxSpeed = _playerData.currentMaxSpeed;
         float actualAcceleration = _playerData.currentAcceleration;
+        float actualDeceleration = _playerData.currentDeceleration; 
 
 
         if (_shiftKeyHeld && (Time.time - _shiftKeyDownTime >= shortPressThreshold) && !_playerData.isDashing)
@@ -207,34 +215,30 @@ public class PlayerController : MonoBehaviour
             actualMaxSpeed *= _playerData.currentBoostFactor;
             actualAcceleration *= _playerData.currentBoostFactor;
         }
+        bool isMovingInput = _worldTargetDirection.sqrMagnitude > 0.01f;
 
-
-        if (_worldTargetDirection.sqrMagnitude > 0.01f || IsAiming)
+        if (isMovingInput)
         {
+            // 조준 중일 때 이동 속도
+            if (IsAiming) { actualMaxSpeed *= 0.5f; } // 조준 시 이동속도 절반
+
             _currentSpeed += actualAcceleration * Time.fixedDeltaTime;
             _currentSpeed = Mathf.Clamp(_currentSpeed, 0, actualMaxSpeed);
         }
-        else if (!IsAiming) 
+        else
+        {
+            // 이동 입력이 없을 때: 감속
+            _currentSpeed -= actualDeceleration * Time.fixedDeltaTime;
+            _currentSpeed = Mathf.Max(0, _currentSpeed); // 속도가 0 이하로 내려가지 않도록
+        }
+
+        if (IsAiming && !isMovingInput)
+        {
+            _currentVelocity = transform.forward * _currentSpeed;
+        }
+        else
         { 
-            // 조준 중이 아니고 이동 입력도 없을 때만 감속
-            _currentSpeed -= _playerData.currentDeceleration * Time.fixedDeltaTime;
-            _currentSpeed = Mathf.Max(0, _currentSpeed);
-        }
-        else 
-        {
-            _currentSpeed -= _playerData.currentDeceleration * Time.fixedDeltaTime; 
-            _currentSpeed = Mathf.Max(0, _currentSpeed); 
-        }
-        _currentVelocity = (IsAiming && _worldTargetDirection.sqrMagnitude < 0.01f) 
-            ? transform.forward * _currentSpeed : _worldTargetDirection * _currentSpeed;
-        
-        if (IsAiming && _worldTargetDirection.sqrMagnitude < 0.01f && _aimingDirection.sqrMagnitude < 0.01f) // 조준 중이고 키보드 이동 입력이 없을 때
-        {
-            _currentVelocity = transform.forward * _currentSpeed; 
-        } 
-        else 
-        {
-            _currentVelocity = _worldTargetDirection * _currentSpeed;
+            _currentVelocity = isMovingInput ? _worldTargetDirection.normalized * _currentSpeed : Vector3.zero;
         }
     }
 
@@ -283,7 +287,7 @@ public class PlayerController : MonoBehaviour
             float clampedX = Mathf.Clamp(currentPosition.x, stageWorldMinX, stageWorldMaxX);
             float clampedZ = Mathf.Clamp(currentPosition.z, stageWorldMinZ, stageWorldMaxZ);
             
-            if (currentPosition.x != clampedX || currentPosition.z != clampedZ)
+            if (!Mathf.Approximately(currentPosition.x, clampedX) || !Mathf.Approximately(currentPosition.z, clampedZ))
             {
                 transform.position = new Vector3(clampedX, currentPosition.y, clampedZ);
             }
@@ -298,13 +302,13 @@ public class PlayerController : MonoBehaviour
         {
             _verticalVelocity.y = _playerData.currentJumpForce;
             _playerData.jumpCountAvailable = _playerData.currentMaxJumpCount - 1;
-            _animator.SetBool("IsJumping", true);
+            _animator.SetTrigger(JumpTrigger);
         }
         else if (_playerData.jumpCountAvailable > 0) 
         {
             _verticalVelocity.y = _playerData.currentJumpForce; 
             _playerData.jumpCountAvailable--;
-            _animator.SetBool("IsJumping", true);
+            _animator.SetTrigger(JumpTrigger);
         }
     }
 
@@ -326,7 +330,7 @@ public class PlayerController : MonoBehaviour
         if (_playerData == null) yield break;
 
         _playerData.isDashing = true;
-        _animator.SetBool("IsDashing", true);
+        _animator.SetBool(IsDashing, true);
         _playerData.dashCooldownTimer = _playerData.currentDashCooldown; // 쿨다운 시작
         _currentSpeed = 0; // 대쉬 시작 시 현재 이동 속도 초기화
 
@@ -354,7 +358,7 @@ public class PlayerController : MonoBehaviour
         }
 
         _playerData.isDashing = false;
-        _animator.SetBool("IsDashing", false);
+        _animator.SetBool(IsDashing, false);
         _dashCoroutine = null; // 코루틴 참조 해제
     }
 
@@ -364,27 +368,16 @@ public class PlayerController : MonoBehaviour
 
         if (_playerData.isDead)
         {
-            _animator.SetBool("IsDead", true);
+            _animator.SetBool(IsDead, true);
             return;
         }
+        _animator.SetFloat(Speed, _currentSpeed);
         
-        Vector3 horizontalVelocity = new Vector3(_characterController.velocity.x, 0, _characterController.velocity.z);
-        float actualSpeed = horizontalVelocity.magnitude;
-        _animator.SetFloat("Speed", actualSpeed);
+        _animator.SetBool(Grounded, _characterController.isGrounded);
         
-        _animator.SetBool("Grounded", _characterController.isGrounded);
-
-        if (!_characterController.isGrounded && _verticalVelocity.y > 0.1f)
-        {
-            _animator.SetBool("IsJumping", true);
-        }
-        else if (_characterController.isGrounded)
-        {
-            _animator.SetBool("IsJumping", false);
-        }
+        _animator.SetBool(IsDashing, _playerData.isDashing);
         
-        _animator.SetBool("IsDashing", _playerData.isDashing);
-        _animator.SetBool("IsAiming", IsAiming);
+        _animator.SetBool(Aiming, IsAiming);
     }
 
     private IEnumerator InvincibilityCoroutine(float duration)
@@ -421,68 +414,3 @@ public class PlayerController : MonoBehaviour
         TryDash();
     }
 }
-
-
-
-
-
-
-
-
-// void HandleRotation()
-    // {
-    //     if (IsAiming)
-    //     {
-    //         if (Camera.main != null)
-    //         {
-    //             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //             Debug.DrawRay(ray.origin, ray.direction * 100f, Color.cyan);
-    //             
-    //             Plane groundPlane = new Plane(Vector3.up, transform.position); 
-    //             
-    //             Debug.Log($"[PlaneDebug] Player Y for plane: {transform.position.y}. Plane defined with normal: {groundPlane.normal}, distance: {groundPlane.distance}");
-    //
-    //
-    //             if (groundPlane.Raycast(ray, out float rayDistance))
-    //             {
-    //                 Vector3 targetPoint = ray.GetPoint(rayDistance);
-    //                 Debug.DrawLine(transform.position, targetPoint, Color.magenta);
-    //
-    //                 
-    //                 Debug.Log($"[AimingCheck] TargetPoint: {targetPoint}, PlayerPos: {transform.position}");
-    //
-    //                 Vector3 directionToTarget = targetPoint - transform.position;
-    //             
-    //                 Debug.Log($"[Aiming] MousePos: {Input.mousePosition}, RayDistance: {rayDistance}, RawDirectionToTarget: {directionToTarget}");
-    //
-    //
-    //                 if (directionToTarget.sqrMagnitude > 0.01f)
-    //                 {
-    //                     directionToTarget.y = 0;
-    //                     Debug.Log($"[Aiming] FlattenedDirectionToTarget: {directionToTarget}");
-    //                     transform.rotation = Quaternion.LookRotation(directionToTarget, Vector3.up);
-    //                     Debug.Log($"[Aiming] New Rotation Euler: {transform.rotation.eulerAngles}");
-    //                 }
-    //                 else
-    //                 {
-    //                     Debug.LogWarning("[Aiming] directionToTarget is too small. No rotation applied.");
-    //                 }
-    //             }
-    //             else
-    //             {
-    //                 Debug.LogWarning($"[Aiming] Raycast to ground plane failed. Mouse Position: {Input.mousePosition}. Character will hold current rotation.");
-    //             }
-    //         }
-    //     }
-    //     else // 조준 중이 아닐 때
-    //     {
-    //         if (_worldTargetDirection.sqrMagnitude > 0.01f)
-    //         {
-    //             Vector3 lookDir = _worldTargetDirection;
-    //             lookDir.y = 0;
-    //             Quaternion targetRotation = Quaternion.LookRotation(lookDir);
-    //             float rotationStep = _playerData.currentRotationSpeed * Time.deltaTime;
-    //             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
-    //         }
-    //     }
-    // }

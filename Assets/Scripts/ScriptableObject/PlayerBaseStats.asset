@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b03505dc9b5d64b03961ef4fccbaf825, type: 3}
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
-  maxHealth: 10000
-  baseAttackDamage: 10
+  maxHealth: 100000
+  initialAttackDamage: 10
+  initialAttackSpeed: 0.5
   initialResources: 100000
-  moveSpeed: 5
+  maxSpeed: 7
+  rotationSpeed: 360
+  acceleration: 10
+  deceleration: 10
+  boostFactor: 1.5
   jumpForce: 8
   initialMaxJumpCount: 1
   dashForce: 15
   dashDuration: 0.2
   dashCooldown: 1
   dashInvincibleDuration: 0.1
-  drillPower: 1
-  drillRange: 3
