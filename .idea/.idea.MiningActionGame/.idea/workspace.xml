@@ -5,41 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1830aa68-1700-4a6b-8c9b-253827e700e1" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Character/Ripple.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Character/Ripple.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Character/Smoke.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Character/Smoke.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Character/Teleport.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Character/Teleport.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Polyart.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Polyart.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MiningActionGame/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MiningActionGame/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/Props.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Props.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/TerrainCubes/Grass01.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/TerrainCubes/Grass01.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Water.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Water.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Materials/WaterSpray.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/WaterSpray.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/grassAtlasMaterial.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/grassAtlasMaterial.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemys/EnemyBullet.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemys/EnemyBullet.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Player/NormalAttack.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Player/NormalAttack.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BakedTextureScene.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BakedTextureScene.unity.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/DynamicCamera.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/DynamicCamera.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TestSecen.unity" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TestSecen.unity.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/BasicEnemy.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/BasicEnemy.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/EnemySpawner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/EnemySpawner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Projectile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Projectile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScriptableObject/EnemyBaseStatsData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScriptableObject/EnemyBaseStatsData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteOrange.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteOrange.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_CubeMaps.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_CubeMaps.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures/Characters.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures/Characters.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures/Vehicles.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/Textures/Vehicles.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials/PA_DroneMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials/PA_DroneMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials/PA_WarriorMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Characters/Materials/PA_WarriorMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_ArchfireTankMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_ArchfireTankMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_ArchlightBomberMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_ArchlightBomberMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_DropPodMat.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/PopupAsylum/PA_SciFiCombatants/_Imported3D/Vehicles/Materials/PA_DropPodMat.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Textures/CubeNormal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Textures/CubeNormal.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/GraphicsSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/GraphicsSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_Plan/DT_Tree" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/_Plan/우선순위.numbers" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/KeepBoneSize.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/KeepBoneSize.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/BlockPool.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/BlockPool.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/CameraFollow.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/CameraFollow.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/ChunkManager.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/ChunkManager.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/Hitbox.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/Hitbox.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/IsometricCamera.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Legacy/IsometricCamera.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/RangedEnemy.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/RangedEnemy.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/ScriptableObject/PlayerWeaponData.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/ScriptableObject/PlayerWeaponData.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteBlue.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteBlue.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteGreen.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteGreen.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteGrey.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteGrey.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteRed.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/StoreAssets/BTM_Assets/BTM_Rockets_Missiles_Bombs/Materials/RocketsPalletteRed.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +50,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/EnemyBase.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Projectile.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.universal@43e3bf1c3037/Shaders/SimpleLit.shader" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -145,7 +143,9 @@
       <workItem from="1748493675822" duration="5988000" />
       <workItem from="1748503624131" duration="162000" />
       <workItem from="1748503921301" duration="218000" />
-      <workItem from="1748504152604" duration="243000" />
+      <workItem from="1748504152604" duration="664000" />
+      <workItem from="1748522601609" duration="21000" />
+      <workItem from="1748522855984" duration="4217000" />
     </task>
     <servers />
   </component>
@@ -177,6 +177,19 @@
           <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
           <option name="timeStamp" value="3" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/RangedEnemy.cs</url>
+          <line>77</line>
+          <properties documentPath="$PROJECT_DIR$/Assets/Scripts/RangedEnemy.cs" containingFunctionPresentation="메서드 'OnEnable'">
+            <startOffsets>
+              <option value="2543" />
+            </startOffsets>
+            <endOffsets>
+              <option value="2544" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

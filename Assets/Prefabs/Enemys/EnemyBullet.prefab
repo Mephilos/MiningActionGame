@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 2553633339398344908}
   - component: {fileID: 868227601261359254}
   - component: {fileID: 5881767405340959735}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: EnemyBullet
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -162,6 +162,10 @@ PrefabInstance:
     - target: {fileID: 7944342337752480393, guid: 9c428d0e0bcfa6e4aa7ee590464751b7, type: 3}
       propertyPath: m_Name
       value: RMB_23
+      objectReference: {fileID: 0}
+    - target: {fileID: 7944342337752480393, guid: 9c428d0e0bcfa6e4aa7ee590464751b7, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

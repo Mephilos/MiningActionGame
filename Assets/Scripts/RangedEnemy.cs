@@ -5,7 +5,7 @@ using System.Collections;
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
-public class RangedEnemy : MonoBehaviour
+public class RangedEnemy : EnemyBase
 {
     [Header("적 스탯 데이터")]
     public EnemyBaseStatsData enemyBaseData; // 공격 사거리, 발사체 데미지, 공격 딜레이 등 여기에 추가 필요
@@ -36,17 +36,18 @@ public class RangedEnemy : MonoBehaviour
 
     public float navMeshSampleRadius = 2.0f;
 
-    public void Initialize(PlayerData playerData, Transform playerTransform)
+    public override void Initialize(PlayerData playerData, Transform playerTransform)
     {
+        base.Initialize(playerData, playerTransform);
         _playerData = playerData;
         _playerTransform = playerTransform;
-
         if (_playerData == null) Debug.LogError($"[{gameObject.name}] Initialize: PlayerData가 null입니다!");
         if (_playerTransform == null) Debug.LogError($"[{gameObject.name}] Initialize: PlayerTransform이 null입니다!");
     }
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
 
@@ -209,14 +210,14 @@ public class RangedEnemy : MonoBehaviour
         // TODO: 발사 애니메이션, 사운드 등 추가
         Debug.Log($"[{gameObject.name}] 공격. 다음 공격 시간: {_lastAttackTime + attackCooldown}");
     }
-    public void TakeDamage(float damageAmount)
+    public override void TakeDamage(float damageAmount)
     {
         if (_currentHealth <= 0 && damageAmount > 0) return;
         _currentHealth -= damageAmount;
         if (_currentHealth <= 0) Die();
     }
 
-    void Die()
+    protected override void Die()
     {
         if (_playerData != null && enemyBaseData != null)
         {
@@ -224,7 +225,28 @@ public class RangedEnemy : MonoBehaviour
         }
         DestroySelf();
     }
+    public override void DeactivateForStageTransition()
+    {
+        Debug.Log($"[{gameObject.name}] Deactivating for stage transition.");
+        IsAgentActive = false; // NavMesh 사용 중지 플래그
+        if (_navMeshAgent != null && _navMeshAgent.enabled)
+        {
+            if (_navMeshAgent.isOnNavMesh) // NavMesh 위에 있을 때만 경로 리셋
+            {
+                _navMeshAgent.isStopped = true;
+                _navMeshAgent.ResetPath();
+            }
+            _navMeshAgent.enabled = false; // NavMeshAgent 비활성화
+        }
+        // 필요하다면 다른 컴포넌트(Collider, Renderer 등)도 비활성화
+        // 또는 이 스크립트 자체를 비활성화: this.enabled = false;
+    }
 
+    void DestroySelfWithoutNavMeshOperations() // NavMesh 작업 없이 오브젝트만 파괴
+    {
+        IsAgentActive = false;
+        Destroy(gameObject, 0.1f);
+    }
     void DestroySelf()
     {
         if (_navMeshAgent != null && _navMeshAgent.enabled)

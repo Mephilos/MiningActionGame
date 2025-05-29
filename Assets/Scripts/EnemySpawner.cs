@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner Instance { get; private set; } // 싱글톤 인스턴스
-
+    
     [System.Serializable]
     public class EnemySpawnInfo
     {
@@ -15,7 +15,8 @@ public class EnemySpawner : MonoBehaviour
         public int minStageToSpawn = 1; // 이 적이 등장하기 시작하는 최소 스테이지
     }
 
-    [Header("Enemy Settings")] public List<EnemySpawnInfo> enemyTypes = new List<EnemySpawnInfo>(); // 스폰할 적 종류들
+    [Header("Enemy Settings")] 
+    public List<EnemySpawnInfo> enemyTypes = new List<EnemySpawnInfo>(); // 스폰할 적 종류들
     public int maxEnemiesToSpawnAtOnce = 1;
 
     [Header("Spawn Area Settings")] [Tooltip("플레이어와의 최소 스폰 거리")]
@@ -29,11 +30,11 @@ public class EnemySpawner : MonoBehaviour
 
     private Transform _playerTransform;
     private PlayerData _playerData; // PlayerData 주입
-    public static List<BasicEnemy> ActiveEnemies = new List<BasicEnemy>(); // 현재 활성화된 적 리스트 (BasicEnemy.cs에서 관리)
+    public static List<EnemyBase> ActiveEnemies = new List<EnemyBase>(); // 현재 활성화된 적 리스트 (BasicEnemy.cs에서 관리)
     private bool _isSpawning; // 현재 스폰 중인지 여부
     private int _currentStageNumberForSpawner; // 현재 스테이지 번호 (StageManager로부터 받음)
     private Coroutine _spawnCoroutine; // 현재 실행 중인 스폰 코루틴
-    private float _currentStageSpawnIntensity = 1f;
+    
 
     void Awake() // 싱글톤 패턴 구현
     {
@@ -46,14 +47,12 @@ public class EnemySpawner : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
+        ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
             _playerTransform = playerObject.transform;
         }
-
-        ActiveEnemies.Clear(); // 게임 시작 시 리스트 초기화
     }
 
     public void Initialize(PlayerData playerData, Transform playerTransform)
@@ -118,17 +117,19 @@ public class EnemySpawner : MonoBehaviour
         }
 
         // activeEnemies 리스트를 복사하여 순회 
-        List<BasicEnemy> enemiesToDestroy = new List<BasicEnemy>(ActiveEnemies);
+        List<EnemyBase> enemiesToDestroy = new List<EnemyBase>(ActiveEnemies);
         Debug.Log($"[EnemySpawner] 파괴할 적 리스트 복사 enemiesToDestroy.Count: {enemiesToDestroy.Count}");
         if (enemiesToDestroy.Count == 0 && ActiveEnemies.Count > 0)
         {
             Debug.LogWarning("[EnemySpawner] enemiesToDestroy는 비었지만 ActiveEnemies에는 적이 남아있습니다");
         }
 
-        foreach (BasicEnemy enemy in enemiesToDestroy)
+        for (int i = ActiveEnemies.Count - 1; i >= 0; i--)
         {
-            if (enemy != null) // 이미 파괴된 경우 대비
+            EnemyBase enemy = ActiveEnemies[i];
+            if (enemy != null)
             {
+                enemy.DeactivateForStageTransition(); // 안전하게 비활성화 먼저 호출
                 Destroy(enemy.gameObject);
             }
         }
@@ -143,7 +144,7 @@ public class EnemySpawner : MonoBehaviour
     private IEnumerator SpawnEnemiesOverTimeCoroutine()
     {
         // 예시: 스테이지 번호에 따라 총 스폰할 적의 수와 간격을 다르게 설정
-        int totalEnemiesToSpawnForThisStage = 5 + (_currentStageNumberForSpawner * 5); // 스테이지가 높아질수록 더 많이 스폰
+        int totalEnemiesToSpawnForThisStage = 5 + (_currentStageNumberForSpawner * 6); // 스테이지가 높아질수록 더 많이 스폰
         int enemiesSpawnedSoFar = 0;
         float spawnDelayBetweenEnemies =
             Mathf.Max(0.5f, 3.0f - (_currentStageNumberForSpawner * 0.2f)); // 스테이지가 높아질수록 더 빨리 스폰
@@ -214,19 +215,12 @@ public class EnemySpawner : MonoBehaviour
                 if (positionFound)
                 {
                     GameObject enemyGO = Instantiate(enemyPrefabToSpawn, spawnPosition, Quaternion.identity);
-                    BasicEnemy basicEnemyScript = enemyGO.GetComponent<BasicEnemy>();
-                    if (basicEnemyScript != null)
+                    EnemyBase enemyScript = enemyGO.GetComponent<EnemyBase>();
+                    if (enemyScript != null)
                     {
                         // PlayerData와 Player의 Transform을 BasicEnemy에 주입
-                        basicEnemyScript.Initialize(_playerData, _playerTransform);
-                    }
-                    else
-                    {
-                        RangedEnemy rangedEnemyScript = enemyGO.GetComponent<RangedEnemy>();
-                        if (rangedEnemyScript != null)
-                        {
-                            rangedEnemyScript.Initialize(_playerData, _playerTransform);
-                        }
+                        enemyScript.Initialize(_playerData, _playerTransform);
+                        ActiveEnemies.Add(enemyScript);
                     }
                     enemiesSpawnedSoFar++;
                 }
@@ -272,7 +266,7 @@ public class EnemySpawner : MonoBehaviour
                 randomPoint -= enemyInfo.spawnWeight;
             }
         }
-        return availableEnemies[availableEnemies.Count - 1].enemyPrefab; // 이론상 도달하지 않아야 함
+        return availableEnemies[availableEnemies.Count - 1].enemyPrefab;
     }
     private bool IsPositionWithinCurrentStageBounds(Vector3 position)
     {
