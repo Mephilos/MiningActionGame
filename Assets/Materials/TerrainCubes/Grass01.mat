@@ -211,7 +211,7 @@ Material:
     - _MidleColor: {r: 0.5660378, g: 0.3624686, b: 0.09967948, a: 0}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 0}
     - _SpecularColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TopColor: {r: 0.40577072, g: 0.6320754, b: 0.2723091, a: 0}
+    - _TopColor: {r: 0.24993624, g: 0.5566038, b: 0.07088822, a: 0}
     - _TopColor1: {r: 1, g: 0.68883955, b: 0.36470592, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

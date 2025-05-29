@@ -7,7 +7,7 @@ public class DynamicCamera : MonoBehaviour
 
     [Header("카메라 기본 위치 및 각도")]
     [SerializeField] private float distance = 15f;         // 타겟으로부터의 기본 거리
-    [SerializeField] private float height = 12f;           // 타겟보다 얼마나 높이 있을지
+    // [SerializeField] private float height = 12f;           // 타겟보다 얼마나 높이 있을지
     [SerializeField] private float horizontalAngle = 45f;  // Y축 기준 기본 회전 각도
     [SerializeField] private float verticalAngle = 35f;    // X축 기준 기본 기울기 각도 (내려다보는 각도)
 

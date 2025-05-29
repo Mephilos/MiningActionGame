@@ -6,6 +6,7 @@ public class Projectile : MonoBehaviour
     // 수명 설정용
     public float lifeTime = 5f;
     private float _damageAmount;
+    public bool isEnemyProjectile = false;
 
     void Start()
     {
@@ -19,14 +20,39 @@ public class Projectile : MonoBehaviour
     // 물리 충돌이 발생했을 때 호출되는 함수
     void OnTriggerEnter(Collider other)
     {
-        BasicEnemy enemy = other.gameObject.GetComponent<BasicEnemy>();
-        Debug.Log("발사체 충돌 확인");
-        if (enemy != null)
+        if (isEnemyProjectile) // 이 투사체가 적의 것이라면
         {
-            enemy.TakeDamage(_damageAmount);
+            if (other.CompareTag("Player")) // 플레이어 태그를 가진 오브젝트와 충돌 시
+            {
+                PlayerData playerData = other.gameObject.GetComponent<PlayerData>();
+                if (playerData != null)
+                {
+                    playerData.TakeDamage(_damageAmount);
+                    Debug.Log($"플레이어가 적 투사체에 맞음! 데미지: {_damageAmount}");
+                }
+                Destroy(gameObject); // 충돌 후 파괴
+            }
         }
-        //TODO:다른 오브젝트 판정 추가 가능
-        // 발사체 자신은 충돌 후 파괴
-        Destroy(gameObject);
+        else // 플레이어
+        {
+            BasicEnemy enemy = other.gameObject.GetComponent<BasicEnemy>(); // 또는 모든 적 유형을 처리할 수 있는 부모 클래스/인터페이스
+            RangedEnemy rangedEnemy = other.gameObject.GetComponent<RangedEnemy>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(_damageAmount);
+                Destroy(gameObject);
+            }
+            else if (rangedEnemy != null)
+            {
+                rangedEnemy.TakeDamage(_damageAmount);
+                Destroy(gameObject);
+            }
+            // TODO: 다른 오브젝트 판정 추가 가능
+        }
+        if (other.gameObject.layer == LayerMask.NameToLayer("Ground")) 
+        {
+            Destroy(gameObject);
+        }
     }
 }

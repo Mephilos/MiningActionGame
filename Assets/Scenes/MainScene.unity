@@ -797,7 +797,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 7604694941761129493}
   distance: 15
-  height: 12
   horizontalAngle: 45
   verticalAngle: 35
   followSmoothSpeed: 5
@@ -5115,7 +5114,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c907fcaadbfe4400dbd928482b93d181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultEnemyPrefab: {fileID: 6327733385080820348, guid: 818017082b8274c84b5e36a5533d16f8, type: 3}
+  enemyTypes:
+  - enemyPrefab: {fileID: 6327733385080820348, guid: 818017082b8274c84b5e36a5533d16f8, type: 3}
+    spawnWeight: 0
+    minStageToSpawn: 0
+  - enemyPrefab: {fileID: 843068112705366160, guid: 7e7335f539722431fbc0c03f85e55489, type: 3}
+    spawnWeight: 1
+    minStageToSpawn: 0
   maxEnemiesToSpawnAtOnce: 1
   minSpawnDistanceFromPlayer: 10
   maxSpawnDistanceFromPlayer: 25
