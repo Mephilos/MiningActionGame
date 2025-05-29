@@ -131,8 +131,7 @@ public class WeaponController : MonoBehaviour
                 ownerHorizontalForward.y = 0;
                 fireDirection = ownerHorizontalForward.normalized;
 
-                // 만약 캐릭터의 전방도 거의 수직이어서 정규화 결과가 0벡터에 가깝다면,
-                // 안전하게 월드 Z축을 사용합니다.
+                // 만약 캐릭터의 전방도 거의 수직이어서 정규화 결과가 0벡터에 가깝다면 안전하게 월드 Z축을 사용
                 if (fireDirection.sqrMagnitude < 0.001f)
                 {
                     fireDirection = Vector3.forward;

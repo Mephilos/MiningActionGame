@@ -28,7 +28,7 @@ public class BasicEnemy : MonoBehaviour
 
     public float navMeshSampleRadius = 2.0f;
 
-    // EnemySpawner가 호출하여 PlayerData와 PlayerTransform을 주입합니다.
+    // EnemySpawner가 호출하여 PlayerData와 PlayerTransform을 주입(DI디자인)
     public void Initialize(PlayerData playerData, Transform playerTransform)
     {
         _playerData = playerData;

@@ -228,10 +228,6 @@ public class PlayerController : MonoBehaviour
         {
             finalAimDirToRotate = _aimingDirection;
         }
-        // (선택적) 만약 위 두 경우가 아니고 그냥 조준 버튼만 누르고 있다면 (마우스 입력X, 어시스트 타겟X)
-        // finalAimDirToRotate는 초기값인 transform.forward를 유지하거나,
-        // 혹은 _worldTargetDirection (이동 방향)을 사용하도록 할 수도 있습니다.
-        // 현재 로직은 transform.forward를 유지하는 방향으로 되어 있습니다.
 
         // 최종 계산된 방향으로 회전
         if (finalAimDirToRotate.sqrMagnitude > 0.01f)
@@ -455,7 +451,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void UpdateLockedTargetLogic()
     {
-        // 1. 현재 락온된 타겟이 유효한지 확인 (Sticky 로직)
+
         if (_lockedAimAssistTarget != null)
         {
             if (!IsTargetStillValid(_lockedAimAssistTarget))
@@ -468,7 +464,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // 2. 락온된 타겟이 없거나 해제되었다면, 새로운 타겟 검색
+ 
         // (장애물에 가로막히지 않은 적 중 플레이어에게 가장 가까운 적 우선)
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, aimAssistRadius, aimAssistLayerMask);
         Transform potentialNewTarget = null;
@@ -518,7 +514,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 락온된 타겟이 여전히 유효한지(Sticky 조건을 만족하는지) 검사합니다.
+    /// 현재 락온된 타겟이 여전히 유효한지(Sticky 조건을 만족하는지) 검사
     /// </summary>
     bool IsTargetStillValid(Transform target)
     {
@@ -548,7 +544,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 특정 타겟까지의 시야가 확보되었는지 (장애물에 가리지 않았는지) 확인합니다.
+    /// 특정 타겟까지의 시야가 확보되었는지 (장애물에 가리지 않았는지) 확인
     /// </summary>
     bool HasLineOfSightToTarget(Transform target)
     {
@@ -577,7 +573,7 @@ public class PlayerController : MonoBehaviour
         // Raycast 시 자기 자신(Player)이나 타겟 자신은 무시하거나, obstacleLayerMask에만 충돌하도록 설정
         if (Physics.Raycast(rayStartPoint, directionToTarget.normalized, distanceToTarget, obstacleLayerMask))
         {
-            return false; // 레이캐스트가 obstacleLayerMask에 설정된 어떤 물체에라도 맞았다면, 시야가 막힌 것임
+            return false; // 레이캐스트가 obstacleLayerMask에 설정된 물체라면 시야가 막힌 것임
         }
         
         return true; // 아무 장애물에도 맞지 않으면 시야 확보

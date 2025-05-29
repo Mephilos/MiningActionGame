@@ -91,7 +91,7 @@ public class NavMeshManager : MonoBehaviour
         return false;
     }
 
-    // 게임 오브젝트 파괴 시 Instance 참조 정리 (선택적이지만 좋은 습관)
+    // 게임 오브젝트 파괴 시 Instance 참조 정리
     void OnDestroy()
     {
         if (Instance == this)
