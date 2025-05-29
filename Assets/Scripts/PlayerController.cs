@@ -5,11 +5,11 @@ public class PlayerController : MonoBehaviour
 {
     private static readonly int Speed = Animator.StringToHash("Speed");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
-    private static readonly int IsJumping = Animator.StringToHash("IsJumping");
     private static readonly int IsDead = Animator.StringToHash("IsDead");
     private static readonly int IsDashing = Animator.StringToHash("IsDashing");
     private static readonly int Aiming = Animator.StringToHash("IsAiming");
     private static readonly int JumpTrigger = Animator.StringToHash("JumpTrigger");
+    
     [SerializeField] private float isometricCameraAngleY = 45f;
     [SerializeField] private float shortPressThreshold = 0.2f;
 
@@ -36,6 +36,16 @@ public class PlayerController : MonoBehaviour
     [Header("Mobile Controls")]
     public Joystick movementJoystick;
 
+    
+    [Header("Aim Assist Settings")]
+    public float aimAssistRadius = 10f; // 에임 어시스트 감지 반경
+    public float aimAssistAngleThreshold = 15f; // 플레이어 정면 기준 각도
+    public LayerMask aimAssistLayerMask; // 에임 어시스트 적용 레이어 마스크 
+    public float aimAssistRotationSpeed = 10f; // 타겟 대상 회전 속도
+    public float loseTargetAngleThreshold = 30f; // 락온 해제 각도 (aimAssistAngleThreshold보다 커야 함)
+    public float loseTargetRadiusFactor = 1.2f;  // 락온 해제 거리 계수 (aimAssistRadius * 이 값보다 멀어지면 해제)
+    public LayerMask obstacleLayerMask; // 장애물 판별용 레이어 마스크 
+    private Transform _lockedAimAssistTarget = null; // 현재 감지된 에임 어시스트 타겟
     void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -69,12 +79,30 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // 죽거나 데이터 셋 없을 때
         if (_playerData == null || _playerData.isDead)
         {
+            _lockedAimAssistTarget = null;
+            // 죽음 애니메이션 처리
+            _animator.SetBool(IsDead, _playerData.isDead);
+            
             return;
         }
-    
+
+        if (!_playerData.isDead)
+        {
+            _animator.SetBool(IsDead, false);
+        }
         HandleInput();
+
+        if (IsAiming)
+        {
+            UpdateLockedTargetLogic();
+        }
+        else
+        {
+            _lockedAimAssistTarget = null;
+        }
         UpdateAnimations();
     }
 
@@ -178,29 +206,53 @@ public class PlayerController : MonoBehaviour
 
     void ApplyRotationFixedUpdate()
     {
-        if (IsAiming && _applyAimRotationInFixedUpdate)
-        {
-            // _aimingDirection은 HandleInput (Update)에서 계산됨
-            if (_aimingDirection.sqrMagnitude > 0.01f)
-            {
-                transform.rotation = Quaternion.LookRotation(_aimingDirection, Vector3.up);
-            }
-        }
-        else if (!IsAiming) // 조준 중이 아닐 때
-        {
-            // _worldTargetDirection은 HandleInput (Update)에서 계산됨
-            if (_worldTargetDirection.sqrMagnitude > 0.01f)
-            {
-                Vector3 lookDir = _worldTargetDirection;
-                lookDir.y = 0;
-                Quaternion targetRotation = Quaternion.LookRotation(lookDir);
-                // Time.fixedDeltaTime을 사용하여 회전 속도 조절
-                float rotationStep = _playerData.currentRotationSpeed * Time.fixedDeltaTime;
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
-            }
-        }
+        Vector3 finalAimDirToRotate = transform.forward; // 기본값은 현재 바라보는 방향 유지
 
-        _applyAimRotationInFixedUpdate = false; // 사용 후 플래그 리셋
+    if (IsAiming)
+    {
+        if (_lockedAimAssistTarget != null)
+        {
+            // 에임 어시스트 타겟이 있으면 그쪽을 향하도록 설정
+            finalAimDirToRotate = (_lockedAimAssistTarget.position - transform.position);
+            finalAimDirToRotate.y = 0; // 수평 회전만
+            if (finalAimDirToRotate.sqrMagnitude < 0.001f) // 매우 가까우면 방향 벡터가 0이 될 수 있으므로 방지
+            {
+                finalAimDirToRotate = transform.forward;
+            }
+            else
+            {
+                finalAimDirToRotate.Normalize();
+            }
+        }
+        else if (_applyAimRotationInFixedUpdate && _aimingDirection.sqrMagnitude > 0.01f)
+        {
+            finalAimDirToRotate = _aimingDirection;
+        }
+        // (선택적) 만약 위 두 경우가 아니고 그냥 조준 버튼만 누르고 있다면 (마우스 입력X, 어시스트 타겟X)
+        // finalAimDirToRotate는 초기값인 transform.forward를 유지하거나,
+        // 혹은 _worldTargetDirection (이동 방향)을 사용하도록 할 수도 있습니다.
+        // 현재 로직은 transform.forward를 유지하는 방향으로 되어 있습니다.
+
+        // 최종 계산된 방향으로 회전
+        if (finalAimDirToRotate.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(finalAimDirToRotate, Vector3.up);
+            // 에임 어시스트 중일 때는 더 빠른 회전 속도를, 아니면 플레이어 기본 회전 속도를 사용
+            float currentEffectiveRotationSpeed = (_lockedAimAssistTarget != null) ? aimAssistRotationSpeed : _playerData.currentRotationSpeed;
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, currentEffectiveRotationSpeed * Time.fixedDeltaTime);
+        }
+    }
+    else // 조준 중이 아닐 때 (기존 이동 회전 로직)
+    {
+        if (_worldTargetDirection.sqrMagnitude > 0.01f)
+        {
+            Vector3 lookDir = _worldTargetDirection;
+            lookDir.y = 0;
+            Quaternion targetRotation = Quaternion.LookRotation(lookDir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _playerData.currentRotationSpeed * Time.fixedDeltaTime);
+        }
+    }
+    _applyAimRotationInFixedUpdate = false; // 플래그 리셋
     }
 
     void HandleMovement()
@@ -399,6 +451,143 @@ public class PlayerController : MonoBehaviour
     }
     
     /// <summary>
+    /// 락온 타겟을 업데이트하는 주 로직 (Sticky 타겟 포함)
+    /// </summary>
+    void UpdateLockedTargetLogic()
+    {
+        // 1. 현재 락온된 타겟이 유효한지 확인 (Sticky 로직)
+        if (_lockedAimAssistTarget != null)
+        {
+            if (!IsTargetStillValid(_lockedAimAssistTarget))
+            {
+                _lockedAimAssistTarget = null; // 유효하지 않으면 락온 해제
+            }
+            else
+            {
+                return; // 현재 락온 타겟이 유효하면, 새로운 타겟을 찾지 않고 유지
+            }
+        }
+
+        // 2. 락온된 타겟이 없거나 해제되었다면, 새로운 타겟 검색
+        // (장애물에 가로막히지 않은 적 중 플레이어에게 가장 가까운 적 우선)
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, aimAssistRadius, aimAssistLayerMask);
+        Transform potentialNewTarget = null;
+        float closestDistanceSqr = Mathf.Infinity;
+
+        Vector3 playerAimingDirection = transform.forward; // 캐릭터의 현재 정면을 기준으로 각도 계산
+
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.transform == this.transform) continue; // 자기 자신 제외
+
+            Vector3 directionToPotentialTarget = (hitCollider.transform.position - transform.position);
+            float distanceSqr = directionToPotentialTarget.sqrMagnitude;
+            
+            // 거리에 따라 각도 임계값 조정 (가까울수록 더 큰 각도 허용)
+            float distance = Mathf.Sqrt(distanceSqr);
+            float adjustedAngleThreshold = aimAssistAngleThreshold;
+            
+            // 가까운 타겟에 대해 각도 제한 완화
+            if (distance < aimAssistRadius * 0.5f)
+            {
+                // 거리가 가까울수록 허용 각도 증가 (최대 2배까지)
+                float distanceFactor = distance / (aimAssistRadius * 0.5f); // 0~1 사이 값
+                adjustedAngleThreshold = Mathf.Lerp(aimAssistAngleThreshold * 2, aimAssistAngleThreshold, distanceFactor);
+            }
+            
+            // Y축 차이를 무시하여 수평 방향만 고려 (가까운 적 락온에 유리)
+            Vector3 horizontalDirection = directionToPotentialTarget;
+            horizontalDirection.y = 0;
+            
+            float angleToTarget = Vector3.Angle(playerAimingDirection, horizontalDirection.normalized);
+
+            if (angleToTarget < adjustedAngleThreshold) // 조정된 각도 임계값 사용
+            {
+                if (HasLineOfSightToTarget(hitCollider.transform)) // 시야 확보(장애물 없는지) 확인
+                {
+                    if (distanceSqr < closestDistanceSqr) // 가장 가까운 타겟인지 확인
+                    {
+                        closestDistanceSqr = distanceSqr;
+                        potentialNewTarget = hitCollider.transform;
+                    }
+                }
+            }
+        }
+        
+        _lockedAimAssistTarget = potentialNewTarget; // 가장 적합한 타겟으로 락온 (또는 null)
+    }
+
+    /// <summary>
+    /// 현재 락온된 타겟이 여전히 유효한지(Sticky 조건을 만족하는지) 검사합니다.
+    /// </summary>
+    bool IsTargetStillValid(Transform target)
+    {
+        if (target == null || !target.gameObject.activeInHierarchy) return false;
+
+        // 거리 검사 (더 넓은 해제 반경 사용)
+        if (Vector3.Distance(transform.position, target.position) > aimAssistRadius * loseTargetRadiusFactor) //
+        {
+            return false;
+        }
+
+        // 각도 검사 (더 넓은 해제 각도 사용)
+        Vector3 directionToTarget = (target.position - transform.position).normalized;
+        // directionToTarget.y = 0; // 수평 각도만 고려하려면 주석 해제
+        if (Vector3.Angle(transform.forward, directionToTarget) > loseTargetAngleThreshold) //
+        {
+            return false;
+        }
+
+        // 장애물(시야) 검사
+        if (!HasLineOfSightToTarget(target))
+        {
+            return false;
+        }
+
+        return true; // 모든 조건을 만족하면 유효
+    }
+
+    /// <summary>
+    /// 특정 타겟까지의 시야가 확보되었는지 (장애물에 가리지 않았는지) 확인합니다.
+    /// </summary>
+    bool HasLineOfSightToTarget(Transform target)
+    {
+        if (target == null) return false;
+
+        // 캐릭터의 눈높이나 발사점 등 적절한 시작점 설정
+        Vector3 rayStartPoint = transform.position + _characterController.center;
+        
+        // 타겟의 콜라이더 중심으로 조준
+        Vector3 targetPoint = target.position;
+        Collider targetCollider = target.GetComponent<Collider>();
+        if (targetCollider != null)
+        {
+            targetPoint = targetCollider.bounds.center;
+        }
+        
+        Vector3 directionToTarget = targetPoint - rayStartPoint;
+        float distanceToTarget = directionToTarget.magnitude;
+        
+        // 매우 가까운 타겟은 항상 시야가 확보된 것으로 간주
+        if (distanceToTarget < aimAssistRadius * 0.3f)
+        {
+            return true;
+        }
+        
+        // Raycast 시 자기 자신(Player)이나 타겟 자신은 무시하거나, obstacleLayerMask에만 충돌하도록 설정
+        if (Physics.Raycast(rayStartPoint, directionToTarget.normalized, distanceToTarget, obstacleLayerMask))
+        {
+            return false; // 레이캐스트가 obstacleLayerMask에 설정된 어떤 물체에라도 맞았다면, 시야가 막힌 것임
+        }
+        
+        return true; // 아무 장애물에도 맞지 않으면 시야 확보
+    }
+    public Transform GetLockedTarget()
+    {
+        return _lockedAimAssistTarget;
+    }
+    
+    /// <summary>
     /// 모바일 조작 위한 ui버튼 설정 메서드들
     /// </summary>
     public void OnJumpButtonPressed()
@@ -412,5 +601,56 @@ public class PlayerController : MonoBehaviour
         if (_playerData == null || _playerData.isDead) return;
         Debug.Log("Dash Button Pressed"); // 버튼 클릭 로그 확인용
         TryDash();
+    }
+    /// <summary>
+    /// 디버그용 (에임 어시스트 범위 확인)
+    /// </summary>
+    void OnDrawGizmosSelected()
+    {
+        if (_characterController == null && Application.isPlaying) 
+        { 
+            return; 
+        }
+
+
+        // 기본 감지 반경 (에임 어시스트 시도 범위)
+        Gizmos.color = new Color(0, 1, 1, 0.15f);
+        if (Application.isPlaying) // 플레이 중에만 캐릭터 컨트롤러 중심 사용
+             Gizmos.DrawSphere(transform.position + _characterController.center, aimAssistRadius);
+        else
+             Gizmos.DrawSphere(transform.position, aimAssistRadius);
+
+
+        // 락온 해제 반경 (Sticky 반경)
+        Gizmos.color = new Color(1, 0.92f, 0.016f, 0.10f); // 
+        if (Application.isPlaying)
+            Gizmos.DrawSphere(transform.position + _characterController.center, aimAssistRadius * loseTargetRadiusFactor);
+        else
+            Gizmos.DrawSphere(transform.position, aimAssistRadius * loseTargetRadiusFactor);
+
+
+        // 감지 각도 (기본)
+        Vector3 gizmoOrigin = Application.isPlaying ? transform.position + _characterController.center : transform.position;
+        Vector3 forwardDir = transform.forward;
+
+        Gizmos.color = Color.cyan;
+        Vector3 leftRay = Quaternion.Euler(0, -aimAssistAngleThreshold, 0) * forwardDir;
+        Vector3 rightRay = Quaternion.Euler(0, aimAssistAngleThreshold, 0) * forwardDir;
+        Gizmos.DrawRay(gizmoOrigin, leftRay * aimAssistRadius);
+        Gizmos.DrawRay(gizmoOrigin, rightRay * aimAssistRadius);
+
+        // 락온 해제 각도
+        Gizmos.color = Color.yellow;
+        Vector3 loseLeftRay = Quaternion.Euler(0, -loseTargetAngleThreshold, 0) * forwardDir;
+        Vector3 loseRightRay = Quaternion.Euler(0, loseTargetAngleThreshold, 0) * forwardDir;
+        Gizmos.DrawRay(gizmoOrigin, loseLeftRay * aimAssistRadius * loseTargetRadiusFactor);
+        Gizmos.DrawRay(gizmoOrigin, loseRightRay * aimAssistRadius * loseTargetRadiusFactor);
+
+        // 현재 락온된 타겟이 있다면 선으로 연결
+        if (_lockedAimAssistTarget != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(gizmoOrigin, _lockedAimAssistTarget.position);
+        }
     }
 }

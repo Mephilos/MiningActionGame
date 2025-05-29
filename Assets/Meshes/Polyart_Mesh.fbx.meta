@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 860793eb3324391468f1c120a75ec049
+guid: 3a5ab2d6d6e4b4ae582b8d9bac4dc16b
 ModelImporter:
   serializedVersion: 23
   fileIDToRecycleName:
@@ -863,10 +863,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 106154
-  packageName: Sci Fi Warrior PBR HP Polyart
-  packageVersion: 1.2
-  assetPath: Assets/SciFiWarriorPBRHPPolyart/Mesh/Polyart_Mesh.fbx
-  uploadId: 349698
