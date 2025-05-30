@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1849310840755912942}
   - component: {fileID: 7671172342828855452}
   - component: {fileID: 4057226820033900063}
+  - component: {fileID: 252297806521020741}
   m_Layer: 0
   m_Name: Custom04
   m_TagString: Untagged
@@ -102,9 +103,25 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &252297806521020741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1788743715782441880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2d96d481e08f40d6a0c903ee82a0b87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemData: {fileID: 0}
+  attractionRadius: 3
+  attractionSpeed: 5
+  pickupSound: {fileID: 0}

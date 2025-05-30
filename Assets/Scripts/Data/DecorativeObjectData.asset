@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45939fc6e1e0244fea8645e7e6db2b26, type: 3}
+  m_Name: DecorativeObjectData
+  m_EditorClassIdentifier: 
+  objectName: "\uC7A5\uC2DD \uC624\uBE0C\uC81D\uD2B8"
+  prefab: {fileID: 3994758674025238816, guid: f8b9f7449b05940e59563ca94ef6c9a2, type: 3}
+  placeableOnBlockTypes: 0100000002000000
+  yOffset: 1
+  collisionRadius: 0.5
+  spawnWeight: 1

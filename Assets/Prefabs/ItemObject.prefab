@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7010141433787989737}
   - component: {fileID: 5011195468237896872}
   - component: {fileID: 8146584201152748181}
-  - component: {fileID: 8213634313185837801}
+  - component: {fileID: 1011407891776358248}
   m_Layer: 0
   m_Name: ItemObject
   m_TagString: Item
@@ -103,13 +103,13 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8213634313185837801
+--- !u!114 &1011407891776358248
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,8 +118,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5817702000151847086}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85845165f48b5453aa2e1634d3973b6f, type: 3}
+  m_Script: {fileID: 11500000, guid: b2d96d481e08f40d6a0c903ee82a0b87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceAmount: 100
-  collectSound: {fileID: 8300000, guid: aba3ce101c40fbe4696140e4ef5d9919, type: 3}
+  itemData: {fileID: 11400000, guid: 68ace81e3b7544427b98c1c1962ed449, type: 2}
+  attractionRadius: 3
+  attractionSpeed: 5
+  pickupSound: {fileID: 8300000, guid: 36955fc3779ab0245916294be534ff40, type: 3}

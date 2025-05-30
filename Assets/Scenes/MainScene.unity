@@ -3761,19 +3761,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageChunkPrefab: {fileID: 2894990324775518276, guid: 31e6a517d903e432d81ff687f1a3433b, type: 3}
-  stageSharedMaterial: {fileID: 2100000, guid: ccf1580dc67ad450ca972f393f78933a, type: 2}
   stageSize: 32
   stageBuildHeight: 32
   baseWorldSeed: 12345
   playerTransform: {fileID: 7604694941761129493}
   uiManager: {fileID: 1123934153}
   enemySpawner: {fileID: 2043441969}
-  timeToSurvivePerStage: 5
-  minNoiseScale: 0.02
-  maxNoiseScale: 0.06
-  minHeightMultiplier: 0
-  maxHeightMultiplier: 8
+  timeToSurvivePerStage: 60
+  defaultMinNoiseScale: 0.02
+  defaultMaxNoiseScale: 0.04
+  defaultMinHeightMultiplier: 5
+  defaultMaxHeightMultiplier: 10
   seedMultiplier: 100
+  StageTheme:
+  - {fileID: 11400000, guid: e4cba977d06894f71ae00d065a63e09e, type: 2}
 --- !u!1 &1605669641
 GameObject:
   m_ObjectHideFlags: 0

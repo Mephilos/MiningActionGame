@@ -1,53 +1,57 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-
 
 public class StageManager : MonoBehaviour
 {
     public static StageManager Instance { get; private set; }
-    
+
     [Header("Stage (Chunk) Settings")]
     [SerializeField] private GameObject stageChunkPrefab;
-    [SerializeField] private Material stageSharedMaterial;
     [SerializeField] public int stageSize = 16;
     [SerializeField] private int stageBuildHeight = 64;
     [SerializeField] private int baseWorldSeed = 12345;
-    
+
     [Header("Player Reference")]
     [SerializeField] private Transform playerTransform;
-    private PlayerData _playerData; // PlayerData 참조
-    
-    [Header("System References")] // 다른 매니저들 참조
+    private PlayerData _playerData;
+
+    [Header("System References")]
     [SerializeField] private UIManager uiManager;
     [SerializeField] private EnemySpawner enemySpawner;
-    
-    [Header("Stage Progression Settings")] [Tooltip("각 스테이지에서 버텨야 하는 시간")]
-    [SerializeField] private float timeToSurvivePerStage = 60f;
 
-    [Header("Terrain Variation Settings")]
+    [Header("Stage Progression Settings")]
+    [SerializeField] private float timeToSurvivePerStage = 60f; // 테마별로 오버라이드 가능
+
+    [Header("Terrain Variation Settings (테마에 없을 경우 기본값)")]
     [Tooltip("스테이지별 노이즈 최소 스케일")]
-    [SerializeField] private float minNoiseScale = 0.02f;
+    [SerializeField] private float defaultMinNoiseScale = 0.02f;
     [Tooltip("스테이지별 노이즈 최대 스케일")]
-    [SerializeField] private float maxNoiseScale = 0.04f;
+    [SerializeField] private float defaultMaxNoiseScale = 0.04f;
     [Tooltip("스테이지별 최소 지형 높이")]
-    [SerializeField] private float minHeightMultiplier = 5f;
+    [SerializeField] private float defaultMinHeightMultiplier = 5f;
     [Tooltip("스테이지별 최대 지형 높이")]
-    [SerializeField] private float maxHeightMultiplier = 10f;
+    [SerializeField] private float defaultMaxHeightMultiplier = 10f;
     [Tooltip("스테이지 시드 값 계수")]
     [SerializeField] private int seedMultiplier = 100;
-    
+
+    [Header("스테이지 테마")]
+    public StageThemeData[] StageTheme; // 다양한 스테이지 테마 목록
+    private StageThemeData _currentActiveTheme; // 현재 활성화된 테마
+
     private Chunk _currentLoadedStageChunk;
-    private float _currentStageTimer; // 현재 스테이지에서 흐른 시간
-    private int _currentStageNumber = 1; // 현재 스테이지 번호 (1부터 시작)
-    private bool _isLoadingNextStage;// 다음 스테이지 로딩 중인지 여부 (중복 호출 방지)
+    private float _currentStageTimer;
+    private int _currentStageNumber = 1;
+    private bool _isLoadingNextStage;
     private bool _isWaitingForPlayerToProceed;
-    private bool _isGameOver; 
-    
+    private bool _isGameOver;
+    private Coroutine _loadStageCoroutine;
+
     private readonly Vector2Int _fixedStageCoordinate = Vector2Int.zero;
     public Vector2Int CurrentStageCoord => _fixedStageCoordinate;
     public int GetCurrentStageNumber() => _currentStageNumber;
-    
-    
+
+
     private void Awake()
     {
         Application.targetFrameRate = 60;
@@ -58,15 +62,23 @@ public class StageManager : MonoBehaviour
 
     private void Start()
     {
-        if (stageChunkPrefab == null || stageSharedMaterial == null)
+        if (stageChunkPrefab == null)
         {
-            Debug.LogError("[StageManager] StageChunkPrefab 또는 StageSharedMaterial이 할당되지 않았습니다");
+            Debug.LogError("[StageManager] StageChunkPrefab이 할당되지 않았습니다. StageManager를 비활성화합니다.");
             enabled = false;
             return;
         }
-        if (!InitializePlayerAndDependencies()) // PlayerData 및 의존성 설정 확인
+
+        if (StageTheme == null || StageTheme.Length == 0)
         {
-            Debug.LogError("[StageManager] 플레이어 및 의존성 초기화 실패");
+            Debug.LogError($"[{gameObject.name}] 스테이지 테마 배열(StageTheme)이 비어있거나 할당되지 않았습니다! StageManager를 비활성화합니다.");
+            enabled = false;
+            return;
+        }
+
+        if (!InitializePlayerAndDependencies())
+        {
+            Debug.LogError("[StageManager] 플레이어 및 의존성 초기화 실패. StageManager를 비활성화합니다.");
             enabled = false;
             return;
         }
@@ -84,104 +96,108 @@ public class StageManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[StageManager] Player 태그를 찾을 수 없습니다");
+                Debug.LogError("[StageManager] Player 태그를 가진 오브젝트를 찾을 수 없습니다.");
                 return false;
             }
         }
-        
+
         _playerData = playerTransform.GetComponent<PlayerData>();
         if (_playerData == null)
         {
-            Debug.LogError("[StageManager] Player 오브젝트에서 PlayerData 컴포넌트를 찾을 수 없습니다");
+            Debug.LogError("[StageManager] Player 오브젝트에서 PlayerData 컴포넌트를 찾을 수 없습니다.");
             return false;
         }
-        // UIManager에 PlayerData 주입
+
         if (uiManager != null)
         {
             uiManager.Initialize(_playerData);
         }
         else
         {
-            Debug.LogWarning("[StageManager] UIManager 참조가 없어 PlayerData를 주입할 수 없습니다.");
+            Debug.LogWarning("[StageManager] UIManager 참조가 없어 PlayerData를 UIManager에 주입할 수 없습니다.");
         }
 
-        // EnemySpawner에 PlayerData와 PlayerTransform 주입
         if (enemySpawner != null)
         {
             enemySpawner.Initialize(_playerData, playerTransform);
         }
         else
         {
-            Debug.LogWarning("[StageManager] EnemySpawner 참조가 없어 PlayerData를 주입할 수 없습니다.");
+            Debug.LogWarning("[StageManager] EnemySpawner 참조가 없어 PlayerData를 EnemySpawner에 주입할 수 없습니다.");
         }
         return true;
     }
 
     private void Update()
     {
-        if (_isGameOver || _isLoadingNextStage || (uiManager != null && uiManager.stageClearPanel &&uiManager.shopPanel != null && uiManager.shopPanel.activeSelf) )
+        if (_isGameOver || _isLoadingNextStage || (uiManager != null && uiManager.shopPanel != null && uiManager.shopPanel.activeSelf))
         {
-            if (_isGameOver && Input.GetKeyDown(KeyCode.R)) RestartGame();
+            if (_isGameOver && Input.GetKeyDown(KeyCode.R))
+            {
+                RestartGame();
+            }
+            return;
+        }
+        if (_isWaitingForPlayerToProceed)
+        {
             return;
         }
 
         _currentStageTimer += Time.deltaTime;
         if (uiManager != null)
         {
-            float timeLeft = timeToSurvivePerStage - _currentStageTimer;
+            float currentStageSurvivalTime = (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0)
+                                             ? _currentActiveTheme.timeToSurvivePerStage
+                                             : this.timeToSurvivePerStage;
+            float timeLeft = currentStageSurvivalTime - _currentStageTimer;
             uiManager.UpdateStageTimerUI(timeLeft > 0 ? timeLeft : 0f);
         }
-        if (_currentStageTimer >= timeToSurvivePerStage)
+
+        if (_currentStageTimer >= ((_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0) ? _currentActiveTheme.timeToSurvivePerStage : this.timeToSurvivePerStage))
         {
             InitiateStageClearSequence();
         }
     }
 
-    /// <summary>
-    /// 새 게임을 시작하거나 첫 번째 스테이지를 로드
-    /// </summary>
     private void StartNewGame()
     {
-        Debug.Log("호출언제? StartNewGame()");
+        Debug.Log("[StageManager] 새 게임 시작 요청.");
         _currentStageNumber = 1;
-        _isLoadingNextStage = false;
+        _isLoadingNextStage = true;
         _isWaitingForPlayerToProceed = false;
-        _isGameOver = false;    // 게임 오버 상태 초기화
-        Time.timeScale = 1f;    // 게임 시간 정상화
+        _isGameOver = false;
+        Time.timeScale = 1f;
 
-        if (_playerData != null) // PlayerData가 초기화된 후 호출
+        if (_playerData != null)
         {
             _playerData.ReviveAndReset();
         }
         else
         {
             Debug.LogError("[StageManager] StartNewGame: PlayerData가 null입니다. ReviveAndReset 호출 불가.");
-            // 게임 진행이 어려우므로 추가 처리 필요 가능성
         }
-
 
         if (uiManager != null)
         {
             uiManager.HideGameOverScreem();
             uiManager.UpdateStageNumberUI(_currentStageNumber);
             uiManager.HideShopPanel();
-            if(_playerData != null) uiManager.UpdateResourceDisplayUI(_playerData.currentResources); // 초기 자원 표시
+            if (_playerData != null) uiManager.UpdateResourceDisplayUI(_playerData.currentResources);
         }
-        LoadStageAndStartTimer(_fixedStageCoordinate);
-        Debug.Log("게임 시작 스테이지: " + _currentStageNumber);
+
+        if (_loadStageCoroutine != null) StopCoroutine(_loadStageCoroutine);
+        _loadStageCoroutine = StartCoroutine(LoadStageAndStartTimerCoroutine(_fixedStageCoordinate));
+        Debug.Log($"[StageManager] 게임 시작 스테이지 {_currentStageNumber} 로딩 시작.");
     }
 
-    /// <summary>
-    /// 플레이어 죽음 처리 (EnemySpawner Instance 사용)
-    /// </summary>
     public void HandlePlayerDeath()
     {
         if (_isGameOver) return;
         _isGameOver = true;
         _isLoadingNextStage = false;
         _isWaitingForPlayerToProceed = false;
-        
-        Debug.Log("[StageManager] 플레이어 사망처리 시작]");
+
+        Debug.Log("[StageManager] 플레이어 사망 처리 시작.");
 
         if (enemySpawner != null)
         {
@@ -189,27 +205,29 @@ public class StageManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없음");
+            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적 정리를 스킵합니다.");
         }
-        
+
         Time.timeScale = 0f;
-        Debug.Log("GameOver");
-        if (enemySpawner != null)
+        Debug.Log("[StageManager] 게임 오버.");
+        if (uiManager != null)
         {
             uiManager.ShowGameOverScreem();
         }
         else
         {
-            Debug.LogWarning("[StageManager] UIManager Instance를 찾을 수 없음");
+            Debug.LogWarning("[StageManager] UIManager 인스턴스를 찾을 수 없어 게임 오버 화면을 표시할 수 없습니다.");
         }
     }
 
-    /// <summary>
-    /// 게임 재시작
-    /// </summary>
     public void RestartGame()
-    {   
-        Debug.Log("[StageManager] 게임 재시작");
+    {
+        Debug.Log("[StageManager] 게임 재시작 요청.");
+        if (_loadStageCoroutine != null)
+        {
+            StopCoroutine(_loadStageCoroutine);
+            _loadStageCoroutine = null;
+        }
         if (_currentLoadedStageChunk != null)
         {
             Destroy(_currentLoadedStageChunk.gameObject);
@@ -221,169 +239,255 @@ public class StageManager : MonoBehaviour
         }
         StartNewGame();
     }
-    
+
     private void InitiateStageClearSequence()
     {
+        if (_isLoadingNextStage || _isWaitingForPlayerToProceed) return;
+
         _isLoadingNextStage = true;
         _isWaitingForPlayerToProceed = true;
         _currentStageTimer = 0f;
-        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어");
+        Debug.Log($"[StageManager] 스테이지 {_currentStageNumber} 클리어!");
+
         if (enemySpawner != null)
         {
             enemySpawner.StopAndClearAllEnemies();
         }
         else
         {
-            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 적을 정리할 수 없음");
+            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없어 스테이지 클리어 시 적 정리를 스킵합니다.");
         }
-       
+
         if (uiManager != null)
         {
             uiManager.ShowStageClearScreen();
         }
     }
+
     public void PlayerConfirmedShop()
     {
-        if (!_isWaitingForPlayerToProceed) // 진행중, 대기 상태 확인
+        if (!_isWaitingForPlayerToProceed)
         {
-            Debug.LogWarning("[StageManager] 대기 상태가 아닙니다");
+            Debug.LogWarning("[StageManager] PlayerConfirmedShop: 플레이어 확인 대기 상태가 아닙니다.");
             return;
         }
+
         if (_currentLoadedStageChunk != null)
         {
-            Debug.Log($"[StageManager] 이전 청크 ({_currentLoadedStageChunk.name}) 파괴 시도");
+            Debug.Log($"[StageManager] 상점 진입 전 이전 청크 ({_currentLoadedStageChunk.name}) 파괴.");
             Destroy(_currentLoadedStageChunk.gameObject);
             _currentLoadedStageChunk = null;
-            
+
             if (NavMeshManager.Instance != null)
             {
                 NavMeshManager.Instance.ClearAllNavMeshData();
-                Debug.Log("[StageManager] NavMeshManager를 통해 NavMesh 데이터 제거");
-            }
-            else
-            {
-                Debug.LogWarning("[StageManager] NavMeshManager 인스턴스를 찾을 수 없어 NavMesh 데이터를 제거할 수 없습니다.");
-                // NavMesh.RemoveAllNavMeshData();
             }
         }
+
         if (uiManager != null)
         {
             uiManager.HideStageClearScreen();
             uiManager.ShowShopPanel();
         }
     }
+
     public void PlayerConfirmedNextStage()
     {
-        if (!_isWaitingForPlayerToProceed) return;
+        if (!_isWaitingForPlayerToProceed && !_isLoadingNextStage)
+        {
+            Debug.LogWarning("[StageManager] PlayerConfirmedNextStage: 부적절한 호출입니다.");
+            return;
+        }
+
         _isWaitingForPlayerToProceed = false;
-        
         _currentStageNumber++;
-        _isLoadingNextStage = true;
-        LoadStageAndStartTimer(_fixedStageCoordinate);
-        
+        _isLoadingNextStage = true; // 다음 스테이지 로딩 시작
+        Debug.Log($"[StageManager] 다음 스테이지 {_currentStageNumber} 로딩 준비.");
+
+        if (_loadStageCoroutine != null) StopCoroutine(_loadStageCoroutine);
+        _loadStageCoroutine = StartCoroutine(LoadStageAndStartTimerCoroutine(_fixedStageCoordinate));
     }
 
-    /// <summary>
-    /// 지정된 좌표에 스테이지를 로드하고 타이머를 시작
-    /// 스테이지 번호 표시
-    /// </summary>
-    private void LoadStageAndStartTimer(Vector2Int stageCoord)
+    private IEnumerator LoadStageAndStartTimerCoroutine(Vector2Int stageCoord)
     {
+        _isLoadingNextStage = true;
+        Debug.Log($"[StageManager_Coroutine] LoadStageAndStartTimerCoroutine 시작 - 스테이지: {_currentStageNumber}");
+
         if (uiManager != null && uiManager.shopPanel != null && uiManager.shopPanel.activeSelf)
         {
             uiManager.HideShopPanel();
         }
 
-        // 이전 스테이지 언로드 및 새 스테이지 로드
         if (_currentLoadedStageChunk != null)
         {
             Destroy(_currentLoadedStageChunk.gameObject);
             _currentLoadedStageChunk = null;
-        }
-        if (NavMeshManager.Instance != null)
-        {
-            NavMeshManager.Instance.ClearAllNavMeshData(); // 새 스테이지 로드 전 이전 데이터 확실히 제거
+            Debug.Log("[StageManager_Coroutine] 이전 청크 파괴 완료.");
         }
 
-        Debug.Log("[StageManager] LoadStageAndStartTimer NavMesh.RemoveAllNavMeshData() 호출 완료.");
+        if (NavMeshManager.Instance != null)
+        {
+            NavMeshManager.Instance.ClearAllNavMeshData();
+            Debug.Log("[StageManager_Coroutine] NavMesh 데이터 클리어 요청 완료.");
+        }
+        yield return null;
+
+        if (StageTheme != null && StageTheme.Length > 0)
+        {
+            _currentActiveTheme = StageTheme[Mathf.Clamp(_currentStageNumber - 1, 0, StageTheme.Length - 1)];
+            Debug.Log($"[StageManager_Coroutine] 현재 활성 테마: {_currentActiveTheme.themeName}");
+        }
+        else
+        {
+            Debug.LogError("[StageManager_Coroutine] 사용할 수 있는 StageTheme이 없습니다!");
+            _isLoadingNextStage = false;
+            yield break;
+        }
+
+        if (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0)
+        {
+            this.timeToSurvivePerStage = _currentActiveTheme.timeToSurvivePerStage;
+        }
+
+        Debug.Log("[StageManager_Coroutine] 새 청크 인스턴스화 시작.");
         Vector3 stageWorldPosition = new Vector3(stageCoord.x * stageSize, 0f, stageCoord.y * stageSize);
         GameObject stageGO = Instantiate(stageChunkPrefab, stageWorldPosition, Quaternion.identity, this.transform);
         Chunk chunkScript = stageGO.GetComponent<Chunk>();
-        if (chunkScript == null) 
+
+        if (chunkScript == null)
         {
-            Debug.LogError($"[StageManager] 생성된 스테이지 청크에 Chunk 스크립트가 없음");
-            _isLoadingNextStage = false; 
-            _isWaitingForPlayerToProceed = false; 
-            return;
+            Debug.LogError($"[StageManager_Coroutine] 생성된 스테이지 청크에 Chunk 스크립트가 없습니다! 로딩 중단.");
+            _isLoadingNextStage = false;
+            Destroy(stageGO);
+            yield break;
+        }
+        Debug.Log($"[StageManager_Coroutine] 청크 오브젝트 ({stageGO.name}) 생성 완료. 초기화 시작.");
+
+        float currentNoiseScale, currentHeightMultiplier;
+        Material chunkMat = null;
+
+        if (_currentActiveTheme != null)
+        {
+            chunkMat = _currentActiveTheme.chunkMaterial;
+            if (_currentActiveTheme.overrideTerrainParameters)
+            {
+                currentNoiseScale = Random.Range(_currentActiveTheme.minNoiseScale, _currentActiveTheme.maxNoiseScale);
+                currentHeightMultiplier = Random.Range(_currentActiveTheme.minHeightMultiplier, _currentActiveTheme.maxHeightMultiplier);
+            }
+            else
+            {
+                currentNoiseScale = Random.Range(this.defaultMinNoiseScale, this.defaultMaxNoiseScale);
+                currentHeightMultiplier = Random.Range(this.defaultMinHeightMultiplier, this.defaultMaxHeightMultiplier);
+            }
+        }
+        else
+        {
+            currentNoiseScale = Random.Range(this.defaultMinNoiseScale, this.defaultMaxNoiseScale);
+            currentHeightMultiplier = Random.Range(this.defaultMinHeightMultiplier, this.defaultMaxHeightMultiplier);
+            Debug.LogWarning("[StageManager_Coroutine] _currentActiveTheme이 null 상태로 Chunk 초기화를 진행합니다.");
         }
 
-        float currentNoiseScale = Random.Range(minNoiseScale, maxNoiseScale);
-        float currentHeightMultiplier = Random.Range(minHeightMultiplier, maxHeightMultiplier);
-
         int derivedSeed = baseWorldSeed + (_currentStageNumber * seedMultiplier);
-        
-        chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed, 
-                               currentNoiseScale, currentHeightMultiplier, stageSharedMaterial);
+        chunkScript.Initialize(stageCoord, stageSize, stageBuildHeight, derivedSeed,
+                               currentNoiseScale, currentHeightMultiplier,
+                               chunkMat, _currentActiveTheme);
         _currentLoadedStageChunk = chunkScript;
-        
-        Debug.Log($"스테이지 {_currentStageNumber} ({stageCoord}) 로드 완료 타이머 시작");
-        MovePlayerToStageCenter(stageWorldPosition); // 플레이어 이동
+        Debug.Log($"[StageManager_Coroutine] 청크 초기화 완료: {_currentLoadedStageChunk.name}.");
 
-        _currentStageTimer = 0f; // 새 스테이지 시작 시 타이머 리셋
-        _isLoadingNextStage = false; // 로딩 완료 플래그
-        
+        if (NavMeshManager.Instance != null)
+        {
+            Debug.Log("[StageManager_Coroutine] NavMesh 빌드 대기 시작...");
+            float navMeshWaitStartTime = Time.time;
+            while (!NavMeshManager.Instance.IsSurfaceBaked && (Time.time - navMeshWaitStartTime < 10f))
+            {
+                yield return null;
+            }
+            if (NavMeshManager.Instance.IsSurfaceBaked)
+            {
+                Debug.Log("[StageManager_Coroutine] NavMesh 빌드 완료 확인!");
+            }
+            else
+            {
+                Debug.LogError("[StageManager_Coroutine] NavMesh 빌드 시간 초과 또는 실패!");
+            }
+        }
+        else
+        {
+            Debug.LogError("[StageManager_Coroutine] NavMeshManager 인스턴스가 없습니다!");
+        }
+
+        Debug.Log($"[StageManager_Coroutine] 스테이지 {_currentStageNumber} 로드 완료 처리 중.");
+        MovePlayerToStageCenter(stageWorldPosition);
+        _currentStageTimer = 0f;
+
         if (uiManager != null)
         {
             uiManager.UpdateStageNumberUI(_currentStageNumber);
             uiManager.UpdateStageClearUI(_currentStageNumber);
         }
-        
-        if (enemySpawner != null)
+
+        if (enemySpawner != null && NavMeshManager.Instance != null && NavMeshManager.Instance.IsSurfaceBaked)
         {
+            Debug.Log("[StageManager_Coroutine] 적 스폰 시작.");
             enemySpawner.StartSpawningForStage(_currentStageNumber);
         }
         else
         {
-            Debug.LogWarning("[StageManager] EnemySpawner 인스턴스를 찾을 수 없음. 적스폰 불가느");
+            if (enemySpawner == null) Debug.LogWarning("[StageManager_Coroutine] EnemySpawner가 할당되지 않아 적 스폰을 스킵합니다.");
+            else Debug.LogWarning("[StageManager_Coroutine] NavMesh가 준비되지 않아 적 스폰을 스킵합니다.");
         }
+
+        _isLoadingNextStage = false;
+        _isWaitingForPlayerToProceed = false;
+        Debug.Log($"[StageManager_Coroutine] LoadStageAndStartTimerCoroutine ★정상 종료★ - 스테이지: {_currentStageNumber}");
     }
 
     private void MovePlayerToStageCenter(Vector3 stageBaseWorldPosition)
     {
         if (playerTransform == null)
         {
-            Debug.LogWarning("[StageManager] 플레이어 참조가 없어 위치를 이동시킬 수 없음");
+            Debug.LogWarning("[StageManager] 플레이어 참조가 없어 위치를 이동시킬 수 없습니다.");
             return;
         }
 
         CharacterController playerCharacterController = playerTransform.GetComponent<CharacterController>();
-        bool wasControllerEnabled = false;
+        bool wasControllerEnabled = false; // 오타 수정: boolwasControllerEnabled -> bool wasControllerEnabled
         if (playerCharacterController != null)
         {
             wasControllerEnabled = playerCharacterController.enabled;
-            playerCharacterController.enabled = false;
+            if (wasControllerEnabled) playerCharacterController.enabled = false;
         }
 
         int spawnLocalX = stageSize / 2;
         int spawnLocalZ = stageSize / 2;
+        int surfaceY = 0;
 
-        // _currentLoadedStageChunk가 null이 아닐 때만 표면 높이 계산
-        int surfaceY = _currentLoadedStageChunk != null 
-            ? _currentLoadedStageChunk.GetSurfaceHeightAt(spawnLocalX, spawnLocalZ) : 0;
+        if (_currentLoadedStageChunk != null)
+        {
+            surfaceY = _currentLoadedStageChunk.GetSurfaceHeightAt(spawnLocalX, spawnLocalZ);
+            if (surfaceY == -1)
+            {
+                Debug.LogWarning($"[StageManager] 스폰 위치 ({spawnLocalX}, {spawnLocalZ})의 표면 높이를 찾을 수 없습니다. 기본 높이 0 사용.");
+                surfaceY = 0;
+            }
+        }
+        else
+        {
+            Debug.LogError("[StageManager] MovePlayerToStageCenter: _currentLoadedStageChunk가 null입니다.");
+        }
 
-        float spawnYPosition = surfaceY + 4.0f;
-        float playerHeight = playerCharacterController != null ? playerCharacterController.height : 2.0f;
-        
+        float playerHeightOffset = 2.0f;
+        float spawnYPosition = surfaceY + playerHeightOffset;
+        float playerControllerHeight = playerCharacterController != null ? playerCharacterController.height : 2.0f;
+
         if (this.stageBuildHeight > 0)
         {
-            spawnYPosition = Mathf.Clamp(spawnYPosition, 1.0f, 
-                stageBuildHeight - (playerCharacterController != null ? playerCharacterController.height : playerHeight));
+            spawnYPosition = Mathf.Clamp(spawnYPosition, 1.0f, stageBuildHeight - playerControllerHeight * 0.5f);
         }
         else
         {
             spawnYPosition = Mathf.Max(1.0f, spawnYPosition);
         }
-
 
         Vector3 spawnPosition = new Vector3(
             stageBaseWorldPosition.x + spawnLocalX + 0.5f,
@@ -394,9 +498,9 @@ public class StageManager : MonoBehaviour
         playerTransform.position = spawnPosition;
         playerTransform.rotation = Quaternion.LookRotation(Vector3.forward);
 
-        if (playerCharacterController != null)
+        if (playerCharacterController != null && wasControllerEnabled) // 변수명 오타 수정
         {
-            playerCharacterController.enabled = wasControllerEnabled;
+            playerCharacterController.enabled = true;
         }
 
         PlayerController pc = playerTransform.GetComponent<PlayerController>();
@@ -407,25 +511,18 @@ public class StageManager : MonoBehaviour
         Debug.Log($"플레이어를 스테이지 중앙 (로컬: {spawnLocalX},{spawnLocalZ}), 지표면높이: {surfaceY}, 최종스폰높이: {spawnYPosition} (월드좌표: {spawnPosition}) 로 이동 완료");
     }
 
-    /// <summary>
-    /// 블록 파괴 업데이트 함수
-    /// </summary>
-    /// <param name="worldX"></param>
-    /// <param name="worldY"></param>
-    /// <param name="worldZ"></param>
-    /// <returns></returns>
     public bool DestroyBlockAt(int worldX, int worldY, int worldZ)
     {
         if (_currentLoadedStageChunk == null) return false;
-        
+
         Vector2Int targetStageCoord = CurrentStageCoord;
-
         int chunkMinX = targetStageCoord.x * stageSize;
-        int chunkMaxX = chunkMinX + stageSize;
+        int chunkMaxX = chunkMinX + stageSize -1; 
         int chunkMinZ = targetStageCoord.y * stageSize;
-        int chunkMaxZ = chunkMinZ + stageSize;
+        int chunkMaxZ = chunkMinZ + stageSize -1; 
 
-        if (worldX >= chunkMinX && worldX < chunkMaxX && worldZ >= chunkMinZ && worldZ < chunkMaxZ)
+        if (worldX >= chunkMinX && worldX < (chunkMinX + stageSize) && 
+            worldZ >= chunkMinZ && worldZ < (chunkMinZ + stageSize))
         {
             int localX = worldX - chunkMinX;
             int localY = worldY;
@@ -451,7 +548,7 @@ public class StageManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[StageManager] 이미 인스턴스가 존재합니다");
+            Debug.LogWarning("[StageManager] 이미 인스턴스가 존재합니다. 새로 생성된 인스턴스를 파괴합니다.");
             Destroy(gameObject);
         }
     }

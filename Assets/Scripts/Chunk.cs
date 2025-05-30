@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
@@ -47,9 +48,10 @@ public class Chunk : MonoBehaviour
     private int[,] _surfaceHeights; // 각 (x,z) 위치의 표면 높이를 저장할 배열
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
-    
     private NavMeshSurface _navMeshSurface; // 네비메쉬 컴포넌트 참조
-
+    private StageThemeData _currentThemeData;
+    private List<Bounds> _objectBounds = new List<Bounds>(); // 겹침 방지위한 바운딩 박스 리스트
+    
     [Header("청크 형태, 아이템 매몰 설정")] [Tooltip("함정 설정")]
     public bool enableWideTrapHoles = false;
     [Tooltip("함정 구멍 크기")]
@@ -109,7 +111,7 @@ public class Chunk : MonoBehaviour
     /// 청크 초기화 및 블록 생성
     /// </summary>
     public void Initialize(Vector2Int coord, int chunkSize, int buildHeight, int seed,
-     float noiseScale, float heightMultiplier, Material chunkMaterial)
+     float noiseScale, float heightMultiplier, Material chunkMaterial, StageThemeData themeData)
     {
         this._chunkCoordinates = coord;
         this._chunkSize = chunkSize;
@@ -117,13 +119,39 @@ public class Chunk : MonoBehaviour
         this._seed = seed;
         this._noiseScale = noiseScale;
         this._heightMultiplier = heightMultiplier;
+        this._currentThemeData = themeData;
 
         //청크 이름
+        // 테마 데이터
         gameObject.name = $"StageChunk";
-
+        
         _meshFilter = GetComponent<MeshFilter>();
         _meshRenderer = GetComponent<MeshRenderer>();
         _navMeshSurface = GetComponent<NavMeshSurface>();
+
+        if (themeData != null) 
+        {
+            gameObject.name = $"{themeData.themeName}_Chunk_{coord.x}_{coord.y}";
+            if (themeData.chunkMaterial != null) 
+            { 
+                // 테마의 머티리얼 사용
+                _meshRenderer.material = themeData.chunkMaterial;
+            } 
+            else if (chunkMaterial != null) 
+            { 
+                // 테마 머티리얼 없으면 기본 머티리얼
+                _meshRenderer.material = chunkMaterial;
+            }
+        } 
+        else if (chunkMaterial != null) 
+        { 
+            // 테마도 기본도 없으면 경고
+            _meshRenderer.material = chunkMaterial;
+        }
+        else 
+        {
+            Debug.LogError($"[{gameObject.name}] Material이 지정되지 않았습니다 (테마 및 기본 모두).");
+        }
 
         _navMeshSurface.collectObjects = CollectObjects.Volume;
         _navMeshSurface.useGeometry = NavMeshCollectGeometry.RenderMeshes;
@@ -147,10 +175,20 @@ public class Chunk : MonoBehaviour
         }
         this._surfaceHeights = new int[chunkSize, chunkSize];
         _blockData = new BlockType[chunkSize, _chunkHeight, chunkSize];
+        _objectBounds.Clear();
 
         PopulateBlockData();
         CreateBedrockPlane();
-        SpawnItemInChunk();
+        
+        if (_currentThemeData != null)
+        {
+            SpawnObjectsFromTheme(_currentThemeData.destructibleObjects, true);
+            SpawnObjectsFromTheme(_currentThemeData.decorativeObjects, false);
+        }
+        else
+        {
+            Debug.LogWarning($"[{gameObject.name}] CurrentThemeData가 null이므로 오브젝트를 스폰할 수 없습니다.");
+        }
     }
 
     /// <summary>
@@ -545,49 +583,146 @@ public class Chunk : MonoBehaviour
         return 0;
     }
 
-    // /// <summary>
-    // /// 청크가 제거될 때 블록을 모두 오브젝트 풀로 반환
-    // /// </summary>
-    // public void ReturnAllBlocks()
-    // {
-    //     for (int i = transform.childCount - 1; i >= 0; i--)
-    //     {
-    //         Transform child = transform.GetChild(i);
-    //         GameObject block = child.gameObject;
+    /// <summary>
+    /// 테마 데이터를 기반으로 파괴 가능 오브젝트, 장식용 오브젝트 스폰
+    /// </summary>
+    /// <param name="objectDataArray">스폰할 오브젝트 데이터 배열</param>
+    /// <param name="isDestructible">파괴 가능한 오브젝트인지 여부</param>
+    /// <typeparam name="T">DestructibleObjectData or DecorativeObjectData</typeparam>
+    private void SpawnObjectsFromTheme<T>(T[] objectDataArray, bool isDestructible) where T : ScriptableObject, IWeightedItem
+    {
+        if (objectDataArray == null || objectDataArray.Length == 0 || _currentThemeData == null) return;
 
-    //         if (block != null && block.activeSelf) 
-    //         {
-    //             if (block.activeSelf)
-    //             {
-    //                 BlockPool.Instance.ReturnBlock(block);
-    //                 child.SetParent(null);
-    //             }
-    //         }
-    //     }
-    // }
-    // private void CheckAndUpdateNeighborChunks(int localX, int localY, int localZ)
-    // {
-    //     // 변경된 블록이 현재 청크의 경계면에 있는지 확인
-    //     bool needsUpdateN = false, needsUpdateE = false, needsUpdateS = false, needsUpdateW = false;
-    //
-    //     if (localX == 0) needsUpdateW = true;           // 서쪽 경계
-    //     else if (localX == chunkSize - 1) needsUpdateE = true; // 동쪽 경계
-    //
-    //     if (localZ == 0) needsUpdateS = true;           // 남쪽 경계
-    //     else if (localZ == chunkSize - 1) needsUpdateN = true; // 북쪽 경계
-    //
-    //     // Y축 경계는 보통 다른 청크와 맞닿지 않으므로 일반적으로는 고려하지 않음 (필요시 추가)
-    //
-    //     // 만약 경계면에 있다면, ChunkManager를 통해 해당 방향의 이웃 청크를 찾아 메시 업데이트 요청
-    //     if (needsUpdateN || needsUpdateE || needsUpdateS || needsUpdateW)
-    //     {
-    //         if (ChunkManager.Instance != null) // ChunkManager 인스턴스가 있는지 확인
-    //         {
-    //             if (needsUpdateN) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.up); // 북쪽 청크
-    //             if (needsUpdateE) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.right); // 동쪽 청크
-    //             if (needsUpdateS) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.down); // 남쪽 청크
-    //             if (needsUpdateW) ChunkManager.Instance.RequestChunkMeshUpdate(chunkCoord + Vector2Int.left); // 서쪽 청크
-    //         }
-    //     }
-    // }
+        int maxAttempts = isDestructible
+            ? _currentThemeData.maxDestructibleSpawnAttempts
+            : _currentThemeData.maxDecorativeSpawnAttempts;
+        float chancePerAttempt = isDestructible
+            ? _currentThemeData.destructibleSpawnChancePerAttempt
+            : _currentThemeData.decorativeSpawnChancePerAttempt;
+
+        int spawnedCount = 0;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            if (Random.value > chancePerAttempt) continue; // 각 시도별 스폰 확률
+
+            T selectedData = GetWeightedRandomObject(objectDataArray);
+            if (selectedData == null) continue;
+
+            // ScriptableObject에서 공통 속성 가져오기 (리플렉션이나 인터페이스 사용 가능, 여기서는 캐스팅)
+            GameObject prefabToSpawn = null;
+            float yOffset = 0f;
+            float collisionRadius = 0.5f;
+            BlockType[] placeableTypes = null;
+
+            if (selectedData is DestructibleObjectData dod)
+            {
+                prefabToSpawn = dod.prefab;
+                yOffset = dod.yOffset;
+                collisionRadius = dod.collisionRadius;
+                placeableTypes = dod.placeableOnBlockTypes;
+            }
+            else if (selectedData is DecorativeObjectData decOd)
+            {
+                prefabToSpawn = decOd.prefab;
+                yOffset = decOd.yOffset;
+                collisionRadius = decOd.collisionRadius;
+                placeableTypes = decOd.placeableOnBlockTypes;
+            }
+
+            if (prefabToSpawn == null || placeableTypes == null || placeableTypes.Length == 0) continue;
+
+            // 스폰 위치 찾기 (최대 10번 시도)
+            for (int posAttempt = 0; posAttempt < 10; posAttempt++)
+            {
+                int x = Random.Range(0, _chunkSize);
+                int z = Random.Range(0, _chunkSize);
+                int surfaceY = GetSurfaceHeightAt(x, z);
+
+                if (surfaceY != -1) // 유효한 표면 높이
+                {
+                    BlockType surfaceBlockType = _blockData[x, surfaceY, z];
+                    bool canPlaceOnBlock = System.Array.Exists(placeableTypes, type => type == surfaceBlockType);
+
+                    if (canPlaceOnBlock)
+                    {
+                        Vector3 potentialSpawnPosition = new Vector3(x + 0.5f, surfaceY + yOffset, z + 0.5f);
+                        Bounds newObjectBounds =
+                            new Bounds(potentialSpawnPosition, Vector3.one * collisionRadius * 2); // 반지름 기반 바운드
+
+                        // 겹침 방지 확인
+                        bool overlaps = false;
+                        foreach (Bounds placedBound in _objectBounds)
+                        {
+                            if (placedBound.Intersects(newObjectBounds))
+                            {
+                                overlaps = true;
+                                break;
+                            }
+                        }
+                        // Physics.OverlapSphere를 사용하는 방법 (특정 레이어의 콜라이더만 감지하도록 설정)
+                        // Collider[] colliders = Physics.OverlapSphere(transform.TransformPoint(potentialSpawnPosition), collisionRadius, LayerMask.GetMask("PlacedObjects"));
+                        // if (colliders.Length > 0) overlaps = true;
+
+
+                        if (!overlaps)
+                        {
+                            GameObject objInstance = Instantiate(prefabToSpawn, this.transform);
+                            objInstance.transform.localPosition = potentialSpawnPosition;
+                            objInstance.transform.localRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+                            // objInstance.layer = LayerMask.NameToLayer("PlacedObjects"); // 겹침 방지 레이어 설정
+
+                            if (isDestructible && selectedData is DestructibleObjectData destructibleData)
+                            {
+                                Destructible destructibleComp = objInstance.AddComponent<Destructible>();
+                                destructibleComp.Initialize(destructibleData);
+                            }
+
+                            _objectBounds.Add(newObjectBounds); // 배치된 오브젝트 목록에 추가 (로컬 좌표 기준 바운드)
+                            spawnedCount++;
+                            goto nextObjectSpawn; // 다음 오브젝트 스폰 시도로 이동
+                        }
+                    }
+                }
+            }
+            nextObjectSpawn: ;
+        }
+    }
+    private T GetWeightedRandomObject<T>(T[] objects) where T : ScriptableObject, IWeightedItem // 제네릭 제약 조건에 IWeightedItem 추가
+    {
+        if (objects == null || objects.Length == 0) return null;
+
+        // 가중치가 0보다 큰 오브젝트만 필터링하여 사용 (선택 사항이지만 권장)
+        var weightedObjects = objects.Where(obj => obj.SpawnWeight > 0).ToList();
+        if (weightedObjects.Count == 0)
+        {
+            // 유효한 가중치를 가진 오브젝트가 없는 경우
+            // return objects.Length > 0 ? objects[Random.Range(0, objects.Length)] : null; // 이전 방식: 가중치 없으면 일반 랜덤
+            return null; // 또는 null을 반환하여 스폰하지 않도록 처리
+        }
+
+        float totalWeight = 0f;
+        foreach (var objData in weightedObjects) // 필터링된 리스트 사용
+        {
+            totalWeight += objData.SpawnWeight; // 인터페이스를 통해 안전하게 접근
+        }
+
+        if (totalWeight <= 0) // 모든 유효 가중치의 합이 0 이하인 경우 (이론적으로는 weightedObjects.Count == 0에서 걸러짐)
+        {
+            // return weightedObjects.Count > 0 ? weightedObjects[Random.Range(0, weightedObjects.Count)] : null; // 가중치 없으면 일반 랜덤
+            return null;
+        }
+
+        float randomPoint = Random.value * totalWeight;
+        foreach (var objData in weightedObjects) // 필터링된 리스트 사용
+        {
+            if (randomPoint < objData.SpawnWeight) // 인터페이스를 통해 안전하게 접근
+            {
+                return objData;
+            }
+            randomPoint -= objData.SpawnWeight; // 인터페이스를 통해 안전하게 접근
+        }
+        // 부동 소수점 연산 오류 등으로 인해 여기까지 도달할 경우, 마지막 항목 반환 (안전장치)
+        return weightedObjects.Count > 0 ? weightedObjects[weightedObjects.Count - 1] : null;
+    }
 }

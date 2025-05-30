@@ -31,24 +31,25 @@ public class Projectile : MonoBehaviour
                     Debug.Log($"플레이어가 적 투사체에 맞음! 데미지: {_damageAmount}");
                 }
                 Destroy(gameObject); // 충돌 후 파괴
+                return;
             }
         }
         else // 플레이어
         {
-            BasicEnemy enemy = other.gameObject.GetComponent<BasicEnemy>(); // 또는 모든 적 유형을 처리할 수 있는 부모 클래스/인터페이스
-            RangedEnemy rangedEnemy = other.gameObject.GetComponent<RangedEnemy>();
-
+            EnemyBase enemy = other.gameObject.GetComponent<EnemyBase>();
             if (enemy != null)
             {
                 enemy.TakeDamage(_damageAmount);
                 Destroy(gameObject);
+                return;
             }
-            else if (rangedEnemy != null)
+            Destructible destructibleObject = other.gameObject.GetComponent<Destructible>();
+            if (destructibleObject != null)
             {
-                rangedEnemy.TakeDamage(_damageAmount);
+                destructibleObject.TakeDamage(_damageAmount);
                 Destroy(gameObject);
+                return;
             }
-            // TODO: 다른 오브젝트 판정 추가 가능
         }
         if (other.gameObject.layer == LayerMask.NameToLayer("Ground")) 
         {

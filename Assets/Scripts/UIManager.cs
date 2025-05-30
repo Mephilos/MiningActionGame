@@ -61,7 +61,7 @@ public class UIManager : MonoBehaviour
         _playerData = playerData;
         if (_playerData == null)
         {
-            Debug.LogError("[UIManager] Initialize: PlayerData가 null입니다!");
+            Debug.LogError($"[{gameObject.name}] Initialize: PlayerData가 null입니다!");
         }
         // PlayerData가 설정된 후 관련 UI 초기 업데이트
         if (_playerData != null)
@@ -199,17 +199,15 @@ public class UIManager : MonoBehaviour
 
         if (moveSpeedStatText != null)
         {
-            moveSpeedStatText.text = $"이동 속도: {_playerData.currentMaxSpeed:F1}\n(비용: {_moveSpeedUpgradeCost} / 증가량: +{_moveSpeedUpgradeAmount:F1})";
+            moveSpeedStatText.text = $"Movement Speed: {_playerData.currentMaxSpeed:F1}\n(cost: {_moveSpeedUpgradeCost} / incease: +{_moveSpeedUpgradeAmount:F1})";
         }
         if (attackDamageStatText != null)
         {
-            attackDamageStatText.text = $"공격력: {_playerData.currentAttackDamage:F1}\n(비용: {_attackDamageUpgradeCost} / 증가량: +{_attackDamageUpgradeAmount:F1})";
+            attackDamageStatText.text = $"Attack Power: {_playerData.currentAttackDamage:F1}\n(cost: {_attackDamageUpgradeCost} / increase: +{_attackDamageUpgradeAmount:F1})";
         }
         if (attackSpeedStatText != null)
         {
-            // 쿨다운을 초당 공격 횟수로 변환하여 표시할 수도 있습니다. (예: 1f / _playerData.currentAttackCooldown)
-            // 여기서는 쿨다운 시간을 직접 표시합니다.
-            attackSpeedStatText.text = $"공격 딜레이: { 1f/_playerData.currentAttackSpeed:F2}초\n(비용: {_attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}초)";
+            attackSpeedStatText.text = $"Attack Cooldown: { 1f/_playerData.currentAttackSpeed:F2}sec\n(cost: {_attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}sec)";
         }
         
         // 버튼 활성화/비활성화 (자원 부족 시)
@@ -231,14 +229,14 @@ public class UIManager : MonoBehaviour
             upgradeAttackSpeedButton.interactable = canUpgrade;
             if (_playerData.currentAttackSpeed <= _attackSpeedCap && attackSpeedStatText != null)
             {
-                attackSpeedStatText.text += "\n(최대 속도 도달)";
+                attackSpeedStatText.text += "\n(Max AttackCooldown)";
             }
         }
 
         // 상점 내 자원도 여기서 한번 더 갱신
         if (shopResourceText != null)
         {
-            shopResourceText.text = $"현재 자원: {_playerData.currentResources}";
+            shopResourceText.text = $"current resources: {_playerData.currentResources}";
         }
     }
 
