@@ -2,8 +2,6 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
-.DS_Store
-.utmp/
 
 #*.prefab
 #*.prefab.meta
@@ -14,6 +12,9 @@
 #*.ogg
 #*.ogg.meta
 
+
+
+.utmp/
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -37,6 +38,12 @@
 
 # Visual Studio cache directory
 .vs/
+
+# Visual Studio Code
+.vscode/
+
+# JetBrains (Rider)
+.idea/
 
 # Gradle cache directory
 .gradle/
@@ -83,4 +90,14 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 

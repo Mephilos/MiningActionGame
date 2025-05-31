@@ -76,8 +76,9 @@ public class WeaponController : MonoBehaviour
                 _animator.SetBool(IsAttack, false);    
             }
         }
-    }
 #endif
+    }
+
     void TryFireProjectile()
     {
         if (_playerData == null || currentWeaponData == null) return; 
