@@ -1,0 +1,166 @@
+# Git이 텍스트 파일을 자동으로 감지하고, 저장소에는 LF (Unix/macOS 스타일) 줄 바꿈 문자를 사용하도록 합니다.
+# Windows 사용자가 checkout하면 CRLF로, commit하면 LF로 자동 변환됩니다.
+* text=auto eol=lf
+
+# --- Unity & C# 프로젝트 관련 텍스트 파일 ---
+# 아래 파일들은 텍스트로 간주하고 LF 줄 바꿈을 사용합니다.
+*.cs eol=lf
+*.js eol=lf
+*.json eol=lf
+*.xml eol=lf
+*.html eol=lf
+*.css eol=lf
+
+# Unity 셰이더 파일
+*.shader eol=lf
+# Unity 셰이더 인클루드 파일
+*.cginc eol=lf
+# Unity 컴퓨트 셰이더
+*.compute eol=lf
+*.txt eol=lf
+# 마크다운 문서
+*.md eol=lf
+# Unity Assembly Definition 파일
+*.asmdef eol=lf
+# Unity Assembly Reference 파일
+*.asmref eol=lf
+# Unity 입력 액션 에셋 (텍스트 기반)
+*.inputactions eol=lf
+# Unity UI Toolkit 스타일시트 (텍스트 기반)
+*.uss eol=lf
+# Unity UI Toolkit 레이아웃 (텍스트 기반)
+*.uxml eol=lf
+# Unity 프리셋 에셋 (텍스트 기반)
+*.preset eol=lf
+# Unity Yamato CI 설정 (YAML 기반)
+*.yamato eol=lf
+# YAML 파일
+*.yml eol=lf
+# YAML 파일
+*.yaml eol=lf
+# CSV 파일
+*.csv eol=lf
+# TSV 파일
+*.tsv eol=lf
+# Roslyn 컴파일러 응답 파일
+*.rsp eol=lf
+
+# --- 바이너리 파일 ---
+# 아래 파일들은 바이너리로 처리되어 줄 바꿈 문자 변환 등이 적용되지 않습니다.
+# Unity 에셋 파일들
+*.unity binary
+*.unitypackage binary
+*.asset binary
+# Unity 머티리얼 에셋
+*.mat binary
+# Unity 메타 파일 (텍스트지만, Unity의 정확한 바이트 유지가 중요할 수 있음)
+*.meta binary
+*.prefab binary
+# Unity 물리 머티리얼
+*.physicmaterial binary
+*.spriteatlas binary
+*.terrainlayer binary
+*.rendertexture binary
+*.cubemap binary
+*.flare binary
+*.fontsettings binary
+*.guiskin binary
+# Unity Global Illumination 파라미터
+*.giparams binary
+# Unity 애니메이션 클립
+*.anim binary
+# Unity Animator Controller
+*.controller binary
+# Unity Animator Override Controller
+*.overrideController binary
+# Unity Avatar Mask
+*.mask binary
+# Unity 메시 에셋 (모델 파일에서 임포트된 후 생성)
+*.mesh binary
+*.assetbundle binary
+*.bundle binary
+# Unity 리소스 파일
+*.resS binary
+
+# 일반적인 바이너리 파일 형식
+# 이미지
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.tif binary
+*.tiff binary
+# Adobe Photoshop
+*.psd binary
+*.exr binary
+*.hdr binary
+*.tga binary
+
+# 모델 원본 파일
+*.fbx binary
+*.obj binary
+# Blender
+*.blend binary
+# Collada
+*.dae binary
+# 3ds Max
+*.max binary
+# Maya ASCII
+*.ma binary
+# Maya Binary
+*.mb binary
+*.3ds binary
+# SketchUp
+*.skp binary
+
+# 오디오 파일
+*.ogg binary
+*.mp3 binary
+*.wav binary
+*.aif binary
+*.aiff binary
+*.flac binary
+
+# 비디오 파일
+*.mp4 binary
+*.mov binary
+*.avi binary
+*.webm binary
+*.mkv binary
+
+# 폰트 파일
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+
+# 문서/압축/기타 바이너리
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+*.zip binary
+*.rar binary
+*.7z binary
+*.gz binary
+*.tar binary
+# Dynamic Link Library
+*.dll binary
+# Executable (Windows)
+*.exe binary
+# Shared Object (Linux)
+*.so binary
+# Dynamic Library (macOS)
+*.dylib binary
+# Program Database (디버그 심볼)
+*.pdb binary
+*.jar binary
+*.ipk binary
+# Static Library
+*.a binary
+# Static Library (Windows)
+*.lib binary
