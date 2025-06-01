@@ -572,14 +572,14 @@ public class Chunk : MonoBehaviour
     {
         if (_surfaceHeights == null)
         {
-            Debug.LogError($"[{gameObject.name}] surfaceHeights 배열이 초기화되지 않았습니다! Chunk.Initialize() 또는 PopulateBlockData()를 확인하세요.");
+            Debug.LogError($"[{gameObject.name}] surfaceHeights 배열이 초기화되지 않음 Chunk.Initialize() 또는 PopulateBlockData()를 확인");
             return 0; // 또는 적절한 기본값, 혹은 예외 발생
         }
         if (localX >= 0 && localX < _chunkSize && localZ >= 0 && localZ < _chunkSize)
         {
             return _surfaceHeights[localX, localZ];
         }
-        Debug.LogWarning($"GetSurfaceHeightAt: 유효하지 않은 로컬 좌표 ({localX}, {localZ}). 청크 크기: {_chunkSize}. 기본 높이 0을 반환합니다.");
+        Debug.LogWarning($"GetSurfaceHeightAt: 유효하지 않은 로컬 좌표 ({localX}, {localZ}). 청크 크기: {_chunkSize}. 기본 높이 0을 반환");
         return 0;
     }
 
@@ -660,10 +660,6 @@ public class Chunk : MonoBehaviour
                                 break;
                             }
                         }
-                        // Physics.OverlapSphere를 사용하는 방법 (특정 레이어의 콜라이더만 감지하도록 설정)
-                        // Collider[] colliders = Physics.OverlapSphere(transform.TransformPoint(potentialSpawnPosition), collisionRadius, LayerMask.GetMask("PlacedObjects"));
-                        // if (colliders.Length > 0) overlaps = true;
-
 
                         if (!overlaps)
                         {

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 905b34a1868b6493bbee0db5c70b4939, type: 3}
+  m_Name: DefaultStageTheme
+  m_EditorClassIdentifier: 
+  themeName: Default Theme
+  chunkMaterial: {fileID: 2100000, guid: ccf1580dc67ad450ca972f393f78933a, type: 2}
+  overrideTerrainParameters: 1
+  minNoiseScale: 0.02
+  maxNoiseScale: 0.04
+  minHeightMultiplier: 0
+  maxHeightMultiplier: 20
+  timeToSurvivePerStage: 60
+  destructibleObjects:
+  - {fileID: 11400000, guid: 6921b0eb24dd34a3f9a9440cff1d99d5, type: 2}
+  maxDestructibleSpawnAttempts: 10
+  destructibleSpawnChancePerAttempt: 0.5
+  decorativeObjects:
+  - {fileID: 11400000, guid: 8f75f01140b8c460494e7e0808c7632f, type: 2}
+  maxDecorativeSpawnAttempts: 20
+  decorativeSpawnChancePerAttempt: 0.7

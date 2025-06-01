@@ -439,7 +439,7 @@ public class StageManager : MonoBehaviour
 
         _isLoadingNextStage = false;
         _isWaitingForPlayerToProceed = false;
-        Debug.Log($"[StageManager_Coroutine] LoadStageAndStartTimerCoroutine ★정상 종료★ - 스테이지: {_currentStageNumber}");
+        Debug.Log($"[StageManager_Coroutine] LoadStageAndStartTimerCoroutine 정상 종료 - 스테이지: {_currentStageNumber}");
     }
 
     private void MovePlayerToStageCenter(Vector3 stageBaseWorldPosition)
@@ -451,7 +451,7 @@ public class StageManager : MonoBehaviour
         }
 
         CharacterController playerCharacterController = playerTransform.GetComponent<CharacterController>();
-        bool wasControllerEnabled = false; // 오타 수정: boolwasControllerEnabled -> bool wasControllerEnabled
+        bool wasControllerEnabled = false;
         if (playerCharacterController != null)
         {
             wasControllerEnabled = playerCharacterController.enabled;
