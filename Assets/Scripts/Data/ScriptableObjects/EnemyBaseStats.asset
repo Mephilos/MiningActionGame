@@ -19,6 +19,6 @@ MonoBehaviour:
   rangedAttackRange: 15
   attackCooldown: 2
   projectilePrefab: {fileID: 6239055993103389687, guid: 931eeb0909dfb4a5293d4e4bd3dadcfd, type: 3}
-  moveSpeed: 0
+  moveSpeed: 3
   detectionRadius: 15
   resourcesToGive: 10

@@ -178,7 +178,7 @@ MonoBehaviour:
   enemyBaseData: {fileID: 11400000, guid: 65fbbb1328a1d4b79a33567eb68de1df, type: 2}
   navMeshSampleRadius: 2
   detectionRadius: 20
-  attackRange: 15
+  attackRange: 5
   attackCooldown: 2
   firePoint: {fileID: 9130034459655231602}
   aimHeightOffset: 2

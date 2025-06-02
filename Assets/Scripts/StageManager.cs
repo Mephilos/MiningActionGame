@@ -552,4 +552,72 @@ public class StageManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    /// <summary>
+    /// 지정된 월드 좌표를 중심으로 일정 영역의 블록을 파괴하고 메시를 업데이트합니다.
+    /// </summary>
+    /// <param name="worldImpactPosition">충격 지점의 월드 좌표</param>
+    /// <param name="areaRadius">중심으로부터 파괴할 반경 (0이면 1x1, 1이면 3x3, 2면 5x5)</param>
+    /// <param name="depth">파괴할 깊이 (Y축으로 몇 칸 아래로)</param>
+    public void DestroyBlocksInArea(Vector3 worldImpactPosition, int areaRadius, int depth)
+    {
+        if (_currentLoadedStageChunk == null)
+        {
+            Debug.LogWarning("[StageManager] DestroyBlocksInArea: 현재 로드된 청크가 없습니다.");
+            return;
+        }
+
+        bool changedAnyBlock = false;
+
+        // 월드 좌표를 청크 로컬 좌표로 변환 준비
+        Vector3 chunkBaseWorldPosition = _currentLoadedStageChunk.transform.position;
+
+        for (int xOffset = -areaRadius; xOffset <= areaRadius; xOffset++)
+        {
+            for (int zOffset = -areaRadius; zOffset <= areaRadius; zOffset++)
+            {
+                // 충격 지점을 기준으로 각 오프셋에 해당하는 블록의 월드 X, Z 좌표 계산
+                int targetWorldX = Mathf.FloorToInt(worldImpactPosition.x + xOffset);
+                int targetWorldZ = Mathf.FloorToInt(worldImpactPosition.z + zOffset);
+
+                // 청크 로컬 좌표로 변환
+                int localX = targetWorldX - Mathf.FloorToInt(chunkBaseWorldPosition.x);
+                int localZ = targetWorldZ - Mathf.FloorToInt(chunkBaseWorldPosition.z);
+
+                // 충격 지점의 Y좌표를 기준으로 파괴 시작 (또는 표면부터 파괴)
+                // 여기서는 충격받은 블록부터 아래로 파괴한다고 가정
+                int startY = Mathf.FloorToInt(worldImpactPosition.y);
+                
+                // 또는 해당 (localX, localZ)의 표면 높이를 가져와서 거기서부터 팔 수도 있음
+                // int surfaceY = _currentLoadedStageChunk.GetSurfaceHeightAt(localX, localZ);
+                // if (surfaceY == -1 && startY < 0) continue; // 파괴할 표면이 없는 경우 (허공)
+                // if (surfaceY != -1) startY = surfaceY;
+
+
+                for (int d = 0; d < depth; d++)
+                {
+                    int targetLocalY = startY - d;
+
+                    // 좌표 유효성 검사 (청크 내부인지, 높이가 유효한지)
+                    if (localX >= 0 && localX < stageSize &&
+                        localZ >= 0 && localZ < stageSize &&
+                        targetLocalY >= 0 && targetLocalY < stageBuildHeight) // stageBuildHeight는 Chunk의 최대 높이
+                    {
+                        // ChangeBlock은 로컬 좌표를 사용
+                        if (_currentLoadedStageChunk.ChangeBlock(localX, targetLocalY, localZ, BlockType.Air))
+                        {
+                            changedAnyBlock = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 모든 변경이 끝난 후 메시 업데이트 (Chunk.ChangeBlock 내부에서 이미 호출될 수 있음)
+        // 만약 ChangeBlock이 메시 업데이트를 즉시 하지 않는다면 여기서 한번만 호출
+        if (changedAnyBlock && _currentLoadedStageChunk != null)
+        {
+             // _currentLoadedStageChunk.CreateChunkMesh(); // ChangeBlock 내부에서 이미 호출되므로 중복 호출 피해야 함
+             Debug.Log($"[StageManager] {worldImpactPosition} 주변 지형 파괴 완료 및 메시 업데이트 요청됨.");
+        }
+    }
 }

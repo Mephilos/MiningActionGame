@@ -3767,7 +3767,7 @@ MonoBehaviour:
   playerTransform: {fileID: 7604694941761129493}
   uiManager: {fileID: 1123934153}
   enemySpawner: {fileID: 2043441969}
-  timeToSurvivePerStage: 60
+  timeToSurvivePerStage: 1000
   defaultMinNoiseScale: 0.02
   defaultMaxNoiseScale: 0.04
   defaultMinHeightMultiplier: 5
@@ -5117,10 +5117,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyTypes:
   - enemyPrefab: {fileID: 6327733385080820348, guid: 818017082b8274c84b5e36a5533d16f8, type: 3}
-    spawnWeight: 1
+    spawnWeight: 0.5
     minStageToSpawn: 0
   - enemyPrefab: {fileID: 843068112705366160, guid: 7e7335f539722431fbc0c03f85e55489, type: 3}
-    spawnWeight: 0
+    spawnWeight: 0.5
+    minStageToSpawn: 0
+  - enemyPrefab: {fileID: 4047770869214564333, guid: df1484a9391524caca30c5afb607c5e5, type: 3}
+    spawnWeight: 0.5
     minStageToSpawn: 0
   maxEnemiesToSpawnAtOnce: 10
   minSpawnDistanceFromPlayer: 10
@@ -5311,6 +5314,18 @@ PrefabInstance:
       propertyPath: movementJoystick
       value: 
       objectReference: {fileID: 562415767}
+    - target: {fileID: 3473584461590960900, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: verticalAimConeAngle
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 3473584461590960900, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: horizontalAimConeAngle
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3473584461590960900, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: aimAssistAngleThreshold
+      value: 29.8
+      objectReference: {fileID: 0}
     - target: {fileID: 3505872087836411694, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: m_Layer
       value: 0
