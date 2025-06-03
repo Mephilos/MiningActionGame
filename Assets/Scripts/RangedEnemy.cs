@@ -9,14 +9,14 @@ public class RangedEnemy : EnemyBase
 {
     [Header("추적 및 공격 설정")]
     [Tooltip("플레이어 감지 거리")]
-    public float detectionRadius = 25f;
+    public float detectionRadius = 20f;
     [Tooltip("공격 사거리 (이 거리 안으로 들어오면 공격 시작)")]
-    public float attackRange = 15f;
+    public float attackRange = 5f;
     [Tooltip("공격 딜레이 (초)")]
     public float attackCooldown = 2f;
     [Tooltip("투사체 발사 위치")]
     public Transform firePoint;
-	public float aimHeightOffset = 1.0f;
+	public float aimHeightOffset = 1.5f;
     [Tooltip("투사체 속도")]
     public float projectileSpeed = 15f;
 
