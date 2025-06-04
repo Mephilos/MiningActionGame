@@ -53,7 +53,7 @@ MonoBehaviour:
   trapHoleThreshold: 0.01
   trapHoleSeedOffset: 3000
   terrainExistenceThreshold: 0.2
-  waterPlane: {fileID: 8077179443502685105, guid: c1b43fbd7ee134c3b8c6014478b9ac29, type: 3}
+  waterPlane: {fileID: 6441246495927980022, guid: 8c863477e28ef4ac79f46095dd5f7268, type: 3}
   itemPrefab: {fileID: 5817702000151847086, guid: 5912b9f907b2d4943a419d1e9dd5d48a, type: 3}
   itemSpawnChance: 0.2
   minItemSpawnY: 1

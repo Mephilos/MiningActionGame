@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0f50661828b733c42a7d485cd0395bc4
+timeCreated: 1454014290
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 55222
+  packageName: Animated Line Renderer
+  packageVersion: 1.0
+  assetPath: Assets/AnimatedLineRenderer/Demo/DemoSceneDraw.unity
+  uploadId: 130647

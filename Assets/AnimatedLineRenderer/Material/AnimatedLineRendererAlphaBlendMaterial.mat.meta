@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: da737f7bd309b8147a8f51e0ccffae32
+timeCreated: 1454014358
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 55222
+  packageName: Animated Line Renderer
+  packageVersion: 1.0
+  assetPath: Assets/AnimatedLineRenderer/Material/AnimatedLineRendererAlphaBlendMaterial.mat
+  uploadId: 130647

@@ -62,9 +62,9 @@ public class NavMeshManager : MonoBehaviour
             return;
         }
         IsSurfaceBaked = false;
-        Debug.Log($"[NavMeshManager] NavMesh 빌드 시작: {_currentActiveSurface.gameObject.name}");
+        // Debug.Log($"[NavMeshManager] NavMesh 빌드 시작: {_currentActiveSurface.gameObject.name}");
         _currentActiveSurface.BuildNavMesh();
-        Debug.Log($"[NavMeshManager] NavMesh 빌드 완료: {_currentActiveSurface.gameObject.name}");
+        // Debug.Log($"[NavMeshManager] NavMesh 빌드 완료: {_currentActiveSurface.gameObject.name}");
         IsSurfaceBaked = true;
     }
 

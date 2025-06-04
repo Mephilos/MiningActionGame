@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: de248d64a99434d40900e4bdfbc2a46b
+timeCreated: 1454447545
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 55222
+  packageName: Animated Line Renderer
+  packageVersion: 1.0
+  assetPath: Assets/AnimatedLineRenderer/Readme.txt
+  uploadId: 130647

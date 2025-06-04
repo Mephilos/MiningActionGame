@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f4743d9f9c36c9a4bb4045ba136e4ba8
+timeCreated: 1454444296
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 55222
+  packageName: Animated Line Renderer
+  packageVersion: 1.0
+  assetPath: Assets/AnimatedLineRenderer/Prefab/PhasorCannon.prefab
+  uploadId: 130647
