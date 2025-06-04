@@ -5229,7 +5229,7 @@ PrefabInstance:
     - target: {fileID: 3562947133331125915, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: muzzleFlashPrefab
       value: 
-      objectReference: {fileID: 100000, guid: f767f10aeba864381a54a2afaa532dcf, type: 3}
+      objectReference: {fileID: 7203365534322085989, guid: bf19428ce023b4d39a8acaaf67829a86, type: 3}
     - target: {fileID: 5194388175690836229, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
