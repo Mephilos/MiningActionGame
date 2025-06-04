@@ -1,6 +1,5 @@
-// LockOnReticleUI.cs
 using UnityEngine;
-using UnityEngine.UI; // Image를 사용하려면 필요
+using UnityEngine.UI;
 
 public class LockOnReticleUI : MonoBehaviour
 {

@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHealth: 100
   attackDamage: 10
   selfDestructDamage: 20
-  rangedAttackRange: 15
+  rangedAttackRange: 5
   attackCooldown: 2
   projectilePrefab: {fileID: 6239055993103389687, guid: 931eeb0909dfb4a5293d4e4bd3dadcfd, type: 3}
   moveSpeed: 3
