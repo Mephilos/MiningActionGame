@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 34dccbda3cd4e9e4cb2dbf7fd17c6f5a
+timeCreated: 1551350921
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 163308
+  packageName: 'Robot Hero : Modular Polyart'
+  packageVersion: 1.2
+  assetPath: Assets/StoreAssets/SciFiWarriorPBRHPPolyart/Prefabs/Handgun01.prefab
+  uploadId: 466475

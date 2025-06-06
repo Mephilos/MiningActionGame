@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3bbc8b5858a7cdc4c88fb4f381348068
+timeCreated: 1551322845
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 163308
+  packageName: 'Robot Hero : Modular Polyart'
+  packageVersion: 1.2
+  assetPath: Assets/StoreAssets/SciFiWarriorPBRHPPolyart/Scene/ShotgunTeam.unity
+  uploadId: 466475

@@ -1,15 +1,16 @@
 fileFormatVersion: 2
-guid: cb367fce222f8c644a223c3021709347
+guid: 2dc4e931d7b15bf43b08c182f32f9fc4
+timeCreated: 1578657228
+licenseType: Store
 NativeFormatImporter:
-  externalObjects: {}
-  mainObjectFileID: 0
+  mainObjectFileID: -1
   userData: 
   assetBundleName: 
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 106154
-  packageName: Sci Fi Warrior PBR HP Polyart
+  productId: 163308
+  packageName: 'Robot Hero : Modular Polyart'
   packageVersion: 1.2
-  assetPath: Assets/SciFiWarriorPBRHPPolyart/Materials/Skybox_Mat.mat
-  uploadId: 349698
+  assetPath: Assets/StoreAssets/SciFiWarriorPBRHPPolyart/Materials/Skybox_Mat.mat
+  uploadId: 466475

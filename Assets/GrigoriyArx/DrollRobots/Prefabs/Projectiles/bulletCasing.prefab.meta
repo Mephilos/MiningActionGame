@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f4cceff2021c6be4593f1770abec6c4b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 250158
+  packageName: Droll Robot 05
+  packageVersion: 1.0
+  assetPath: Assets/GrigoriyArx/DrollRobots/Prefabs/Projectiles/bulletCasing.prefab
+  uploadId: 572407
