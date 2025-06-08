@@ -5170,6 +5170,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 440789903275826629, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
     - target: {fileID: 1052387645192070925, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: m_Name
       value: Player
@@ -5214,10 +5218,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2713703679122992604, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
+    - target: {fileID: 3356600147461150237, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
     - target: {fileID: 3473584461590960900, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: movementJoystick
       value: 
       objectReference: {fileID: 562415767}
+    - target: {fileID: 3544762502051163202, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
     - target: {fileID: 3562947133331125915, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: bulletSpeed
       value: 20
@@ -5230,6 +5246,10 @@ PrefabInstance:
       propertyPath: muzzleFlashPrefab
       value: 
       objectReference: {fileID: 915984143002522250, guid: b8f8a2f3ef749494f8fa13fe541596e3, type: 3}
+    - target: {fileID: 4141565060492347229, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
     - target: {fileID: 5194388175690836229, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
       propertyPath: m_LocalScale.x
       value: 10
@@ -5242,6 +5262,10 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 7082541516299916026, guid: 074d89411bfeb450c973e72e3d3c8474, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 362c4a9b8f1ba6a44b64208bb8cf1576, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

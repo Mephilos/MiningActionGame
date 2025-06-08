@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4421e11c6961abc4c9d43a5d9cd71018
+timeCreated: 1511864971
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 163308
+  packageName: 'Robot Hero : Modular Polyart'
+  packageVersion: 1.2
+  assetPath: Assets/SciFiHeroPolyart/Animators/Sniper Rifle Control.controller
+  uploadId: 466475
