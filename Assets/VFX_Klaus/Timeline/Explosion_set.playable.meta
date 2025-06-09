@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b618ed7818cf34647bd49ce9578ffb88
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Timeline/Explosion_set.playable
+  uploadId: 466686

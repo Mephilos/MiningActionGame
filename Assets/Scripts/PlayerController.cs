@@ -29,6 +29,11 @@ public class PlayerController : MonoBehaviour
 
     private Coroutine _dashCoroutine;
     private Coroutine _invincibilityCoroutine;
+    private Coroutine _knockbackCoroutine;
+
+    private bool _isBeingKnockedBack;
+
+
 
     public bool IsAiming { get; private set; }
     private Vector3 _aimingDirection;
@@ -45,6 +50,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask aimAssistLayerMask; // 에임 어시스트 적용 레이어 마스크 
     public LayerMask obstacleLayerMask; // 장애물 판별용 레이어 마스크 
     public float onReticleHorizontalAngle = 5.0f; // 조준선 일치 각도
+    
     void Awake()
     {
         _characterController = GetComponent<CharacterController>();
@@ -95,6 +101,8 @@ public class PlayerController : MonoBehaviour
 
     void HandleInput()
     {
+        if (_isBeingKnockedBack) return;
+
         float moveX = 0f;
         float moveZ = 0f;
 
@@ -544,6 +552,38 @@ public class PlayerController : MonoBehaviour
         }
         
         return true; // 아무 장애물에도 맞지 않으면 시야 확보
+    }
+
+    /// <summary>
+    /// 넉백 적용 메서드
+    /// </summary>
+    /// <param name="direction">밀려난 방향</param>
+    /// <param name="force">미는 힘</param>
+    /// <param name="duration">적용 시간</param>
+    public void ApplyKnockback(Vector3 direction, float force, float duration)
+    {
+        if (_knockbackCoroutine != null)
+        {
+            StopCoroutine( _knockbackCoroutine );
+        }
+        _knockbackCoroutine = StartCoroutine(KnockbackCoroutine(direction, force, duration));
+    }
+    // 넉백 코루틴
+    private IEnumerator KnockbackCoroutine(Vector3 direction, float force, float duration)
+    {
+        _isBeingKnockedBack = true;
+
+        float timer = 0;
+        while (timer < duration)
+        {
+            float currentForce = Mathf.Lerp(force, 0, timer / duration);
+            _characterController.Move(direction * currentForce * Time.deltaTime);
+
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        _isBeingKnockedBack = false;
+        _knockbackCoroutine = null;
     }
     public Transform GetLockedTarget()
     {

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c210a509fedfb5f4fa8ff6fd3f19c6dc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Timeline/Explosion_set.prefab
+  uploadId: 466686

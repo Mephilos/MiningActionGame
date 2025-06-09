@@ -8,6 +8,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1010185575759030150, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1e34edc6d119ee84994a51060db8632d, type: 2}
+    - target: {fileID: 2378964403949974036, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 9a93729315c3eb44baecbeb9b864d7c8, type: 2}
+    - target: {fileID: 7467388687720487986, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1e34edc6d119ee84994a51060db8632d, type: 2}
+    - target: {fileID: 8102493670542300644, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1e34edc6d119ee84994a51060db8632d, type: 2}
+    - target: {fileID: 8214731627410268589, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8214731627410268589, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8214731627410268589, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 8214731627410268589, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -67,6 +95,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8740156780556122903, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2081990474712506906}
+    - targetCorrespondingSourceObject: {fileID: 8740156780556122903, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3038135603858954042}
   m_SourcePrefab: {fileID: 100100000, guid: 38b8999bb1db4bf4f91855e5fd253af1, type: 3}
 --- !u!4 &6016493156248457184 stripped
 Transform:
@@ -124,16 +155,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyBaseData: {fileID: 11400000, guid: 3133ee7aa10564a7cb8940a4c72f2d38, type: 2}
   navMeshSampleRadius: 2
-  detectionRadius: 40
-  attackRange: 25
-  stoppingDistance: 20
-  attackCooldown: 4
+  maxEnrageMultiplier: 1.5
+  rangedAttackRange: 25
+  rangedAttackCooldown: 5
+  aimDuration: 1.5
   projectilePrefab: {fileID: 6239055993103389687, guid: 931eeb0909dfb4a5293d4e4bd3dadcfd, type: 3}
   firePoints:
   - {fileID: 6016493156248457184}
   - {fileID: 6016493157852036767}
   projectilesPerVolley: 3
   timeBetweenShots: 0.2
+  meleeAttackRange: 5
+  meleeAttackCooldown: 0
+  shockwaveKnockbackForce: 5
+  shockwaveKnockbackDuration: 2
+  shockwaveEffectPrefab: {fileID: 7240094759912866524, guid: 42a69e5d5f0e7494690e716966cf3194, type: 3}
 --- !u!136 &2081990474712506906
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -153,7 +189,29 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.39
+  m_Radius: 0.5
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!195 &3038135603858954042
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6899384301604392278}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4

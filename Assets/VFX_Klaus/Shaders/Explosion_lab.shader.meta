@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d3610f0c2e60a9f439b9be2b9f42824e
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Shaders/Explosion_lab.shader
+  uploadId: 466686

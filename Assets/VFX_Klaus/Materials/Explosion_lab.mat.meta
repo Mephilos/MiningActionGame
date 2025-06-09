@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1db8894cc1da2324eaa273fdab066560
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Materials/Explosion_lab.mat
+  uploadId: 466686

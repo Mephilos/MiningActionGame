@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0fe762657c7d65f46a3d0297ae8867a7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Prefabs/Stylized_Explosion_Package/FX_muzzle_fire_hit_wall_03.prefab
+  uploadId: 466686

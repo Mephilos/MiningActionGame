@@ -134,5 +134,5 @@ MonoBehaviour:
   damage: 10
   explosionRadius: 1.5
   terrainDestructionDepth: 2
-  impactEffectPrefab: {fileID: 0}
+  impactEffectPrefab: {fileID: 261765961484630301, guid: f44ab53478da0494b853a4b4880123c8, type: 3}
   projectileColliderRadius: 0.5

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 3502acf05d190b044aa96ed279ab77bc
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 190334
+  packageName: Stylized Explosion Package
+  packageVersion: 1.3
+  assetPath: Assets/VFX_Klaus/Shaders/Fx_explosion_apb.shader
+  uploadId: 466686

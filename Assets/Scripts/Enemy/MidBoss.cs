@@ -2,134 +2,183 @@ using UnityEngine;
 using System.Collections;
 public class MidBoss : EnemyBase
 {
-    [Header("보스 패턴 설정")]
-    public float detectionRadius = 40f; // 플레이어 감지 범위
-    public float attackRange = 25f; // 공격 사거리
-    public float stoppingDistance = 20f; // 플레이어와 유지할 거리
-    public float attackCooldown = 4f; // 공격 쿨다운
-    public GameObject projectilePrefab; // 발사할 투사체
-    public Transform[] firePoints; // 여러 발사 지점
-    public int projectilesPerVolley = 3; // 한 번에 발사할 투사체 수
-    public float timeBetweenShots = 0.2f; // 연속 발사 시 간격
+    private enum BossState
+    {
+        Idle,
+        Chasing,
+        RangedAiming,
+        RangedFiring,
+        MeleeAttacking,
+        Cooldown
+    }
+    private BossState _currentBossState;
+    [Header("보스 분노 설정")]
+    [Tooltip("체력이 낮아질 경우 최대 몇배까지 빨라질지 설정")]
+    public float maxEnrageMultiplier = 1.5f;
 
-    private float _lastAttackTime;
+    [Header("원거리 공격")]
+    public float rangedAttackRange = 25f;
+    public float rangedAttackCooldown = 5f;
+    public float aimDuration = 1.5f; // 조준 지연시간
+    public GameObject projectilePrefab;
+    public Transform[] firePoints;
+    public int projectilesPerVolley = 10;
+    public float timeBetweenShots = 0.1f;
+
+    [Header("근거리 공격")]
+    public float meleeAttackRange = 5f;
+    public float meleeAttackCooldown;
+    public float shockwaveKnockbackForce;
+    public float shockwaveKnockbackDuration;
+    public GameObject shockwaveEffectPrefab;
+
+    private float _lastRangedAttackTime;
+    private float _lastMeleeAttackTime;
+    private float _stateTimer;
+    private PlayerController _playerController;
 
     protected override void Awake()
     {
         base.Awake();
-        if (enemyBaseData != null)
-        {
-            this.MaxHealth = enemyBaseData.maxHealth;
-            this.CurrentHealth = MaxHealth;
-            if (NavMeshAgent != null) NavMeshAgent.speed = enemyBaseData.moveSpeed;
+        _currentBossState = BossState.Chasing;
+        _lastRangedAttackTime = -rangedAttackCooldown;
+        _lastMeleeAttackTime = -meleeAttackCooldown;
+    }
 
-            // 추가적인 보스 전용 스탯 로드
-            this.projectilePrefab = enemyBaseData.projectilePrefab;
-            
-        }
-
-        if (firePoints == null || firePoints.Length == 0)
-        {
-            // 발사 지점이 없으면 자기 자신을 사용
-            firePoints = new Transform[] { transform };
-        }
+    public override void Initialize(PlayerData playerData, Transform playerTransform)
+    {
+        base.Initialize(playerData, playerTransform);
+        _playerController = playerTransform.GetComponent<PlayerController>();
     }
 
     void Update()
     {
-        if (IsDead || PlayerTransform == null || !IsAgentActive)
+        if (IsDead || PlayerTransform == null || !IsAgentActive || _playerController == null)
         {
             if (NavMeshAgent.enabled) NavMeshAgent.isStopped = true;
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, PlayerTransform.position);
+        float enrageMultiplier = CalculateEnrageMultiplier();
+        NavMeshAgent.speed = enemyBaseData.moveSpeed * enrageMultiplier;
 
-        // 항상 플레이어를 바라보도록 설정
-        if (PlayerTransform != null)
+        switch (_currentBossState)
         {
-            Vector3 direction = (PlayerTransform.position - transform.position).normalized;
-            direction.y = 0;
-            if (direction != Vector3.zero)
-            {
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 5f);
-            }
-        }
-
-        // 상태 머신
-        switch (CurrentState)
-        {
-            case EnemyState.Idle:
-            case EnemyState.Chasing:
-                if (distanceToPlayer <= detectionRadius)
-                {
-                    if (distanceToPlayer > stoppingDistance)
-                    {
-                        CurrentState = EnemyState.Chasing;
-                        NavMeshAgent.SetDestination(PlayerTransform.position);
-                        NavMeshAgent.isStopped = false;
-                    }
-                    else
-                    {
-                        CurrentState = EnemyState.Attacking;
-                        NavMeshAgent.isStopped = true;
-                    }
-                }
+            case BossState.Idle:
+            case BossState.Chasing:
+                HandleChasingState(enrageMultiplier);
                 break;
-            
-            case EnemyState.Attacking:
-                if (Time.time > _lastAttackTime + attackCooldown)
-                {
-                    StartCoroutine(AttackCoroutine());
-                }
-                // 공격 후 다시 거리 조절
-                if (distanceToPlayer > attackRange)
-                {
-                    CurrentState = EnemyState.Chasing;
-                }
-                break;
-            
-            case EnemyState.Cooldown:
-                // 공격 코루틴이 끝나면 Chasing 상태로 돌아가 거리를 다시 재도록 함
-                 if (Time.time > _lastAttackTime + attackCooldown)
-                {
-                    CurrentState = EnemyState.Chasing;
-                }
+            case BossState.RangedAiming:
+                HandleRangedAimingState();
                 break;
         }
     }
-    
-    private IEnumerator AttackCoroutine()
-    {
-        CurrentState = EnemyState.Cooldown; // 중복 공격 방지
-        _lastAttackTime = Time.time;
 
-        // TODO: 공격 전 예비 동작 애니메이션 실행
-        // _animator.SetTrigger("PrepareAttack");
-        // yield return new WaitForSeconds(1f);
+    private float CalculateEnrageMultiplier()
+    {
+        if (MaxHealth <= 0) return 1f;
+        float healthPercentageRemaining = CurrentHealth / MaxHealth;
+        return Mathf.Lerp(maxEnrageMultiplier, 1f, healthPercentageRemaining);
+    }
+    private void HandleChasingState(float enrageMultiplier)
+    {
+        LookAtPlayer();
+
+        float distanceToPlayer = Vector3.Distance(transform.position, PlayerTransform.position);
+
+        if (distanceToPlayer <= meleeAttackRange && Time.time > _lastMeleeAttackTime + (meleeAttackCooldown / enrageMultiplier))
+        {
+            StartCoroutine(MeleeAttackCoroutine());
+            return;
+        }
+
+        if (distanceToPlayer <= rangedAttackRange && Time.time > _lastRangedAttackTime + (rangedAttackCooldown / enrageMultiplier))
+        {
+            _currentBossState = BossState.RangedAiming;
+            _stateTimer = 0f; // 조준 타이머 초기화
+            NavMeshAgent.isStopped = true; // 조준 중에는 멈춤
+            return;
+        }
+
+        NavMeshAgent.isStopped = false;
+        NavMeshAgent.SetDestination(PlayerTransform.position);
+    }
+    // 원거리 공격 - 조준 상태 로직
+    private void HandleRangedAimingState()
+    {
+        // 조준하는 동안 계속 플레이어 응시
+        LookAtPlayer();
+
+        _stateTimer += Time.deltaTime;
+        if (_stateTimer >= aimDuration)
+        {
+            // 조준 시간이 끝나면 발사 코루틴 시작
+            StartCoroutine(RangedFiringCoroutine());
+        }
+    }
+
+    // 원거리 공격 - 발사 코루틴
+    private IEnumerator RangedFiringCoroutine()
+    {
+        _currentBossState = BossState.RangedFiring;
+        _lastRangedAttackTime = Time.time;
 
         for (int i = 0; i < projectilesPerVolley; i++)
         {
-            // 각 발사 지점을 순환하며 발사
+            // 복수의 firepoint를 순환하며 사용
             Transform firePoint = firePoints[i % firePoints.Length];
-
             if (projectilePrefab != null)
             {
-                GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
                 // TODO: 투사체에 데미지, 속도 등 설정
-                // proj.GetComponent<Projectile>().SetDamage(enemyBaseData.attackDamage);
             }
             yield return new WaitForSeconds(timeBetweenShots);
         }
-        
-        // 코루틴이 끝나면 Update에서 다시 Chasing 상태로 전환됨
+
+        // 발사가 끝나면 쿨다운 상태를 거쳐 다시 추적 시작
+        _currentBossState = BossState.Cooldown;
+        yield return new WaitForSeconds(1.0f); // 공격 후 짧은 딜레이
+        _currentBossState = BossState.Chasing;
     }
-    
-    // 이펙트, 사운드 등 보스 전용 죽음 연출
+    private IEnumerator MeleeAttackCoroutine()
+    {
+        _currentBossState = BossState.MeleeAttacking;
+        _lastMeleeAttackTime = Time.time;
+        NavMeshAgent.isStopped = true;
+
+        // TODO: 충격파 시전 애니메이션 추가
+        yield return new WaitForSeconds(0.5f); // 선딜레이
+
+        // 충격파 이펙트 생성
+        if (shockwaveEffectPrefab != null)
+        {
+            Instantiate(shockwaveEffectPrefab, transform.position, Quaternion.identity);
+        }
+
+        // 범위 내 플레이어에게 넉백 적용
+        if (Vector3.Distance(transform.position, PlayerTransform.position) <= meleeAttackRange + 1.0f) // 범위 보정
+        {
+            Vector3 knockbackDir = (PlayerTransform.position - transform.position).normalized;
+            knockbackDir.y = 0.2f; // 살짝 위로 띄우는 효과
+            _playerController.ApplyKnockback(knockbackDir.normalized, shockwaveKnockbackForce, shockwaveKnockbackDuration);
+        }
+
+        // 공격 후 쿨다운 상태를 거쳐 다시 추적 시작
+        _currentBossState = BossState.Cooldown;
+        yield return new WaitForSeconds(1.5f); // 공격 후 긴 딜레이
+        _currentBossState = BossState.Chasing;
+    }
+    private void LookAtPlayer()
+    {
+        Vector3 direction = (PlayerTransform.position - transform.position).normalized;
+        direction.y = 0;
+        if (direction != Vector3.zero)
+        {
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 10f);
+        }
+    }
     protected override void PerformUniqueDeathActions()
     {
-        Debug.Log("보스가 처치되었습니다! 특별한 폭발 효과를 보여줍니다.");
-        // TODO: 거대한 폭발 이펙트 생성, 아이템 드랍 등
+        // TODO: 죽음 연출 추가
     }
 }
-
