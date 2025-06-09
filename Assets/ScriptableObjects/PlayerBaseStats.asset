@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PlayerBaseStats
   m_EditorClassIdentifier: 
   maxHealth: 1000000
-  initialAttackDamage: 10
-  initialAttackSpeed: 0.1
+  initialAttackDamage: 1
+  initialAttackSpeed: 1
   initialResources: 100000
   maxSpeed: 7
   rotationSpeed: 360

@@ -47,6 +47,9 @@ public class StageManager : MonoBehaviour
     private bool _isGameOver;
     private Coroutine _loadStageCoroutine;
 
+    private bool _isBossStage;
+    private bool _spawningCompleted;
+
     private readonly Vector2Int _fixedStageCoordinate = Vector2Int.zero;
     public Vector2Int CurrentStageCoord => _fixedStageCoordinate;
     public int GetCurrentStageNumber() => _currentStageNumber;
@@ -143,22 +146,34 @@ public class StageManager : MonoBehaviour
             return;
         }
 
-        _currentStageTimer += Time.deltaTime;
-        if (uiManager != null)
+        if (_isBossStage)
         {
-            float currentStageSurvivalTime = (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0)
-                                             ? _currentActiveTheme.timeToSurvivePerStage
-                                             : this.timeToSurvivePerStage;
-            float timeLeft = currentStageSurvivalTime - _currentStageTimer;
-            uiManager.UpdateStageTimerUI(timeLeft > 0 ? timeLeft : 0f);
+            if (_spawningCompleted && EnemySpawner.ActiveEnemies.Count == 0)
+            {
+                InitiateStageClearSequence();
+            }
         }
-
-        if (_currentStageTimer >= ((_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0) ? _currentActiveTheme.timeToSurvivePerStage : this.timeToSurvivePerStage))
+        else
         {
-            InitiateStageClearSequence();
+            _currentStageTimer += Time.deltaTime;
+            if (uiManager != null)
+            {
+                float currentStageSurvivalTime = (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0)
+                        ? _currentActiveTheme.timeToSurvivePerStage
+                        : this.timeToSurvivePerStage;
+                float timeLeft = currentStageSurvivalTime - _currentStageTimer;
+                uiManager.UpdateStageTimerUI(timeLeft > 0 ? timeLeft : 0f);
+            }
+
+            if (_currentStageTimer >= (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0
+                    ? _currentActiveTheme.timeToSurvivePerStage : this.timeToSurvivePerStage))
+            {
+                InitiateStageClearSequence();
+            }
         }
     }
 
+    
     private void StartNewGame()
     {
         Debug.Log("[StageManager] 새 게임 시작 요청.");
@@ -293,9 +308,9 @@ public class StageManager : MonoBehaviour
 
     public void PlayerConfirmedNextStage()
     {
-        if (!_isWaitingForPlayerToProceed && !_isLoadingNextStage)
+        if (!_isWaitingForPlayerToProceed)
         {
-            Debug.LogWarning("[StageManager] PlayerConfirmedNextStage: 부적절한 호출입니다.");
+            Debug.LogWarning($"[{gameObject.name}] PlayerConfirmedNextStage 호출 문제");
             return;
         }
 
@@ -311,8 +326,10 @@ public class StageManager : MonoBehaviour
     private IEnumerator LoadStageAndStartTimerCoroutine(Vector2Int stageCoord)
     {
         _isLoadingNextStage = true;
-        Debug.Log($"[StageManager_Coroutine] LoadStageAndStartTimerCoroutine 시작 - 스테이지: {_currentStageNumber}");
-
+        _spawningCompleted = false;
+        _isBossStage = (_currentStageNumber > 0 && _currentStageNumber % 5 == 0);
+        Debug.Log($"[{gameObject.name}_Coroutine] LoadStageAndStartTimerCoroutine 시작 - 스테이지: {_currentStageNumber}");
+        
         if (uiManager != null && uiManager.shopPanel != null && uiManager.shopPanel.activeSelf)
         {
             uiManager.HideShopPanel();
@@ -619,5 +636,10 @@ public class StageManager : MonoBehaviour
              // _currentLoadedStageChunk.CreateChunkMesh(); // ChangeBlock 내부에서 이미 호출되므로 중복 호출 피해야 함
              Debug.Log($"[StageManager] {worldImpactPosition} 주변 지형 파괴 완료 및 메시 업데이트 요청됨.");
         }
+    }
+    public void NotifySpawningCompleted()
+    {
+        _spawningCompleted = true;
+        Debug.Log("[StageManager] 이 스테이지의 모든 스폰이 완료되었습니다.");
     }
 }

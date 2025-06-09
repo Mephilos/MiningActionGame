@@ -329,7 +329,7 @@ public class UIManager : MonoBehaviour
     public void OnShopProceedButtonPressed()
     {
         Debug.Log("상점: 으로");
-        HideShopPanel();
+        
         if (StageManager.Instance != null)
         {
             StageManager.Instance.PlayerConfirmedShop(); // 기존 다음 스테이지 진행 로직 호출

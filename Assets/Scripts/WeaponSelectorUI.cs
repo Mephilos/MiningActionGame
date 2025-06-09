@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class WeaponSelectorUI : MonoBehaviour
 {
+    public Button startGameButton;
     public Toggle weaponToggle1;
     public Toggle weaponToggle2;
     public Toggle weaponToggle3;
@@ -26,8 +27,12 @@ public class WeaponSelectorUI : MonoBehaviour
         if (weaponToggle3 != null)
         {
             weaponToggle3.onValueChanged.AddListener((isOn) => { if (isOn) OnToggleSelected(weaponDataForToggle3, "무기3"); });
-        }   
-        
+        }
+
+        if (startGameButton != null)
+        {
+            startGameButton.onClick.AddListener(ConfirmSelectionAndStartGame);
+        }
         
         // 초기 선택된 톡들에 대한 처리
         if (weaponToggle1 != null && weaponToggle1.isOn)
@@ -42,6 +47,15 @@ public class WeaponSelectorUI : MonoBehaviour
         {
             OnToggleSelected(weaponDataForToggle3, "무기3");
         }
+        else
+        {
+            // 아무것도 선택되지 않았을 경우, 첫 번째 무기를 기본으로 선택
+            if (weaponToggle1 != null)
+            {
+                weaponToggle1.isOn = true;
+                OnToggleSelected(weaponDataForToggle1, "무기1");
+            }
+        }
     }
     void OnToggleSelected(WeaponData selectedData, string weaponNameForDebug)
     {
@@ -55,9 +69,23 @@ public class WeaponSelectorUI : MonoBehaviour
             Debug.LogWarning($"{weaponNameForDebug}에 연결된 WeaponData가 없습니다.");
         }
     }
-    public WeaponData GetChosenWeaponData()
+    public void ConfirmSelectionAndStartGame()
     {
-        return _chosenWeaponData;
-    }
+        if (_chosenWeaponData == null)
+        {
+            Debug.LogError("선택된 무기가 없습니다!");
+            return;
+        }
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetSelectedWeapon(_chosenWeaponData);
+            
+            GameManager.Instance.LoadGameplayScene();
+        }
+        else
+        {
+            Debug.LogError("GameManager 인스턴스를 찾을 수 없습니다");
+        }
+    }
 }

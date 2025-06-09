@@ -927,9 +927,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1181480177383672734, guid: 3ba5f33461b98413f94d534912ce8a6b, type: 3}
-        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: LoadGameplayScene
+      - m_Target: {fileID: 1118700066}
+        m_TargetAssemblyTypeName: WeaponSelectorUI, Assembly-CSharp
+        m_MethodName: ConfirmSelectionAndStartGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1430,12 +1430,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b5a1543222d74df585fe03cfec441fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponToggle1: {fileID: 0}
-  weaponToggle2: {fileID: 0}
-  weaponToggle3: {fileID: 0}
-  weaponDataForToggle1: {fileID: 0}
-  weaponDataForToggle2: {fileID: 0}
-  weaponDataForToggle3: {fileID: 0}
+  startGameButton: {fileID: 943607612}
+  weaponToggle1: {fileID: 1536025633}
+  weaponToggle2: {fileID: 1393795474}
+  weaponToggle3: {fileID: 668255310}
+  weaponDataForToggle1: {fileID: 11400000, guid: 15d074fd1c5944ff989a3f5164396572, type: 2}
+  weaponDataForToggle2: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
+  weaponDataForToggle3: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
 --- !u!1 &1205824696
 GameObject:
   m_ObjectHideFlags: 0

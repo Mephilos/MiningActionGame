@@ -11,8 +11,7 @@ public class GameManager : MonoBehaviour
     public string gameplaySceneName = "MainScene";
     public string resultsSceneName = "Result";
 
-    // TODO:나중에 선택된 무기 데이터를 저장할 변수
-    // public WeaponData SelectedWeapon { get; private set; }
+    public WeaponData SelectedWeapon { get; private set; }
 
     void Awake()
     {
@@ -25,6 +24,12 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    public void SetSelectedWeapon(WeaponData weapon)
+    {
+        SelectedWeapon = weapon;
+        Debug.Log($"[{gameObject.name}] 선택무기: {weapon.weaponName}");
     }
 
     /// <summary>
@@ -44,13 +49,12 @@ public class GameManager : MonoBehaviour
 
     public void LoadGameplayScene()
     {
-        // TODO: 무기 선택이 완료되었는지 확인하는 로직 추가
-        // if (SelectedWeapon == null)
-        // {
-        //     Debug.LogError("무기가 선택되지 않았습니다! 무기 선택 씬으로 돌아갑니다.");
-        //     LoadWeaponSelectScene();
-        //     return;
-        // }
+        if (SelectedWeapon == null)
+        {
+            Debug.LogError("무기가 선택되지 않음.");
+            return;
+        }
+        
         SceneManager.LoadScene(gameplaySceneName);
         Debug.Log($"Loading Scene: {gameplaySceneName}");
     }

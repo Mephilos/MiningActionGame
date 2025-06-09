@@ -21,18 +21,18 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 _worldTargetDirection = Vector3.forward;
     private Vector3 _currentVelocity = Vector3.zero;
-    private float _currentSpeed = 0;
+    private float _currentSpeed;
     private Vector3 _verticalVelocity = Vector3.zero;
 
-    private float _shiftKeyDownTime = 0f;
-    private bool _shiftKeyHeld = false;
+    private float _shiftKeyDownTime;
+    private bool _shiftKeyHeld;
 
     private Coroutine _dashCoroutine;
     private Coroutine _invincibilityCoroutine;
 
     public bool IsAiming { get; private set; }
     private Vector3 _aimingDirection;
-    
+    private Transform _lockedAimAssistTarget; // 현재 감지된 에임 어시스트 타겟
     
     [Header("Mobile Controls")]
     public Joystick movementJoystick;
@@ -44,8 +44,6 @@ public class PlayerController : MonoBehaviour
     public float verticalAimConeAngle = 25f;
     public LayerMask aimAssistLayerMask; // 에임 어시스트 적용 레이어 마스크 
     public LayerMask obstacleLayerMask; // 장애물 판별용 레이어 마스크 
-    private Transform _lockedAimAssistTarget = null; // 현재 감지된 에임 어시스트 타겟
-
     public float onReticleHorizontalAngle = 5.0f; // 조준선 일치 각도
     void Awake()
     {
@@ -60,25 +58,8 @@ public class PlayerController : MonoBehaviour
             enabled = false;
             return;
         }
-
-        if (_animator == null)
-        {
-            Debug.LogWarning($"[{gameObject.name}] 플레이어에 Animator가 없음");
-        }
-
-        // 초기 바라보는 방향 설정
-        _worldTargetDirection = Quaternion.Euler(0, isometricCameraAngleY, 0) * Vector3.forward;
-        transform.rotation = Quaternion.LookRotation(_worldTargetDirection);
+        if (_weaponController == null) Debug.LogError("WeaponController를 찾을 수 없음");
     }
-
-    void Start()
-    {
-        if (_playerData != null)
-        {
-            _playerData.jumpCountAvailable = _playerData.currentMaxJumpCount;
-        }
-    }
-
     void Update()
     {
         // 죽거나 데이터 셋 없을 때
@@ -90,21 +71,11 @@ public class PlayerController : MonoBehaviour
             
             return;
         }
-
-        if (!_playerData.isDead)
-        {
-            _animator.SetBool(IsDead, false);
-        }
+        
+        //플레이어 웨폰컨트롤러 기능 분리위해 새로 작성
         HandleInput();
-
-        if (IsAiming)
-        {
-            UpdateLockOnTargetLogic();
-        }
-        else
-        {
-            _lockedAimAssistTarget = null;
-        }
+        UpdateAiming();
+        PassDataToWeaponController();
         UpdateAnimations();
     }
 
@@ -128,7 +99,6 @@ public class PlayerController : MonoBehaviour
         float moveZ = 0f;
 
 #if UNITY_IOS || UNITY_ANDROID// 모바일 플랫폼
-        
         if (movementJoystick != null && movementJoystick.Direction.sqrMagnitude > 0.01f) // 조이스틱이 할당되어 있고, 입력이 있을 때
         { 
             moveX = movementJoystick.Horizontal; // 조이스틱의 Horizontal 값 사용
@@ -153,7 +123,6 @@ public class PlayerController : MonoBehaviour
             _worldTargetDirection = Vector3.zero; // 이동 입력 없으면 0벡터
         }
 #if !(UNITY_IOS || UNITY_ANDROID) // PC 환경
-        
         // Shift 키 (대쉬/부스트)
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -169,7 +138,6 @@ public class PlayerController : MonoBehaviour
                 TryDash();
             }
         }
-
         // Space 키 (점프)
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -181,47 +149,57 @@ public class PlayerController : MonoBehaviour
         // 마우스 우클릭 (조준 상태)
         IsAiming = Input.GetMouseButton(1);
 
-        if (IsAiming)
+        if (_weaponController.currentWeaponData != null && _weaponController.currentWeaponData.isChargeWeapon)
         {
-            if (Camera.main != null)
+            if (Input.GetMouseButtonDown(0))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); // 마우스 위치는 Update에서 샘플링하는 것이 좋음
-                Plane groundPlane = new Plane(Vector3.up, transform.position);
-
-                if (groundPlane.Raycast(ray, out float rayDistance))
-                {
-                    Vector3 targetPoint = ray.GetPoint(rayDistance);
-                    Vector3 directionToTarget = targetPoint - transform.position;
-
-                    if (directionToTarget.sqrMagnitude > 0.01f)
-                    {
-                        directionToTarget.y = 0;
-                        _aimingDirection = directionToTarget.normalized; // 정규화된 조준 방향 저장
-                    }
-                    
-                    else if (_aimingDirection.sqrMagnitude < 0.01f)
-                    {
-                        _aimingDirection = transform.forward;
-                        _aimingDirection.y = 0;
-                        _aimingDirection.Normalize();
-                    }
-                }
-                else if (_aimingDirection.sqrMagnitude < 0.01f)
-                {
-                    _aimingDirection = transform.forward;
-                    _aimingDirection.y = 0;
-                    _aimingDirection.Normalize();
-                }
+                _weaponController.HandleChargeStart();
             }
-            else if (_aimingDirection.sqrMagnitude < 0.01f)
+            if (Input.GetMouseButtonUp(0))
             {
-                _aimingDirection = transform.forward;
-                _aimingDirection.y = 0;
-                _aimingDirection.Normalize();
+                _weaponController.HandleChargeRelease();
             }
+        }
+        else
+        {
+            _weaponController.HandleFireInput(Input.GetMouseButton(0));
         }
 #endif
     }
+    void UpdateAiming()
+    {
+        if (Camera.main != null)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane groundPlane = new Plane(Vector3.up, transform.position);
+
+            if (groundPlane.Raycast(ray, out float rayDistance))
+            {
+                Vector3 targetPoint = ray.GetPoint(rayDistance);
+                _aimingDirection = (targetPoint - transform.position);
+                _aimingDirection.y = 0;
+                if(_aimingDirection.sqrMagnitude > 0.01f) _aimingDirection.Normalize();
+            }
+        }
+
+        if (IsAiming)
+        {
+            UpdateLockOnTargetLogic();
+        }
+        else
+        {
+            _lockedAimAssistTarget = null;
+        }
+    }
+    
+    void PassDataToWeaponController()
+    {
+        if (_weaponController == null) return;
+        
+        _weaponController.AimDirection = (_aimingDirection.sqrMagnitude > 0.01f) ? _aimingDirection : transform.forward;
+        _weaponController.AimTarget = _lockedAimAssistTarget;
+    }
+
 
     void ApplyRotationFixedUpdate()
     {
@@ -402,11 +380,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
         _animator.SetFloat(Speed, _currentSpeed);
-        
         _animator.SetBool(Grounded, _characterController.isGrounded);
-        
         _animator.SetBool(IsDashing, _playerData.isDashing);
-        
         _animator.SetBool(Aiming, IsAiming);
     }
 
@@ -473,10 +448,8 @@ public class PlayerController : MonoBehaviour
             if (horizontalAngle <= horizontalAimConeAngle) // 설정된 임계 각도 내에 있고, 이전에 찾은 것보다 더 가까운 각도일 때
             {
                 float verticalAngle = Vector3.Angle(vectorToTargetHorizontal.normalized, directionToTarget.normalized);
-                // Vector3.Angle은 항상 0~180 사이의 양수 각도를 반환.
-                // 타겟이 플레이어보다 위에 있는지 아래에 있는지는 vectorToTarget3D.y의 부호로 알 수 있지만,
-                // 여기서는 수평면으로부터의 절대적인 각도만 중요.
-
+                // Vector3.Angle은 항상 0~180 사이의 양수 각도를 반환
+                // 여기서는 수평면으로부터의 절대적인 각도만 중요
                 if (verticalAngle <= verticalAimConeAngle) // 수직 각도 조건 만족 시
                 {
                     if (HasLineOfSightToTarget(hitCollider.transform)) 
@@ -539,7 +512,7 @@ public class PlayerController : MonoBehaviour
             {
                 Debug.LogWarning($"[{gameObject.name}] WeaponController 또는 firePoint를 찾을 수 없음 캐릭터 머리 기준으로 대체.");
                 float headHeightRatio = 0.45f; 
-                rayStartPoint = (transform.position + _characterController.center) + (Vector3.up * _characterController.height * headHeightRatio);
+                rayStartPoint = (transform.position + _characterController.center) + Vector3.up * (_characterController.height * headHeightRatio);
             }
             else 
             {
@@ -595,62 +568,62 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 디버그용 (에임 어시스트 범위 확인)
     /// </summary>
-void OnDrawGizmosSelected()
-{
-    if (_characterController == null && Application.isPlaying) {
-         _characterController = GetComponent<CharacterController>(); 
-    }
-    if (_characterController == null && !Application.isPlaying) { 
-         _characterController = GetComponent<CharacterController>();
-         if(_characterController == null && GetComponent<PlayerData>() == null) return;
-    }
-    
-    Vector3 gizmoOrigin = transform.position;
-    if (_characterController != null) 
+    void OnDrawGizmosSelected()
     {
-         gizmoOrigin = transform.position + _characterController.center;
-    }
-
-    Gizmos.color = new Color(0, 0.8f, 0, 0.10f); 
-    Gizmos.DrawWireSphere(gizmoOrigin, aimAssistRadius);
-
-    if (IsAiming && _aimingDirection.sqrMagnitude > 0.01f)
-    {
-        Gizmos.color = Color.blue; 
-        Gizmos.DrawRay(gizmoOrigin, _aimingDirection.normalized * aimAssistRadius);
-
-        // 수평 에임 어시스트 각도(cone) 시각화
-        Gizmos.color = new Color(0.5f, 0.5f, 1f, 0.2f); 
-        Vector3 leftRayOverallH = Quaternion.Euler(0, -horizontalAimConeAngle, 0) * _aimingDirection.normalized;
-        Vector3 rightRayOverallH = Quaternion.Euler(0, horizontalAimConeAngle, 0) * _aimingDirection.normalized;
-        Gizmos.DrawRay(gizmoOrigin, leftRayOverallH * (aimAssistRadius * 0.9f)); 
-        Gizmos.DrawRay(gizmoOrigin, rightRayOverallH * (aimAssistRadius * 0.9f));
-        Gizmos.DrawLine(gizmoOrigin + leftRayOverallH * (aimAssistRadius * 0.9f), gizmoOrigin + rightRayOverallH * (aimAssistRadius * 0.9f));
-
-        // 수평 조준선 근처 우선 타겟팅 각도(cone) 시각화
-        Gizmos.color = new Color(0, 1f, 1f, 0.3f); 
-        Vector3 leftRayOnReticleH = Quaternion.Euler(0, -onReticleHorizontalAngle, 0) * _aimingDirection.normalized;
-        Vector3 rightRayOnReticleH = Quaternion.Euler(0, onReticleHorizontalAngle, 0) * _aimingDirection.normalized;
-        Gizmos.DrawRay(gizmoOrigin, leftRayOnReticleH * aimAssistRadius); 
-        Gizmos.DrawRay(gizmoOrigin, rightRayOnReticleH * aimAssistRadius);
-        Gizmos.DrawLine(gizmoOrigin + leftRayOnReticleH * aimAssistRadius, gizmoOrigin + rightRayOnReticleH * aimAssistRadius);
-
-        // (참고: verticalAimConeAngle을 3D로 정확히 시각화하는 것은 더 복잡합니다.
-        // 위 기즈모는 수평 범위만 보여주며, 실제로는 이 수평 범위 내에서 수직으로도 verticalAimConeAngle 만큼의 허용치가 더해집니다.)
-    }
-    
-    if (_lockedAimAssistTarget != null)
-    {
-        Gizmos.color = Color.red;
-        Vector3 targetDisplayPoint = _lockedAimAssistTarget.position;
-        Collider targetCol = _lockedAimAssistTarget.GetComponent<Collider>();
-        if(targetCol != null) targetDisplayPoint = targetCol.bounds.center;
-
-        Vector3 startLinePoint = gizmoOrigin; 
-        if (_weaponController != null && _weaponController.firePoint != null) {
-             startLinePoint = _weaponController.firePoint.position; 
+        if (_characterController == null && Application.isPlaying) {
+             _characterController = GetComponent<CharacterController>(); 
         }
-        Gizmos.DrawLine(startLinePoint, targetDisplayPoint);
+        if (_characterController == null && !Application.isPlaying) { 
+             _characterController = GetComponent<CharacterController>();
+             if(_characterController == null && GetComponent<PlayerData>() == null) return;
+        }
+        
+        Vector3 gizmoOrigin = transform.position;
+        if (_characterController != null) 
+        {
+             gizmoOrigin = transform.position + _characterController.center;
+        }
+
+        Gizmos.color = new Color(0, 0.8f, 0, 0.10f); 
+        Gizmos.DrawWireSphere(gizmoOrigin, aimAssistRadius);
+
+        if (IsAiming && _aimingDirection.sqrMagnitude > 0.01f)
+        {
+            Gizmos.color = Color.blue; 
+            Gizmos.DrawRay(gizmoOrigin, _aimingDirection.normalized * aimAssistRadius);
+
+            // 수평 에임 어시스트 각도(cone) 시각화
+            Gizmos.color = new Color(0.5f, 0.5f, 1f, 0.2f); 
+            Vector3 leftRayOverallH = Quaternion.Euler(0, -horizontalAimConeAngle, 0) * _aimingDirection.normalized;
+            Vector3 rightRayOverallH = Quaternion.Euler(0, horizontalAimConeAngle, 0) * _aimingDirection.normalized;
+            Gizmos.DrawRay(gizmoOrigin, leftRayOverallH * (aimAssistRadius * 0.9f)); 
+            Gizmos.DrawRay(gizmoOrigin, rightRayOverallH * (aimAssistRadius * 0.9f));
+            Gizmos.DrawLine(gizmoOrigin + leftRayOverallH * (aimAssistRadius * 0.9f), gizmoOrigin + rightRayOverallH * (aimAssistRadius * 0.9f));
+
+            // 수평 조준선 근처 우선 타겟팅 각도(cone) 시각화
+            Gizmos.color = new Color(0, 1f, 1f, 0.3f); 
+            Vector3 leftRayOnReticleH = Quaternion.Euler(0, -onReticleHorizontalAngle, 0) * _aimingDirection.normalized;
+            Vector3 rightRayOnReticleH = Quaternion.Euler(0, onReticleHorizontalAngle, 0) * _aimingDirection.normalized;
+            Gizmos.DrawRay(gizmoOrigin, leftRayOnReticleH * aimAssistRadius); 
+            Gizmos.DrawRay(gizmoOrigin, rightRayOnReticleH * aimAssistRadius);
+            Gizmos.DrawLine(gizmoOrigin + leftRayOnReticleH * aimAssistRadius, gizmoOrigin + rightRayOnReticleH * aimAssistRadius);
+
+            // (참고: verticalAimConeAngle을 3D로 정확히 시각화하는 것은 더 복잡합니다.
+            // 위 기즈모는 수평 범위만 보여주며, 실제로는 이 수평 범위 내에서 수직으로도 verticalAimConeAngle 만큼의 허용치가 더해집니다.)
+        }
+        
+        if (_lockedAimAssistTarget != null)
+        {
+            Gizmos.color = Color.red;
+            Vector3 targetDisplayPoint = _lockedAimAssistTarget.position;
+            Collider targetCol = _lockedAimAssistTarget.GetComponent<Collider>();
+            if(targetCol != null) targetDisplayPoint = targetCol.bounds.center;
+
+            Vector3 startLinePoint = gizmoOrigin; 
+            if (_weaponController != null && _weaponController.firePoint != null) {
+                 startLinePoint = _weaponController.firePoint.position; 
+            }
+            Gizmos.DrawLine(startLinePoint, targetDisplayPoint);
+        }
     }
-}
 }

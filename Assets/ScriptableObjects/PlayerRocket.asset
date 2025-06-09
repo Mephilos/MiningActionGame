@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Rocket
   baseDamage: 15
-  attackSpeed: 0.1
+  attackSpeed: 1
   range: 100
   projectilePrefab: {fileID: 3929694715233593608, guid: 379de5bda06e3436fb42ce65a1bf07b8, type: 3}
   explosionRadius: 3
@@ -22,3 +22,11 @@ MonoBehaviour:
   explosionDamageLayerMask:
     serializedVersion: 2
     m_Bits: 65
+  isChargeWeapon: 0
+  chargeTime: 2
+  minChargeToFire: 0.1
+  damageScalesWithCharge: 1
+  maxChargeDamageMultiplier: 2
+  laserEffectPrefab: {fileID: 0}
+  chargeEffectPrefab: {fileID: 0}
+  fireOnRelease: 1

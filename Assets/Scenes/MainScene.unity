@@ -1461,6 +1461,10 @@ PrefabInstance:
       propertyPath: baseStatsData
       value: 
       objectReference: {fileID: 11400000, guid: e4fa13eda78fe4e5d800a16a08179760, type: 2}
+    - target: {fileID: 6254655235384279046, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 01801c21c49f549a1b9f68498bf108cb, type: 2}
     - target: {fileID: 6310566825574666354, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.60924
@@ -3860,7 +3864,7 @@ MonoBehaviour:
   playerTransform: {fileID: 1613055495}
   uiManager: {fileID: 1123934153}
   enemySpawner: {fileID: 2043441969}
-  timeToSurvivePerStage: 1000
+  timeToSurvivePerStage: 60
   defaultMinNoiseScale: 0.02
   defaultMaxNoiseScale: 0.04
   defaultMinHeightMultiplier: 0
@@ -5241,6 +5245,7 @@ MonoBehaviour:
   maxSpawnDistanceFromPlayer: 25
   spawnPositionAttempts: 10
   navMeshSampleRadius: 2
+  bossPrefab: {fileID: 6899384301604392278, guid: 5ed88399a02984b95aa49fb9bfd520bf, type: 3}
 --- !u!4 &2043441970
 Transform:
   m_ObjectHideFlags: 0
