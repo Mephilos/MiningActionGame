@@ -163,7 +163,8 @@ MonoBehaviour:
   firePoints:
   - {fileID: 6016493156248457184}
   - {fileID: 6016493157852036767}
-  projectilesPerVolley: 3
+  projectileSpeed: 30
+  projectilesPerVolley: 5
   timeBetweenShots: 0.2
   meleeAttackRange: 5
   meleeAttackCooldown: 0

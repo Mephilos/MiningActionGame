@@ -22,6 +22,7 @@ public class MidBoss : EnemyBase
     public float aimDuration = 1.5f; // 조준 지연시간
     public GameObject projectilePrefab;
     public Transform[] firePoints;
+    public float projectileSpeed = 20f;
     public int projectilesPerVolley = 10;
     public float timeBetweenShots = 0.1f;
 
@@ -125,12 +126,25 @@ public class MidBoss : EnemyBase
 
         for (int i = 0; i < projectilesPerVolley; i++)
         {
-            // 복수의 firepoint를 순환하며 사용
+            // 복수의 firepoint 사용 가능
             Transform firePoint = firePoints[i % firePoints.Length];
             if (projectilePrefab != null)
             {
-                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-                // TODO: 투사체에 데미지, 속도 등 설정
+                Vector3 direction = (PlayerTransform.position + Vector3.up * 1.5f - firePoint.position).normalized;
+                Quaternion rotation = Quaternion.LookRotation(direction);
+                
+                GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+
+                if (projectileGO.TryGetComponent<Projectile>(out var projectileScript))
+                {
+                    projectileScript.SetDamage(enemyBaseData.attackDamage);
+                    projectileScript.isEnemyProjectile = true;
+                }
+                
+                if (projectileGO.TryGetComponent<Rigidbody>(out var rb))
+                {
+                    rb.linearVelocity = direction * projectileSpeed;
+                }
             }
             yield return new WaitForSeconds(timeBetweenShots);
         }
