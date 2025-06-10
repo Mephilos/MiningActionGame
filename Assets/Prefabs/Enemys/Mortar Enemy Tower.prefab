@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3978943365885307416}
   - component: {fileID: 6115308551746318698}
   - component: {fileID: 5309561571999978585}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: MortarG_Barrel02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5401001450604799266}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 6115843659329984914}
   - component: {fileID: 1152287132125426795}
   - component: {fileID: 1105751705189244897}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: MortarG_Stand00
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -219,9 +219,9 @@ GameObject:
   - component: {fileID: 3092833682235351593}
   - component: {fileID: 182728806023571162}
   - component: {fileID: 3239005761825747253}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Mortar Enemy Tower
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -348,7 +348,7 @@ GameObject:
   - component: {fileID: 7785696309279608219}
   - component: {fileID: 6126927031129147557}
   - component: {fileID: 5296173514359080929}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: FireFx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5197,7 +5197,7 @@ GameObject:
   - component: {fileID: 115062275034772994}
   - component: {fileID: 6685595268725211319}
   - component: {fileID: 7457179007336455367}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: MortarG_Plate00
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5281,7 +5281,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1819803901425409068}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ShootPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

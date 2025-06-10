@@ -21,7 +21,7 @@ MonoBehaviour:
   explosionEffectPrefab: {fileID: 1326252799184205898, guid: 497c6c0b9aeac44a4b102e9ff9e3c4ff, type: 3}
   explosionDamageLayerMask:
     serializedVersion: 2
-    m_Bits: 65
+    m_Bits: 321
   isChargeWeapon: 0
   chargeTime: 2
   minChargeToFire: 0.1

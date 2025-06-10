@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc1093a972404c17ac91f025d45bc5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  impactEffectPrefab: {fileID: 1063539193084281190, guid: a62134467c2eb4127afd7fbb18d764e8, type: 3}
+  impactEffectPrefab: {fileID: 0}
   lifeTime: 5
   isEnemyProjectile: 0
 --- !u!54 &8291716054623040305

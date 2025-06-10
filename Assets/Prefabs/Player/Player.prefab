@@ -43,6 +43,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1307621692026614, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 4090008478502722, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -83,6 +87,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95097915334025014, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 01801c21c49f549a1b9f68498bf108cb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -125,13 +133,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeaponData: {fileID: 0}
-  firePoint: {fileID: 0}
+  currentWeaponData: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
+  firePoint: {fileID: 975871988846311673}
   bulletSpeed: 30
-  muzzleFlashPrefab: {fileID: 0}
+  muzzleFlashPrefab: {fileID: 915984143002522250, guid: b8f8a2f3ef749494f8fa13fe541596e3, type: 3}
   aimLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 257
 --- !u!114 &-2656565280028974690
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -152,10 +160,10 @@ MonoBehaviour:
   verticalAimConeAngle: 25
   aimAssistLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 257
   obstacleLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   onReticleHorizontalAngle: 5
 --- !u!114 &4521416094532657764
 MonoBehaviour:
@@ -169,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bdc83b965e5648d79cfc0800cca56f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseStatsData: {fileID: 0}
+  baseStatsData: {fileID: 11400000, guid: e4fa13eda78fe4e5d800a16a08179760, type: 2}
   currentHealth: 0
   isDead: 0
   currentResources: 0
