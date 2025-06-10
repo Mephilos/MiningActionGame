@@ -1,16 +1,25 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New FireSupportSkillData", menuName = "Data/FireSupportSkillData")]
+[CreateAssetMenu(fileName = "New FireSupportSkillData", menuName = "Player Character/FireSupportSkillData")]
 public class FireSupportSkillData : SkillData
 {
     [Header("포격 스킬 전용 설정")]
     public GameObject grenadePrefab; // 이 스킬이 사용할 수류탄 프리팹
     public float throwForce = 15f;
 
+    [Header("포격 설정")]
+    public GameObject fireSupportProjectilePrefab; // 떨어질 포탄 프리팹
+    public GameObject targetIndicatorPrefab; // 포탄 낙하 지점 표시 프리팹
+    public int waves = 3;
+    public int projectilesPerWave = 4;
+    public float spawnRadius;
+    public float aimDuration;
+    public float fallDuration;
+
     // PlayerController가 이 메서드를 호출
     public override void Activate(PlayerController player)
     {
-        if (grenadePrefab == null || player.ThrowPoint == null) return;
+        if (grenadePrefab == null || player.grenadeThrowPoint == null) return;
 
         // 마우스 커서 방향으로 수류탄 발사
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -33,7 +42,7 @@ public class FireSupportSkillData : SkillData
         // 생성된 수류탄에 이 스킬 데이터(자기 자신)를 전달
         if(grenadeGO.TryGetComponent<SkillGrenade>(out var skillGrenade))
         {
-            skillGrenade.sourceSkill = this;
+            skillGrenade.sourceSkillData = this;
         }
         
         if (grenadeGO.TryGetComponent<Rigidbody>(out var rb))
@@ -48,7 +57,7 @@ public class FireSupportSkillData : SkillData
         if (StageManager.Instance != null)
         {
             // StageManager에 포격 요청 시, 스킬 데이터를 함께 넘겨줌
-            StageManager.Instance.RequestArtilleryStrike(position, this);
+            StageManager.Instance.RequestFireSupportStrike(position, this);
         }
     }
 }

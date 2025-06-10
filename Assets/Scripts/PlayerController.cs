@@ -33,6 +33,10 @@ public class PlayerController : MonoBehaviour
 
     private bool _isBeingKnockedBack;
 
+    [Header("스킬 설정")]
+    [Tooltip("수류탄을 던질 시작 위치")]
+    public Transform grenadeThrowPoint;
+
 
 
     public bool IsAiming { get; private set; }
@@ -77,9 +81,11 @@ public class PlayerController : MonoBehaviour
             
             return;
         }
-        
+        // TODO: 스킬 쿨타임 표기 UI 추가
+
         //플레이어 웨폰컨트롤러 기능 분리위해 새로 작성
         HandleInput();
+        HandleSkillInput();
         UpdateAiming();
         PassDataToWeaponController();
         UpdateAnimations();
@@ -98,6 +104,22 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
         ApplyFinalMovement();
     }
+    void HandleSkillInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Q) && _playerData.currentSkillCooldown <= 0)
+        {
+            // 무기 데이터에서 스킬 을 가져옴
+            SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
+
+            if (currentSkill != null)
+            {
+                // 스킬 매서드 호출
+                currentSkill.Activate(this);
+                _playerData.currentSkillCooldown = currentSkill.cooldown;
+            }
+        }
+    }
+
 
     void HandleInput()
     {

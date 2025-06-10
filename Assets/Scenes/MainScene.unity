@@ -1428,6 +1428,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+      propertyPath: grenadeThrowPoint
+      value: 
+      objectReference: {fileID: 466908797}
     - target: {fileID: 6310566825574666354, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1477,6 +1481,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+--- !u!4 &466908797 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 975871988846311673, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+  m_PrefabInstance: {fileID: 466908796}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &519297916
 GameObject:
   m_ObjectHideFlags: 0

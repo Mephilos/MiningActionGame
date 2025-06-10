@@ -3,18 +3,22 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewWeaponData", menuName = "Game Data/Weapon Data")]
 public class WeaponData : ScriptableObject
 {
-    public string weaponName = "기본 무기";
+    public string weaponName = "Default Weapon";
+
+    [Tooltip("장착할 SkillData 에셋")]
+    public SkillData specialSkill;
+    
     public float baseDamage = 15f; // 무기 자체의 기본 데미지
     public float attackSpeed = 1.0f;
     public float range = 100f;
     public GameObject projectilePrefab; // 발사체 프리팹
     
     [Header("Explosion Settings (범위 공격용)")]
-    [Tooltip("폭발 반경. 0 이하면 단일 타겟으로 간주됩니다.")]
+    [Tooltip("폭발 반경 0 이하면 단일 타겟으로 간주")]
     public float explosionRadius = 0f;
     [Tooltip("폭발 시 생성될 이펙트 프리팹입니다.")]
     public GameObject explosionEffectPrefab;
-    [Tooltip("폭발 데미지가 적용될 레이어를 선택합니다.")]
+    [Tooltip("폭발 데미지가 적용될 레이어")]
     public LayerMask explosionDamageLayerMask;
     
     [Header("Charge Laser Settings (차징 레이저 무기용)")]

@@ -642,4 +642,60 @@ public class StageManager : MonoBehaviour
         _spawningCompleted = true;
         Debug.Log("[StageManager] 이 스테이지의 모든 스폰이 완료되었습니다.");
     }
+
+    public void RequestFireSupportStrike(Vector3 position, FireSupportSkillData skillData)
+    {
+        if (skillData.fireSupportProjectilePrefab == null)
+        {
+            Debug.LogError($"[{gameObject.name}]화력지원 프리팹 설정 필요");
+            return;
+        }
+        StartCoroutine(FireSupportStrikeCoroutine(position, skillData));
+    }
+    private IEnumerator FireSupportStrikeCoroutine(Vector3 centerPosition, FireSupportSkillData skillData)
+    {
+        int waves = skillData.waves;
+        int projectilesPerWave = skillData.projectilesPerWave;
+        float waveDelay = 0.8f; // 이 값도 skillData에 추가할 수 있습니다.
+        float spawnRadius = skillData.spawnRadius;
+        float aimDuration = skillData.aimDuration;
+        float fallDuration = skillData.fallDuration;
+        float spawnHeight = 50f;
+
+        WaitForSeconds waveWait = new WaitForSeconds(waveDelay);
+
+        for (int i = 0; i < waves; i++)
+        {
+            for (int j = 0; j < projectilesPerWave; j++)
+            {
+                Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
+                Vector3 targetPos = centerPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
+
+                if (Physics.Raycast(targetPos + Vector3.up * 20f, Vector3.down, out RaycastHit hit, 40f, LayerMask.GetMask("Ground")))
+                {
+                    targetPos = hit.point;
+                }
+
+                GameObject indicator = null;
+                if (skillData.targetIndicatorPrefab != null)
+                {
+                    indicator = Instantiate(skillData.targetIndicatorPrefab, targetPos, Quaternion.Euler(90, 0, 0));
+                }
+
+                Vector3 startPos = targetPos + Vector3.up * spawnHeight;
+
+                yield return new WaitForSeconds(aimDuration);
+
+                if (indicator != null) Destroy(indicator);
+
+                GameObject projectileGO = Instantiate(skillData.fireSupportProjectilePrefab, startPos, Quaternion.identity);
+                FireSupportProjectile projectileScript = projectileGO.GetComponent<FireSupportProjectile>();
+                if (projectileScript != null)
+                {
+                    projectileScript.Initialize(startPos, targetPos, fallDuration);
+                }
+            }
+            yield return waveWait;
+        }
+    }
 }

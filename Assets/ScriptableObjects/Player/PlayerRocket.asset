@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: PlayerRocket
   m_EditorClassIdentifier: 
   weaponName: Rocket
+  specialSkill: {fileID: 11400000, guid: 53789c4752f9d42469b027550a05224a, type: 2}
   baseDamage: 15
   attackSpeed: 1
   range: 100

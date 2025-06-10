@@ -2,21 +2,22 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
-    // 기본 스텟 데이터(ScriptableObject)
+    [Header("플레이어 스탯 데이터")]
     public PlayerBaseStatsData baseStatsData;
 
-    // 체력 스탯
+    [Header("체력 스탯")]
     public float currentHealth;
     private float _maxHealth;
     public bool isDead;
-    
-    // 자원
+
+    [Header("자원 관련 스탯")]
     public int currentResources;
 
-    // 전투력
+    [Header("전투 관련 스탯")]
     public float currentAttackDamage;
     public float currentAttackSpeed;
-    // 이동기
+
+    [Header("이동 관련 스탯")]
     public float currentMaxSpeed;
     public float currentRotationSpeed;
     public float currentAcceleration;
@@ -32,15 +33,24 @@ public class PlayerData : MonoBehaviour
     public float currentDashInvincibleDuration;
     public bool isInvincible;
     public bool isDashing;
+
+
+    [Header("스킬 관련 스탯")]
+    public float currentSkillCooldown;
     
     //TODO:아이템은 나중에 추가 (리스트 사용 예정)
 
     void Awake()
     {
         InitializeStatsFromBaseData();
+        currentSkillCooldown = 0;
     }
     void Update()
     {
+        if (currentSkillCooldown > 0)
+        {
+            currentSkillCooldown -= Time.deltaTime;
+        }
         if (dashCooldownTimer > 0)
         {
             dashCooldownTimer -= Time.deltaTime;
