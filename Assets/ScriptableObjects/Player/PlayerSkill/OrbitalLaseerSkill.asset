@@ -15,7 +15,7 @@ MonoBehaviour:
   skillName: 
   description: 
   skillIcon: {fileID: 0}
-  cooldown: 30
+  cooldown: 1
   grenadePrefab: {fileID: 3805954997797676055, guid: 0d7c32f76b0608549a9a286412ffb53b, type: 3}
   throwForce: 15
   laserBeamPrefab: {fileID: 8223419632573574704, guid: d356c570cf6cb4f53ba641677e20aa65, type: 3}

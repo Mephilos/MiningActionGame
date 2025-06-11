@@ -34,9 +34,9 @@ public class PlayerController : MonoBehaviour
     private bool _isBeingKnockedBack;
 
     [Header("스킬 설정")]
-    [Tooltip("수류탄을 던질 시작 위치")]
-    public Transform grenadeThrowPoint;
-
+    [SerializeField] private TrajectoryPredictor trajectoryPredictor;
+    [Tooltip("수류탄을 던질 시작 위치")] public Transform grenadeThrowPoint;
+    private bool _isAimingSkill = false;
 
 
     public bool IsAiming { get; private set; }
@@ -106,17 +106,70 @@ public class PlayerController : MonoBehaviour
     }
     void HandleSkillInput()
     {
+        SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
+        
+        // 스킬이 없거나, 궤도 예측기가 없으면 실행하지 않음
+        if (currentSkill == null || trajectoryPredictor == null) return;
+        
         if (Input.GetKeyDown(KeyCode.Q) && _playerData.currentSkillCooldown <= 0)
         {
-            // 무기 데이터에서 스킬 을 가져옴
-            SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
+            _isAimingSkill = true;
+            trajectoryPredictor.Show(); // 궤도 UI 표시
+        }
 
-            if (currentSkill != null)
-            {
-                // 스킬 매서드 호출
-                currentSkill.Activate(this);
-                _playerData.currentSkillCooldown = currentSkill.cooldown;
-            }
+        // Q키를 누르고 있는 동안
+        if (_isAimingSkill && Input.GetKey(KeyCode.Q))
+        {
+            // 마우스 위치에 따라 궤도 실시간 업데이트
+            Vector3 throwDirection = GetThrowDirection(currentSkill.throwForce);
+            trajectoryPredictor.PredictTrajectory(grenadeThrowPoint.position, throwDirection);
+        }
+
+        // Q키를 뗐을 때 
+        if (_isAimingSkill && Input.GetKeyUp(KeyCode.Q))
+        {
+            ThrowSkillGrenade(currentSkill); // 수류탄 투척
+            _playerData.currentSkillCooldown = currentSkill.cooldown; // 쿨타임 시작
+
+            _isAimingSkill = false;
+            trajectoryPredictor.Hide(); // 궤도 UI 숨김
+        }
+    }
+    private Vector3 GetThrowDirection(float force)
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Vector3 targetPoint;
+        if (Physics.Raycast(ray, out RaycastHit hit, 200f, ~LayerMask.GetMask("Player")))
+        {
+            targetPoint = hit.point;
+        }
+        else
+        {
+            targetPoint = ray.GetPoint(50f);
+        }
+        
+        Vector3 direction = (targetPoint - grenadeThrowPoint.position).normalized;
+        return direction * force;
+    }
+
+    /// <summary>
+    /// 스킬 수류탄을 실제로 던지는 메서드
+    /// </summary>
+    private void ThrowSkillGrenade(SkillData skill)
+    {
+        if (skill.grenadePrefab == null) return;
+        
+        Vector3 throwDirection = GetThrowDirection(skill.throwForce);
+        GameObject grenadeGO = Instantiate(skill.grenadePrefab, grenadeThrowPoint.position, Quaternion.identity);
+
+        if (grenadeGO.TryGetComponent<SkillGrenade>(out var skillGrenade))
+        {
+            skillGrenade.sourceSkillData = skill;
+        }
+
+        if (grenadeGO.TryGetComponent<Rigidbody>(out var rb))
+        {
+            rb.linearVelocity = throwDirection; // AddForce 대신 velocity를 직접 설정하여 궤도 예측과 일치시킴
         }
     }
 

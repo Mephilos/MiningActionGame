@@ -103,7 +103,6 @@ public class MortarProjectile : MonoBehaviour
                 }
             }
         }
-
         Destroy(gameObject);
     }
 }

@@ -15,7 +15,7 @@ public class OrbitalLaserSkillData : SkillData
 
         if (laserGO.TryGetComponent<OrbitalLaserBeam>(out OrbitalLaserBeam beam))
         {
-            
+            beam.Initialize(duration, tickRate, damagePerTick, radius);
         }
     }
 }

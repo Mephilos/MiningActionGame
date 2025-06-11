@@ -15,7 +15,9 @@ public class SkillGrenade : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (!_isLanded && collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        int otherLayer = collision.gameObject.layer;
+        
+        if (!_isLanded && otherLayer == LayerMask.NameToLayer("Ground") || otherLayer == LayerMask.NameToLayer("Enemy"))
         {
             _isLanded = true;
 
@@ -24,18 +26,12 @@ public class SkillGrenade : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.isKinematic = true;
             }
-            if (smokeEffectPrefab != null)
-            {
-                Instantiate(smokeEffectPrefab, transform.position, Quaternion.identity);
-            }
-
-            if (sourceSkillData != null)
-            {
-                sourceSkillData.ExecuteEffect(transform.position);
-            }
+            if (smokeEffectPrefab != null) Instantiate(smokeEffectPrefab, transform.position, Quaternion.identity);
+            
+            if (sourceSkillData != null) sourceSkillData.ExecuteEffect(transform.position);
+            
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();
-
             if (renderer) renderer.enabled = false;
             Destroy(renderer, 1f);
         }

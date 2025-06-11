@@ -10,6 +10,7 @@ public class OrbitalLaserBeam : MonoBehaviour
 
     public void Initialize(float duration, float tickRate, float damagePerTick, float radius)
     {
+        Debug.Log($"레이저 빔 초기화! 지속시간: {duration}, 틱당 데미지: {damagePerTick}");
         _duration = duration;
         _tickRate = tickRate;
         _damagePerTick = damagePerTick;
@@ -33,6 +34,7 @@ public class OrbitalLaserBeam : MonoBehaviour
                 if (hit.TryGetComponent<EnemyBase>(out EnemyBase enemy))
                 {
                     enemy.TakeDamage(_damagePerTick);
+                    Debug.Log($"{enemy.name}에게 {_damagePerTick} 데미지");
                 }
             }
             yield return wait;
