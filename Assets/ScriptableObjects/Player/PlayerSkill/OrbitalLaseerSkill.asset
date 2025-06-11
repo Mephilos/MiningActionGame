@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dff4d494f4bf4b61ad86a936b454ae6, type: 3}
+  m_Name: OrbitalLaseerSkill
+  m_EditorClassIdentifier: 
+  skillName: 
+  description: 
+  skillIcon: {fileID: 0}
+  cooldown: 30
+  grenadePrefab: {fileID: 3805954997797676055, guid: 0d7c32f76b0608549a9a286412ffb53b, type: 3}
+  throwForce: 15
+  laserBeamPrefab: {fileID: 8223419632573574704, guid: d356c570cf6cb4f53ba641677e20aa65, type: 3}
+  duration: 5
+  tickRate: 3
+  damagePerTick: 30
+  radius: 2

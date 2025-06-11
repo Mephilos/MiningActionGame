@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SkillGrenade : MonoBehaviour
 {
-    public FireSupportSkillData sourceSkillData;
+    public SkillData sourceSkillData;
 
     public float lifeTime = 5f;
     public GameObject smokeEffectPrefab;
@@ -31,7 +31,7 @@ public class SkillGrenade : MonoBehaviour
 
             if (sourceSkillData != null)
             {
-                sourceSkillData.ExecuteStrike(transform.position);
+                sourceSkillData.ExecuteEffect(transform.position);
             }
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();

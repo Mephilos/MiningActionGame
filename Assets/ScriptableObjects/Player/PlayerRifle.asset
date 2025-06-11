@@ -13,7 +13,21 @@ MonoBehaviour:
   m_Name: PlayerRifle
   m_EditorClassIdentifier: 
   weaponName: AssaultRifle
+  specialSkill: {fileID: 11400000, guid: 3cf458b2611e34adfad919e3dda46539, type: 2}
   baseDamage: 2
   attackSpeed: 0.2
   range: 100
   projectilePrefab: {fileID: 6730927503448550575, guid: 7c112116d497b416a9a01d64583aa8ed, type: 3}
+  explosionRadius: 0
+  explosionEffectPrefab: {fileID: 0}
+  explosionDamageLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  isChargeWeapon: 0
+  chargeTime: 2
+  minChargeToFire: 0.1
+  damageScalesWithCharge: 1
+  maxChargeDamageMultiplier: 2
+  laserEffectPrefab: {fileID: 0}
+  chargeEffectPrefab: {fileID: 0}
+  fireOnRelease: 1
