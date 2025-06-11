@@ -154,6 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyBaseData: {fileID: 11400000, guid: 65fbbb1328a1d4b79a33567eb68de1df, type: 2}
   navMeshSampleRadius: 2
+  hpBarPrefab: {fileID: 6455096524345293041, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
   detectionRadius: 20
   attackRange: 1
   attackCooldown: 2

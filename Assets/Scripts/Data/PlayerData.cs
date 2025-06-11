@@ -37,13 +37,30 @@ public class PlayerData : MonoBehaviour
 
     [Header("스킬 관련 스탯")]
     public float currentSkillCooldown;
-    
+
+    [Header("UI 설정")] 
+    public GameObject hpBarPrefab;
+    private WorldSpaceHealthBar _hpBarInstance;
     //TODO:아이템은 나중에 추가 (리스트 사용 예정)
 
     void Awake()
     {
         InitializeStatsFromBaseData();
         currentSkillCooldown = 0;
+
+        if (hpBarPrefab != null)
+        {
+            GameObject hpBarInstanceObj = Instantiate(hpBarPrefab, transform.position, Quaternion.identity, null);
+            _hpBarInstance = hpBarInstanceObj.GetComponent<WorldSpaceHealthBar>();
+
+            if (_hpBarInstance != null)
+            {
+                _hpBarInstance.healthBarFill.color = Color.green;
+                _hpBarInstance.targetToFollow = this.transform;
+                _hpBarInstance.offset = new Vector3(0, 2.5f, 0);
+                _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+            }
+        }
     }
     void Update()
     {
@@ -143,6 +160,11 @@ public class PlayerData : MonoBehaviour
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
         }
+
+        if (_hpBarInstance != null)
+        {
+            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+        }
         if (currentHealth <= 0)
         {
             Die();
@@ -162,6 +184,10 @@ public class PlayerData : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
+        }
+        if (_hpBarInstance != null)
+        {
+            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
         }
     }
 
@@ -196,6 +222,11 @@ public class PlayerData : MonoBehaviour
             Debug.LogWarning("[PlayerData] 플레이어 사망 처리 오류 발생");
             Time.timeScale = 0f;
         }
+
+        if (_hpBarInstance != null)
+        {
+            _hpBarInstance.SetVisibility(false);
+        }
     }
     /// <summary>
     /// 부활 , 스탯 초기화 (재시작시 사용)
@@ -225,6 +256,12 @@ public class PlayerData : MonoBehaviour
         else
         {
             Debug.LogWarning("[PlayerData] PlayerController를 찾을 수 없음");
+        }
+
+        if (_hpBarInstance != null)
+        {
+            _hpBarInstance.SetVisibility(true);
+            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
         }
     }
     /// <summary>
@@ -284,12 +321,12 @@ public class PlayerData : MonoBehaviour
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
 
-    public void IncreaseAttackSpeed(float additionalAttackSpeed, float AttackSpeedCap = 5f)
+    public void IncreaseAttackSpeed(float additionalAttackSpeed, float attackSpeedCap = 5f)
     {
         currentAttackSpeed -= additionalAttackSpeed;
-        if (currentAttackSpeed < AttackSpeedCap)
+        if (currentAttackSpeed < attackSpeedCap)
         {
-            currentAttackSpeed = AttackSpeedCap;
+            currentAttackSpeed = attackSpeedCap;
         }
         Debug.Log($"[{gameObject.name}] 공격 쿨다운 감소. 현재 공격 쿨다운 {currentAttackSpeed}");
         // 상점 ui 스텟 정보 업데이트

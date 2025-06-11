@@ -111,6 +111,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: -5910758365971810844}
   m_SourcePrefab: {fileID: 100100000, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
+--- !u!4 &6308545038487230616 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4873625208801192, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
+  m_PrefabInstance: {fileID: 6313242662376005424}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6308804347756109416 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4579330213675352, guid: e89380ccdfc49e745ab6113ecd0a5b1e, type: 3}
@@ -133,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeaponData: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
+  currentWeaponData: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
   firePoint: {fileID: 975871988846311673}
   bulletSpeed: 30
   muzzleFlashPrefab: {fileID: 915984143002522250, guid: b8f8a2f3ef749494f8fa13fe541596e3, type: 3}
@@ -154,6 +159,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isometricCameraAngleY: 45
   shortPressThreshold: 0.2
+  trajectoryPredictor: {fileID: 0}
+  grenadeThrowPoint: {fileID: 6308545038487230616}
   movementJoystick: {fileID: 0}
   aimAssistRadius: 10
   horizontalAimConeAngle: 15
@@ -198,6 +205,8 @@ MonoBehaviour:
   currentDashInvincibleDuration: 0
   isInvincible: 0
   isDashing: 0
+  currentSkillCooldown: 0
+  hpBarPrefab: {fileID: 6455096524345293041, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
 --- !u!143 &-5910758365971810844
 CharacterController:
   m_ObjectHideFlags: 0

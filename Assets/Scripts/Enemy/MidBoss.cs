@@ -46,6 +46,15 @@ public class MidBoss : EnemyBase
         _lastMeleeAttackTime = -meleeAttackCooldown;
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        
+        if (HpBarInstance != null)
+        {
+            HpBarInstance.offset = new Vector3(0, 4.0f, 0); 
+        }
+    }
     public override void Initialize(PlayerData playerData, Transform playerTransform)
     {
         base.Initialize(playerData, playerTransform);
@@ -193,6 +202,7 @@ public class MidBoss : EnemyBase
     }
     protected override void PerformUniqueDeathActions()
     {
+        Destroy(gameObject, 10f);
         // TODO: 죽음 연출 추가
     }
 }

@@ -1464,11 +1464,7 @@ PrefabInstance:
     - target: {fileID: -4331770944359682716, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: currentWeaponData
       value: 
-      objectReference: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
-    - target: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
-      propertyPath: grenadeThrowPoint
-      value: 
-      objectReference: {fileID: 1574136264}
+      objectReference: {fileID: 11400000, guid: 15d074fd1c5944ff989a3f5164396572, type: 2}
     - target: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: trajectoryPredictor
       value: 
@@ -3903,11 +3899,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556376572}
   m_CullTransparentMesh: 1
---- !u!4 &1574136264 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6308545038487230616, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
-  m_PrefabInstance: {fileID: 466908796}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1593179335
 GameObject:
   m_ObjectHideFlags: 0

@@ -28,6 +28,10 @@ public abstract class EnemyBase : MonoBehaviour
     [Header("추적 셋팅")] [Tooltip("네비메쉬 사용시 탐색 반경")]
     public float navMeshSampleRadius = 2.0f;
 
+    [Header("UI설정")]
+    public GameObject hpBarPrefab;
+    protected WorldSpaceHealthBar HpBarInstance;
+    
     public virtual void Initialize(PlayerData playerData, Transform playerTransform)
     {
         this.PlayerData = playerData;
@@ -64,6 +68,19 @@ public abstract class EnemyBase : MonoBehaviour
             CurrentHealth = MaxHealth;
         }
 
+        if (hpBarPrefab != null)
+        {
+            if (HpBarInstance != null) Destroy(HpBarInstance.gameObject);
+            
+            GameObject hpBarInstanceObj = Instantiate(hpBarPrefab, transform.position, Quaternion.identity, null);
+            HpBarInstance = hpBarInstanceObj.GetComponent<WorldSpaceHealthBar>();
+
+            if (HpBarInstance != null)
+            {
+                HpBarInstance.targetToFollow = this.transform;
+                HpBarInstance.UpdateHealth(CurrentHealth, MaxHealth);
+            }
+        }
         if (EnemySpawner.Instance != null && EnemySpawner.ActiveEnemies != null)
         {
             if (!EnemySpawner.ActiveEnemies.Contains(this))
@@ -80,6 +97,8 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void OnDisable()
     {
+        if (HpBarInstance != null) Destroy(HpBarInstance.gameObject);
+        
         if (EnemySpawner.Instance != null && EnemySpawner.ActiveEnemies != null)
         {
             EnemySpawner.ActiveEnemies.Remove(this);
@@ -120,6 +139,10 @@ public abstract class EnemyBase : MonoBehaviour
         CurrentHealth -= damageAmount;
         CurrentHealth = Mathf.Clamp(CurrentHealth, 0, MaxHealth);
 
+        if (HpBarInstance != null)
+        {
+            HpBarInstance.UpdateHealth(CurrentHealth, MaxHealth);
+        }
         if (CurrentHealth <= 0)
         {
             Die();
