@@ -46,6 +46,11 @@ public class MortarEnemyTower : EnemyBase
         _lastAttackTime = -attackCooldown;
         CurrentState = EnemyState.Idle;
     }
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        if (_currentTargetIndicatorInstance != null) Destroy(_currentTargetIndicatorInstance);        
+    }
 
     void Update()
     {
@@ -105,20 +110,24 @@ public class MortarEnemyTower : EnemyBase
 
         // 바닥 확인
         RaycastHit hitInfo;
+        Vector3 indicatorPosition;
+
         if (Physics.Raycast(_predictedTargetPosition + Vector3.up * 10f, Vector3.down, out hitInfo, 20f, LayerMask.GetMask("Ground")))
         {
             _predictedTargetPosition = hitInfo.point;
+            indicatorPosition = _predictedTargetPosition + hitInfo.normal * 0.05f;
         }
         else
         {
             _predictedTargetPosition.y = 0;
+            indicatorPosition = _predictedTargetPosition + Vector3.up * 0.05f;
              Debug.LogWarning($"[{gameObject.name}] 박격포 조준 시 바닥을 찾지 못했습니다.");
         }
 
         if (targetIndicatorPrefab != null)
         {
             if (_currentTargetIndicatorInstance != null) Destroy(_currentTargetIndicatorInstance);
-            _currentTargetIndicatorInstance = Instantiate(targetIndicatorPrefab, _predictedTargetPosition, Quaternion.Euler(90, 0, 0));
+            _currentTargetIndicatorInstance = Instantiate(targetIndicatorPrefab, indicatorPosition, Quaternion.Euler(90, 0, 0));
         }
 
         yield return new WaitForSeconds(aimDuration);
