@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class FireSupportProjectile : MonoBehaviour
 {
-    [Header("´É·ÂÄ¡")]
+    [Header("ëŠ¥ë ¥ì¹˜")]
     public float damage = 50f;
     public float explosionRadius = 2f;
     public int terrainDestructionRadius = 1;
 
-    [Header("È¿°ú")]
+    [Header("íš¨ê³¼")]
     public GameObject impactEffectPrefab;
 
     private Vector3 _startPosition;
@@ -15,7 +15,7 @@ public class FireSupportProjectile : MonoBehaviour
     private float _flightDuration;
     private float _elapsedTime;
 
-    // StageManager¿¡¼­ ÀÌ ÇÔ¼ö¸¦ È£Ãâ
+    // StageManagerì—ì„œ ì´ í•¨ìˆ˜ë¥¼ í˜¸ì¶œ
     public void Initialize(Vector3 start, Vector3 target, float duration)
     {
         _startPosition = start;

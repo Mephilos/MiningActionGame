@@ -3022,6 +3022,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerHelperDrone
       objectReference: {fileID: 0}
+    - target: {fileID: 938051562624169941, guid: 3633122dde2d146058a3f83e1bf85735, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2552507542780418427, guid: 3633122dde2d146058a3f83e1bf85735, type: 3}
       propertyPath: playerTransform
       value: 

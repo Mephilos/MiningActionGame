@@ -18,7 +18,7 @@ MonoBehaviour:
   cooldown: 30
   grenadePrefab: {fileID: 3805954997797676055, guid: 0d7c32f76b0608549a9a286412ffb53b, type: 3}
   throwForce: 15
-  fireSupportProjectilePrefab: {fileID: 5391040043729856053, guid: 63350e87966ff7b489c035107ea48f3b, type: 3}
+  fireSupportProjectilePrefab: {fileID: 4164615049386094086, guid: 51ace7d0bd95940c292d0bee1a630eb8, type: 3}
   targetIndicatorPrefab: {fileID: 6441246495927980022, guid: 8c863477e28ef4ac79f46095dd5f7268, type: 3}
   waves: 3
   projectilesPerWave: 4
