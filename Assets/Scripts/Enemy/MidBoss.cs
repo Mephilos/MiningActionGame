@@ -202,7 +202,14 @@ public class MidBoss : EnemyBase
     }
     protected override void PerformUniqueDeathActions()
     {
-        Destroy(gameObject, 10f);
         // TODO: 죽음 연출 추가
+    }
+
+    protected override void Die()
+    {
+        if (IsDead) return;
+        base.Die();
+        PerformUniqueDeathActions();
+        DestroyEnemy(1.0f);
     }
 }

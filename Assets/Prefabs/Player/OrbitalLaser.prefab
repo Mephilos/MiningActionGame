@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1504111731878045155}
   - component: {fileID: 3199422334116190965}
   - component: {fileID: 3746567983084219074}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: OrbitalLaser
   m_TagString: Untagged
   m_Icon: {fileID: 0}

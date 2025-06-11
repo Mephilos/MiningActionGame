@@ -1464,7 +1464,7 @@ PrefabInstance:
     - target: {fileID: -4331770944359682716, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: currentWeaponData
       value: 
-      objectReference: {fileID: 11400000, guid: 15d074fd1c5944ff989a3f5164396572, type: 2}
+      objectReference: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
     - target: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: trajectoryPredictor
       value: 
