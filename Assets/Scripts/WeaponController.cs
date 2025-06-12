@@ -196,10 +196,11 @@ public class WeaponController : MonoBehaviour
 
     private void TryFireProjectile()
     {
+        float finalAttackCooldown = _playerData.currentAttackSpeed * _playerData.globalAttackCooldownMultiplier;
         if (Time.time >= _nextFireTime)
         {
             FireProjectileInternal();
-            _nextFireTime = Time.time + _playerData.currentAttackSpeed;
+            _nextFireTime = Time.time + finalAttackCooldown;
         }
     }private void FireProjectileInternal()
     {
@@ -227,7 +228,7 @@ public class WeaponController : MonoBehaviour
 
         if (bullet.TryGetComponent<Projectile>(out var projectileScript))
         {
-            float totalDamage = _playerData.currentAttackDamage + currentWeaponData.baseDamage;
+            float totalDamage = (_playerData.currentAttackDamage + currentWeaponData.baseDamage) * _playerData.globalDamageMultiplier;
             projectileScript.SetDamage(totalDamage);
             projectileScript.isEnemyProjectile = false;
 
@@ -267,6 +268,7 @@ public class WeaponController : MonoBehaviour
         {
             actualDamage *= currentWeaponData.maxChargeDamageMultiplier;
         }
+        actualDamage *= _playerData.globalDamageMultiplier;
 
         Vector3 laserEndPoint = firePoint.position + fireDirection * currentWeaponData.range;
         if (currentWeaponData.laserEffectPrefab != null)

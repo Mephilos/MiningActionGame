@@ -7,7 +7,7 @@ public class PlayerData : MonoBehaviour
 
     [Header("체력 스탯")]
     public float currentHealth;
-    private float _maxHealth;
+    public float maxHealth;
     public bool isDead;
 
     [Header("자원 관련 스탯")]
@@ -16,6 +16,9 @@ public class PlayerData : MonoBehaviour
     [Header("전투 관련 스탯")]
     public float currentAttackDamage;
     public float currentAttackSpeed;
+    // 전역 계수
+    public float globalDamageMultiplier;
+    public float globalAttackCooldownMultiplier;
 
     [Header("이동 관련 스탯")]
     public float currentMaxSpeed;
@@ -58,7 +61,7 @@ public class PlayerData : MonoBehaviour
                 _hpBarInstance.healthBarFill.color = Color.green;
                 _hpBarInstance.targetToFollow = this.transform;
                 _hpBarInstance.offset = new Vector3(0, 2.5f, 0);
-                _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+                _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
             }
         }
     }
@@ -80,8 +83,8 @@ public class PlayerData : MonoBehaviour
         {
             Debug.LogError("[PlayerData] PlayerBaseStatsData가 PlayerStats 컴포넌트에 할당되지 않음 임시 값으로 초기화");
             //기본값으로 초기화
-            _maxHealth = 100f;
-            currentHealth = _maxHealth;
+            maxHealth = 100f;
+            currentHealth = maxHealth;
             currentResources = 0;
             currentAttackDamage = 10f;
             currentAttackSpeed = 0.5f;
@@ -104,7 +107,7 @@ public class PlayerData : MonoBehaviour
         else
         {
             // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
-            _maxHealth = baseStatsData.maxHealth;
+            maxHealth = baseStatsData.maxHealth;
             currentResources = baseStatsData.initialResources;
             currentAttackDamage = baseStatsData.initialAttackDamage;
             currentAttackSpeed = baseStatsData.initialAttackSpeed;
@@ -124,7 +127,7 @@ public class PlayerData : MonoBehaviour
         }
 
         // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
-        currentHealth = _maxHealth; // 시작 시 체력은 최대로
+        currentHealth = maxHealth; // 시작 시 체력은 최대로
 
         // 기타 초기화
         jumpCountAvailable = currentMaxJumpCount;
@@ -135,7 +138,7 @@ public class PlayerData : MonoBehaviour
         
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
+            UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
             UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
 
@@ -154,16 +157,16 @@ public class PlayerData : MonoBehaviour
             return;
         }
         currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, _maxHealth);
-        Debug.Log($"[PlayerData] 받은 데미지: {amount} / 현재 체력: {currentHealth}/{_maxHealth}");
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log($"[PlayerData] 받은 데미지: {amount} / 현재 체력: {currentHealth}/{maxHealth}");
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
+            UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
         }
 
         if (_hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
         }
         if (currentHealth <= 0)
         {
@@ -178,16 +181,16 @@ public class PlayerData : MonoBehaviour
     {
         if (isDead) return; // 죽었을 때 회복 방지
         currentHealth += amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, _maxHealth);
-        Debug.Log($"[PlayerData] 회복: {amount} / 현재 체력: {currentHealth}/{_maxHealth}");
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        Debug.Log($"[PlayerData] 회복: {amount} / 현재 체력: {currentHealth}/{maxHealth}");
         
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.UpdatePlayerHpUI(currentHealth, _maxHealth);
+            UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
         }
         if (_hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
         }
     }
 
@@ -261,7 +264,7 @@ public class PlayerData : MonoBehaviour
         if (_hpBarInstance != null)
         {
             _hpBarInstance.SetVisibility(true);
-            _hpBarInstance.UpdateHealth(currentHealth,_maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
         }
     }
     /// <summary>
@@ -335,6 +338,18 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdateShopStatsUI();
         }
     }
+    public void IncreaseMaxHealth(float amount)
+    {
+        maxHealth += amount;
+        currentHealth += amount; // 현재 체력도 같이 올려줌
+        Debug.Log($"[PlayerData] 최대 체력 증가! 현재: {maxHealth}");
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
+            UIManager.Instance.UpdateShopStatsUI();
+        }
+    }
+
     public void IncreaseMaxSpeed(float additionalMaxSpeed)
     {
         currentMaxSpeed += additionalMaxSpeed;

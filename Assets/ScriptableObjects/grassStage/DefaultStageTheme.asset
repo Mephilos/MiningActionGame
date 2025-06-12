@@ -18,8 +18,8 @@ MonoBehaviour:
   minNoiseScale: 0.02
   maxNoiseScale: 0.04
   minHeightMultiplier: 0
-  maxHeightMultiplier: 20
-  timeToSurvivePerStage: 120
+  maxHeightMultiplier: 8
+  timeToSurvivePerStage: 5
   destructibleObjects:
   - {fileID: 11400000, guid: 6921b0eb24dd34a3f9a9440cff1d99d5, type: 2}
   maxDestructibleSpawnAttempts: 10
@@ -29,4 +29,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6ba364ae5c8ff7848b25a89f9c2ea009, type: 2}
   - {fileID: 11400000, guid: 744d44e2634d33c49af765a112196c31, type: 2}
   maxDecorativeSpawnAttempts: 30
-  decorativeSpawnChancePerAttempt: 0.71
+  decorativeSpawnChancePerAttempt: 0.7

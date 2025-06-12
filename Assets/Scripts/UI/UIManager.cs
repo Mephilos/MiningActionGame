@@ -1,6 +1,9 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
+
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -22,18 +25,27 @@ public class UIManager : MonoBehaviour
     public GameObject shopPanel; 
     public TMP_Text shopResourceText; 
     // 능력치 업그레이드 버튼
+    public Button upgradeMaxHealthButton;
     public Button upgradeMoveSpeedButton;
     public Button upgradeAttackDamageButton;
     public Button upgradeAttackSpeedButton;
     // 능력치 현재 값 및 비용 표시 텍스트
+    public TMP_Text maxHealthStatText;
     public TMP_Text moveSpeedStatText;
     public TMP_Text attackDamageStatText;
     public TMP_Text attackSpeedStatText;
     // 다음 스테이지 진행 버튼 (상점 ui용)
     public Button proceedToNextStageButtonFromShop;
     
+    public List<PerkData> allPerks = new List<PerkData>();
+    public GameObject perkUIPrefab;
+    public Transform playerPerksPanel;
+    public Transform dronePerksPanel;
     
-    // TODO: 업그레이드 코스트 증가량(나중에 Data(ScriptableObject)로 관리 예정)
+    private List<ShopPerkUI> _activePerkUIItems = new List<ShopPerkUI>(); 
+    
+    private int _maxHealthUpgradeCost = 10;
+    private float _maxHealthUpgradeAmount = 20f;
     private int _moveSpeedUpgradeCost = 10;
     private float _moveSpeedUpgradeAmount = 0.5f;
     private int _attackDamageUpgradeCost = 15;
@@ -89,6 +101,10 @@ public class UIManager : MonoBehaviour
             
         }
         //상점 버튼 리스너 연결
+        if (upgradeMaxHealthButton != null)
+        {
+            upgradeMaxHealthButton.onClick.AddListener(OnUpgradeMaxHealthPressed);
+        }
         if (upgradeMoveSpeedButton != null)
         {
             upgradeMoveSpeedButton.onClick.AddListener(OnUpgradeMoveSpeedButtonPressed);
@@ -173,6 +189,8 @@ public class UIManager : MonoBehaviour
             shopPanel.SetActive(true);
             Time.timeScale = 0f; // 상점 열리면 시간 정지
             UpdateShopStatsUI(); // 상점 열 때 스탯 정보 업데이트
+            PopulatePerks();
+            
             if (_playerData != null)
             {
                  UpdateResourceDisplayUI(_playerData.currentResources); // 상점 내 자원 텍스트 업데이트
@@ -180,7 +198,7 @@ public class UIManager : MonoBehaviour
         }
         if (stageClearPanel != null) stageClearPanel.SetActive(false); 
     }
-
+    
     public void HideShopPanel()
     {
         if (shopPanel != null)
@@ -197,25 +215,39 @@ public class UIManager : MonoBehaviour
     {
         if (_playerData == null) return;
 
+        if (maxHealthStatText != null)
+        {
+            maxHealthStatText.text =
+                $"Max Health: {_playerData.maxHealth:F0}\n(cost: {_maxHealthUpgradeCost} / +{_maxHealthUpgradeAmount:F0})";
+        }
+
         if (moveSpeedStatText != null)
         {
-            moveSpeedStatText.text = $"Movement Speed: {_playerData.currentMaxSpeed:F1}\n(cost: {_moveSpeedUpgradeCost} / incease: +{_moveSpeedUpgradeAmount:F1})";
+            moveSpeedStatText.text =
+                $"Movement Speed: {_playerData.currentMaxSpeed:F1}\n(cost: {_moveSpeedUpgradeCost} / increase: +{_moveSpeedUpgradeAmount:F1})";
         }
+
         if (attackDamageStatText != null)
         {
-            attackDamageStatText.text = $"Attack Power: {_playerData.currentAttackDamage:F1}\n(cost: {_attackDamageUpgradeCost} / increase: +{_attackDamageUpgradeAmount:F1})";
+            attackDamageStatText.text =
+                $"Attack Power: {_playerData.currentAttackDamage:F1}\n(cost: {_attackDamageUpgradeCost} / increase: +{_attackDamageUpgradeAmount:F1})";
         }
+
         if (attackSpeedStatText != null)
         {
-            attackSpeedStatText.text = $"Attack Cooldown: { 1f/_playerData.currentAttackSpeed:F2}sec\n(cost: {_attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}sec)";
+            attackSpeedStatText.text =
+                $"Attack Cooldown: {1f / _playerData.currentAttackSpeed:F2}sec\n(cost: {_attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}sec)";
         }
-        
+
         // 버튼 활성화/비활성화 (자원 부족 시)
+        if (upgradeMaxHealthButton != null)
+        {
+            upgradeMaxHealthButton.interactable = _playerData.currentResources >= _maxHealthUpgradeCost;
+        }
         if (upgradeMoveSpeedButton != null)
         {
             upgradeMoveSpeedButton.interactable = _playerData.currentResources >= _moveSpeedUpgradeCost;
         }
-
         if (upgradeAttackDamageButton != null)
         {
             upgradeAttackDamageButton.interactable = _playerData.currentResources >= _attackDamageUpgradeCost;
@@ -232,7 +264,10 @@ public class UIManager : MonoBehaviour
                 attackSpeedStatText.text += "\n(Max AttackCooldown)";
             }
         }
-
+        foreach (var perkUI in _activePerkUIItems)
+        {
+            perkUI.UpdateInteractable();
+        }
         // 상점 내 자원도 여기서 한번 더 갱신
         if (shopResourceText != null)
         {
@@ -240,13 +275,130 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void PopulatePerks()
+    {
+        // 기존 퍽 UI 정리
+        foreach (Transform child in playerPerksPanel) Destroy(child.gameObject);
+        foreach (Transform child in dronePerksPanel) Destroy(child.gameObject);
+        _activePerkUIItems.Clear();
+
+        // 퍽 목록 필터링
+        var availablePlayerPerks = allPerks.Where(p => p.target == PerkTarget.Player).ToList();
+        var availableDronePerks = allPerks.Where(p => p.target == PerkTarget.Drone).ToList();
+
+        // 플레이어 퍽 2개 랜덤 선택 및 생성
+        for (int i = 0; i < 2; i++)
+        {
+            PerkData selectedPerk = GetWeightedRandomPerk(availablePlayerPerks);
+            if (selectedPerk != null)
+            {
+                CreatePerkUI(selectedPerk, playerPerksPanel);
+                availablePlayerPerks.Remove(selectedPerk); // 중복 방지
+            }
+        }
+
+        // 드론 퍽 2개 랜덤 선택 및 생성
+        for (int i = 0; i < 2; i++)
+        {
+            PerkData selectedPerk = GetWeightedRandomPerk(availableDronePerks);
+            if (selectedPerk != null)
+            {
+                CreatePerkUI(selectedPerk, dronePerksPanel);
+                availableDronePerks.Remove(selectedPerk); // 중복 방지
+            }
+        }
+        UpdateShopStatsUI();
+    }
+    private void CreatePerkUI(PerkData perk, Transform parentPanel)
+    {
+        GameObject perkGO = Instantiate(perkUIPrefab, parentPanel);
+        ShopPerkUI shopPerkUI = perkGO.GetComponent<ShopPerkUI>();
+        if (shopPerkUI != null)
+        {
+            shopPerkUI.Setup(perk, this);
+            _activePerkUIItems.Add(shopPerkUI);
+        }
+    }
+
+    private PerkData GetWeightedRandomPerk(List<PerkData> perks)
+    {
+        if (perks == null || perks.Count == 0) return null;
+
+        float totalWeight = perks.Sum(p => p.SpawnWeight);
+        float randomPoint = Random.value * totalWeight;
+
+        foreach (var perk in perks)
+        {
+            if (randomPoint < perk.SpawnWeight)
+                return perk;
+            else
+                randomPoint -= perk.SpawnWeight;
+        }
+        return perks[perks.Count - 1];
+    }
+    
+    // 구매 관련
+    public bool CanAfford(int cost)
+    {
+        return _playerData != null && _playerData.currentResources >= cost;
+    }
+
+    public void TryPurchasePerk(PerkData perk, ShopPerkUI sourceUI)
+    {
+        if (_playerData != null && _playerData.SpendResources(perk.cost))
+        {
+            ApplyPerkEffect(perk);
+            Destroy(sourceUI.gameObject); // 구매 후 UI 제거
+            _activePerkUIItems.Remove(sourceUI);
+            UpdateShopStatsUI(); // 모든 버튼의 구매 가능 여부 갱신
+        }
+        else
+        {
+            Debug.Log($"{perk.perkName} 구매 실패: 자원 부족");
+        }
+    }
+    
+    private void ApplyPerkEffect(PerkData perk)
+    {
+        if (_playerData == null) return;
+        
+        switch (perk.effectType)
+        {
+            // Player Perks
+            case PerkEffectType.PlayerMaxHealthAdd:
+                _playerData.IncreaseMaxHealth(perk.effectValue);
+                break;
+            case PerkEffectType.PlayerAttackDamageAdd:
+                _playerData.IncreaseAttackDamage(perk.effectValue);
+                break;
+            case PerkEffectType.PlayerAttackSpeedDecrease:
+                _playerData.IncreaseAttackSpeed(perk.effectValue, _attackSpeedCap);
+                break;
+            case PerkEffectType.PlayerGlobalDamageMultiply:
+                _playerData.globalDamageMultiplier += perk.effectValue;
+                break;
+            case PerkEffectType.PlayerGlobalAttackSpeedMultiply:
+                _playerData.globalAttackCooldownMultiplier -= perk.effectValue;
+                if (_playerData.globalAttackCooldownMultiplier < 0.1f) _playerData.globalAttackCooldownMultiplier = 0.1f;
+                break;
+        }
+    }
 
     // 업그레이드 버튼 핸들러들
+    public void OnUpgradeMaxHealthPressed()
+    {
+        if (_playerData != null && _playerData.SpendResources(_maxHealthUpgradeCost))
+        {
+            _playerData.IncreaseMaxHealth(_maxHealthUpgradeAmount);
+            upgradeMaxHealthButton.interactable = false;
+        }
+    }
     public void OnUpgradeMoveSpeedButtonPressed()
     {
         if (_playerData != null && _playerData.SpendResources(_moveSpeedUpgradeCost))
         {
             _playerData.IncreaseMoveSpeed(_moveSpeedUpgradeAmount);
+            upgradeMaxHealthButton.interactable = false;
         }
         else
         {
@@ -259,6 +411,7 @@ public class UIManager : MonoBehaviour
         if (_playerData != null && _playerData.SpendResources(_attackDamageUpgradeCost))
         {
             _playerData.IncreaseAttackDamage(_attackDamageUpgradeAmount);
+            upgradeMaxHealthButton.interactable = false;
         }
         else
         {
@@ -273,6 +426,7 @@ public class UIManager : MonoBehaviour
             _playerData.SpendResources(_attackSpeedUpgradeCost))
         {
             _playerData.IncreaseAttackSpeed(_attackSpeedAmount, _attackSpeedCap);
+            upgradeMaxHealthButton.interactable = false;
         }
     }
 
