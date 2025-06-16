@@ -2,26 +2,23 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
-    [Header("플레이어 스탯 데이터")]
-    public PlayerBaseStatsData baseStatsData;
+    [Header("플레이어 스탯 데이터")] public PlayerBaseStatsData baseStatsData;
 
-    [Header("체력 스탯")]
-    public float currentHealth;
+    [Header("체력 스탯")] public float currentHealth;
     public float maxHealth;
     public bool isDead;
 
-    [Header("자원 관련 스탯")]
-    public int currentResources;
+    [Header("자원 관련 스탯")] public int currentResources;
 
-    [Header("전투 관련 스탯")]
-    public float currentAttackDamage;
+    [Header("전투 관련 스탯")] public float currentAttackDamage;
+
     public float currentAttackSpeed;
-    // 전역 계수
-    public float globalDamageMultiplier;
-    public float globalAttackCooldownMultiplier;
 
-    [Header("이동 관련 스탯")]
-    public float currentMaxSpeed;
+    // 전역 계수
+    public float globalDamageMultiplier = 1;
+    public float globalAttackCooldownMultiplier = 1;
+
+    [Header("이동 관련 스탯")] public float currentMaxSpeed;
     public float currentRotationSpeed;
     public float currentAcceleration;
     public float currentDeceleration;
@@ -42,12 +39,10 @@ public class PlayerData : MonoBehaviour
     public int attackDamageUpgradeCost;
     public int attackSpeedUpgradeCost;
 
-    
-    [Header("스킬 관련 스탯")]
-    public float currentSkillCooldown;
 
-    [Header("UI 설정")] 
-    public GameObject hpBarPrefab;
+    [Header("스킬 관련 스탯")] public float currentSkillCooldown;
+
+    [Header("UI 설정")] public GameObject hpBarPrefab;
     private WorldSpaceHealthBar _hpBarInstance;
     //TODO:아이템은 나중에 추가 (리스트 사용 예정)
 
@@ -66,16 +61,18 @@ public class PlayerData : MonoBehaviour
                 _hpBarInstance.healthBarFill.color = Color.green;
                 _hpBarInstance.targetToFollow = this.transform;
                 _hpBarInstance.offset = new Vector3(0, 2.5f, 0);
-                _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
+                _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
             }
         }
     }
+
     void Update()
     {
         if (currentSkillCooldown > 0)
         {
             currentSkillCooldown -= Time.deltaTime;
         }
+
         if (dashCooldownTimer > 0)
         {
             dashCooldownTimer -= Time.deltaTime;
@@ -93,20 +90,20 @@ public class PlayerData : MonoBehaviour
             currentResources = 0;
             currentAttackDamage = 10f;
             currentAttackSpeed = 0.5f;
-            
+
             currentMaxSpeed = 7f;
             currentRotationSpeed = 360f;
             currentAcceleration = 10f;
             currentDeceleration = 10f;
             currentBoostFactor = 1.5f;
-            
+
             currentJumpForce = 8f;
             currentMaxJumpCount = 2;
             currentDashForce = 15f;
             currentDashDuration = 0.2f;
             currentDashCooldown = 1f;
             currentDashInvincibleDuration = 0.1f;
-            
+
             return;
         }
         else
@@ -116,13 +113,13 @@ public class PlayerData : MonoBehaviour
             currentResources = baseStatsData.initialResources;
             currentAttackDamage = baseStatsData.initialAttackDamage;
             currentAttackSpeed = baseStatsData.initialAttackSpeed;
-            
+
             currentMaxSpeed = baseStatsData.maxSpeed;
             currentRotationSpeed = baseStatsData.rotationSpeed;
             currentAcceleration = baseStatsData.acceleration;
             currentDeceleration = baseStatsData.deceleration;
             currentBoostFactor = baseStatsData.boostFactor;
-            
+
             currentJumpForce = baseStatsData.jumpForce;
             currentMaxJumpCount = baseStatsData.initialMaxJumpCount;
             currentDashForce = baseStatsData.dashForce;
@@ -131,13 +128,13 @@ public class PlayerData : MonoBehaviour
             currentDashInvincibleDuration = baseStatsData.dashInvincibleDuration;
         }
 
-        
+
         //업그레이드 비용 초기화
         maxHealthUpgradeCost = 10;
         attackDamageUpgradeCost = 15;
         attackSpeedUpgradeCost = 20;
-        
-        
+
+
         // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
         currentHealth = maxHealth; // 시작 시 체력은 최대로
         jumpCountAvailable = currentMaxJumpCount;
@@ -145,15 +142,16 @@ public class PlayerData : MonoBehaviour
         isInvincible = false;
         isDashing = false;
         isDead = false;
-        
+
         Debug.Log($"[{gameObject.name}] PlayerStats가 PlayerBaseStatsData로부터 초기화되었습니다.");
-        
+
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
             UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
     }
+
     /// <summary>
     /// 대미지 받는 함수
     /// </summary>
@@ -162,10 +160,11 @@ public class PlayerData : MonoBehaviour
     {
         if (isDead || isInvincible)
         {
-            if(isDead) Debug.Log($"[{gameObject.name}] 플레이어가 이미 사망한 상태");
-            if(isInvincible) Debug.Log($"[{gameObject.name}] 플레이어 무적 상태");
+            if (isDead) Debug.Log($"[{gameObject.name}] 플레이어가 이미 사망한 상태");
+            if (isInvincible) Debug.Log($"[{gameObject.name}] 플레이어 무적 상태");
             return;
         }
+
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         Debug.Log($"[PlayerData] 받은 데미지: {amount} / 현재 체력: {currentHealth}/{maxHealth}");
@@ -176,13 +175,15 @@ public class PlayerData : MonoBehaviour
 
         if (_hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
+
         if (currentHealth <= 0)
         {
             Die();
         }
     }
+
     /// <summary>
     /// 채력 회복
     /// </summary>
@@ -193,14 +194,15 @@ public class PlayerData : MonoBehaviour
         currentHealth += amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         Debug.Log($"[PlayerData] 회복: {amount} / 현재 체력: {currentHealth}/{maxHealth}");
-        
+
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
         }
+
         if (_hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
     }
 
@@ -210,10 +212,10 @@ public class PlayerData : MonoBehaviour
     void Die()
     {
         if (isDead) return; // 중복 사망 처리 방지
-        
+
         isDead = true;
         Debug.Log("[PlayerData] 플레이어 죽음");
-        
+
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null)
         {
@@ -241,6 +243,7 @@ public class PlayerData : MonoBehaviour
             _hpBarInstance.SetVisibility(false);
         }
     }
+
     /// <summary>
     /// 부활 , 스탯 초기화 (재시작시 사용)
     /// </summary>
@@ -248,8 +251,8 @@ public class PlayerData : MonoBehaviour
     {
         Debug.Log("[PlayerData] 플레이어 부활 및 스탯 초기화");
         InitializeStatsFromBaseData();
-        isDead =false;
-        
+        isDead = false;
+
         PlayerController controller = GetComponent<PlayerController>();
         if (controller != null)
         {
@@ -274,17 +277,18 @@ public class PlayerData : MonoBehaviour
         if (_hpBarInstance != null)
         {
             _hpBarInstance.SetVisibility(true);
-            _hpBarInstance.UpdateHealth(currentHealth,maxHealth);
+            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
     }
+
     /// <summary>
     /// 자원 획득 로직
     /// </summary>
     /// <param name="amount">획득한 자원</param>
     public void GainResources(int amount)
     {
-        if(isDead) return;
-        
+        if (isDead) return;
+
         currentResources += amount;
         Debug.Log($"[PlayerData] 자원획득 {amount}, 현재 자원 {currentResources}");
 
@@ -293,6 +297,7 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
     }
+
     /// <summary>
     /// 자원 소비 시도. 성공하면 true, 실패(자원 부족)하면 false 반환.
     /// </summary>
@@ -306,6 +311,7 @@ public class PlayerData : MonoBehaviour
             {
                 UIManager.Instance.UpdateResourceDisplayUI(currentResources); // UI 업데이트
             }
+
             return true;
         }
         else
@@ -314,7 +320,7 @@ public class PlayerData : MonoBehaviour
             return false;
         }
     }
-    
+
     /// <summary>
     /// 공격력 증가
     /// </summary>
@@ -326,9 +332,9 @@ public class PlayerData : MonoBehaviour
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
 
-    public void IncreaseAttackSpeed(float additionalAttackSpeed, float attackSpeedCap = 5f)
+    public void IncreaseAttackSpeed(float amountToAdd, float attackSpeedCap = 5f)
     {
-        currentAttackSpeed -= additionalAttackSpeed;
+        currentAttackSpeed += amountToAdd;
         if (currentAttackSpeed < attackSpeedCap)
         {
             currentAttackSpeed = attackSpeedCap;
@@ -342,6 +348,7 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdateShopStatsUI();
         }
     }
+
     public void IncreaseMaxHealth(float amount)
     {
         maxHealth += amount;
@@ -353,16 +360,5 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
             UIManager.Instance.UpdateShopStatsUI();
         }
-    }
-    
-    /// <summary>
-    /// 점프 횟수 증가
-    /// </summary>
-    /// <param name="amount">최대 점프 횟수</param>
-    public void IncreaseMaxJumpCount(int amount)
-    {
-        currentMaxJumpCount += amount;
-        // jumpCountAvailable도 상황에 맞게 조절 필요
-        Debug.Log($"[PlayerData] 최대 점프 횟수 증가: {currentMaxJumpCount}");
     }
 }

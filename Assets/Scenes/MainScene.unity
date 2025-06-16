@@ -1600,11 +1600,19 @@ PrefabInstance:
     - target: {fileID: -4331770944359682716, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: currentWeaponData
       value: 
-      objectReference: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
+      objectReference: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
     - target: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: trajectoryPredictor
       value: 
       objectReference: {fileID: 1450903818}
+    - target: {fileID: 4521416094532657764, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+      propertyPath: globalDamageMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4521416094532657764, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+      propertyPath: globalAttackCooldownMultiplier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6310566825574666354, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

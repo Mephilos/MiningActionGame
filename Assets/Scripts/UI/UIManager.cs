@@ -49,8 +49,8 @@ public class UIManager : MonoBehaviour
     
     private float _maxHealthUpgradeAmount = 20f;
     private float _attackDamageUpgradeAmount = 2f;
-    private float _attackSpeedAmount = 0.05f;
-    private float _attackSpeedCap = 0.1f;
+    private float _attackSpeedAmount = 0.2f;
+    private float _attackSpeedCap = 10f;
 
     private int _healCost = 15;
     private float _healAmount = 50f;
@@ -228,7 +228,7 @@ public class UIManager : MonoBehaviour
         if (attackSpeedStatText != null)
         {
             attackSpeedStatText.text =
-                $"Attack Cooldown: {1f / _playerData.currentAttackSpeed:F2}sec\n(cost: {_playerData.attackSpeedUpgradeCost} / -{_attackSpeedAmount:F2}sec)";
+                $"Attack Rate: {_playerData.currentAttackSpeed:F2}\n(cost: {_playerData.attackSpeedUpgradeCost} / +{_attackSpeedAmount:F2}회)";
         }
 
         // 버튼 활성화/비활성화 (자원 부족 시)
@@ -378,7 +378,7 @@ public class UIManager : MonoBehaviour
             case PerkEffectType.PlayerAttackDamageAdd:
                 _playerData.IncreaseAttackDamage(perk.effectValue);
                 break;
-            case PerkEffectType.PlayerAttackSpeedDecrease:
+            case PerkEffectType.PlayerAttackSpeedIncrease:
                 _playerData.IncreaseAttackSpeed(perk.effectValue, _attackSpeedCap);
                 break;
             case PerkEffectType.PlayerGlobalDamageMultiply:

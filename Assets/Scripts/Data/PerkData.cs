@@ -21,7 +21,7 @@ public enum PerkEffectType
     // 플레이어 스텟 증가
     PlayerMaxHealthAdd,
     PlayerAttackDamageAdd,
-    PlayerAttackSpeedDecrease,
+    PlayerAttackSpeedIncrease,
     
     PlayerGlobalDamageMultiply,
     PlayerGlobalAttackSpeedMultiply,

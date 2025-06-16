@@ -196,11 +196,15 @@ public class WeaponController : MonoBehaviour
 
     private void TryFireProjectile()
     {
-        float finalAttackCooldown = _playerData.currentAttackSpeed * _playerData.globalAttackCooldownMultiplier;
+        float finalAttacksPerSecond = _playerData.currentAttackSpeed / _playerData.globalAttackCooldownMultiplier; // global multiplier는 쿨다운에 곱해지므로, 여기선 나눠줍니다.
+        if (finalAttacksPerSecond <= 0) return; // 0으로 나누기 방지
+
+        float finalCooldown = 1f / finalAttacksPerSecond;
+
         if (Time.time >= _nextFireTime)
         {
             FireProjectileInternal();
-            _nextFireTime = Time.time + finalAttackCooldown;
+            _nextFireTime = Time.time + finalCooldown;
         }
     }private void FireProjectileInternal()
     {
@@ -228,10 +232,18 @@ public class WeaponController : MonoBehaviour
 
         if (bullet.TryGetComponent<Projectile>(out var projectileScript))
         {
-            float totalDamage = (_playerData.currentAttackDamage + currentWeaponData.baseDamage) * _playerData.globalDamageMultiplier;
-            projectileScript.SetDamage(totalDamage);
-            projectileScript.isEnemyProjectile = false;
+            // 플레이어 무기의 기본 데미지 합산값
+            float baseTotalDamage = _playerData.currentAttackDamage + currentWeaponData.baseDamage;
+            // 퍽, 업그레이드 등으로 인한 순수 보너스 데미지 비율
+            float bonusDamageRatio = _playerData.globalDamageMultiplier - 1f;
+            // 보너스 데미지 비율에 무기별 계수 계산
+            float scaledBonusDamage = baseTotalDamage * bonusDamageRatio * currentWeaponData.damageMultiplierScale;
+            // 기본 데미지에 보너스 데미지 합산
+            float finalDamage = baseTotalDamage + scaledBonusDamage;
+            
+            Debug.Log($"무기: {currentWeaponData.weaponName}, 최종 데미지: {finalDamage} (기본: {baseTotalDamage}, 보너스: {scaledBonusDamage})");
 
+            projectileScript.SetDamage(finalDamage);
             if (currentWeaponData.explosionRadius > 0f)
             {
                 projectileScript.InitializeExplosion(

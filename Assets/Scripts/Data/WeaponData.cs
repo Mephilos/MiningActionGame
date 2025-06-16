@@ -13,6 +13,9 @@ public class WeaponData : ScriptableObject
     public float range = 100f;
     public GameObject projectilePrefab; // 발사체 프리팹
     
+    [Header("데미지 계수 설정")]
+    [Range(0.1f, 3.0f)]
+    public float damageMultiplierScale = 0.5f;
     [Header("Explosion Settings (범위 공격용)")]
     [Tooltip("폭발 반경 0 이하면 단일 타겟으로 간주")]
     public float explosionRadius = 0f;
