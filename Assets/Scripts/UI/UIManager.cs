@@ -26,16 +26,19 @@ public class UIManager : MonoBehaviour
     public TMP_Text shopResourceText; 
     // 능력치 업그레이드 버튼
     public Button upgradeMaxHealthButton;
-    public Button upgradeMoveSpeedButton;
     public Button upgradeAttackDamageButton;
     public Button upgradeAttackSpeedButton;
     // 능력치 현재 값 및 비용 표시 텍스트
     public TMP_Text maxHealthStatText;
-    public TMP_Text moveSpeedStatText;
     public TMP_Text attackDamageStatText;
     public TMP_Text attackSpeedStatText;
     // 다음 스테이지 진행 버튼 (상점 ui용)
     public Button proceedToNextStageButtonFromShop;
+
+    public Button healButton;
+    public TMP_Text healCostText;
+    public Button rerollPerksButton;
+    public TMP_Text rerollCostText;
     
     public List<PerkData> allPerks = new List<PerkData>();
     public GameObject perkUIPrefab;
@@ -46,14 +49,17 @@ public class UIManager : MonoBehaviour
     
     private int _maxHealthUpgradeCost = 10;
     private float _maxHealthUpgradeAmount = 20f;
-    private int _moveSpeedUpgradeCost = 10;
-    private float _moveSpeedUpgradeAmount = 0.5f;
+
     private int _attackDamageUpgradeCost = 15;
     private float _attackDamageUpgradeAmount = 2f;
     private int _attackSpeedUpgradeCost = 20;
     private float _attackSpeedAmount = 0.05f;
     private float _attackSpeedCap = 0.1f;
 
+    private int _healCost = 15;
+    private float _healAmount = 50f;
+    private int _rerollCost = 20;
+    
     private PlayerData _playerData; // 의존성 주입 방식
     
     
@@ -105,10 +111,6 @@ public class UIManager : MonoBehaviour
         {
             upgradeMaxHealthButton.onClick.AddListener(OnUpgradeMaxHealthPressed);
         }
-        if (upgradeMoveSpeedButton != null)
-        {
-            upgradeMoveSpeedButton.onClick.AddListener(OnUpgradeMoveSpeedButtonPressed);
-        }
         if (upgradeAttackDamageButton != null)
         {
             upgradeAttackDamageButton.onClick.AddListener(OnUpgradeAttackDamageButtonPressed);
@@ -122,6 +124,14 @@ public class UIManager : MonoBehaviour
         if (proceedToNextStageButtonFromShop != null)
         {
             proceedToNextStageButtonFromShop.onClick.AddListener(OnNextStageButtonPressed);
+        }
+        if (healButton != null)
+        {
+            healButton.onClick.AddListener(OnHealButtonPressed);
+        }
+        if (rerollPerksButton != null)
+        {
+            rerollPerksButton.onClick.AddListener(OnRerollPerksButtonPressed);
         }
     }
 
@@ -221,12 +231,6 @@ public class UIManager : MonoBehaviour
                 $"Max Health: {_playerData.maxHealth:F0}\n(cost: {_maxHealthUpgradeCost} / +{_maxHealthUpgradeAmount:F0})";
         }
 
-        if (moveSpeedStatText != null)
-        {
-            moveSpeedStatText.text =
-                $"Movement Speed: {_playerData.currentMaxSpeed:F1}\n(cost: {_moveSpeedUpgradeCost} / increase: +{_moveSpeedUpgradeAmount:F1})";
-        }
-
         if (attackDamageStatText != null)
         {
             attackDamageStatText.text =
@@ -244,10 +248,6 @@ public class UIManager : MonoBehaviour
         {
             upgradeMaxHealthButton.interactable = _playerData.currentResources >= _maxHealthUpgradeCost;
         }
-        if (upgradeMoveSpeedButton != null)
-        {
-            upgradeMoveSpeedButton.interactable = _playerData.currentResources >= _moveSpeedUpgradeCost;
-        }
         if (upgradeAttackDamageButton != null)
         {
             upgradeAttackDamageButton.interactable = _playerData.currentResources >= _attackDamageUpgradeCost;
@@ -264,6 +264,25 @@ public class UIManager : MonoBehaviour
                 attackSpeedStatText.text += "\n(Max AttackCooldown)";
             }
         }
+        
+        if (healButton != null && healCostText != null)
+        {
+            bool canHeal = _playerData.currentResources >= _healCost && _playerData.currentHealth < _playerData.maxHealth;
+            healButton.interactable = canHeal;
+            healCostText.text = $"HP recovery (+{_healAmount})\nCost: {_healCost}";
+            if (_playerData.currentHealth >= _playerData.maxHealth)
+            {
+                healCostText.text = "HP FULL!";
+            }
+        }
+
+        // 특성 리롤 버튼 UI 업데이트
+        if (rerollPerksButton != null && rerollCostText != null)
+        {
+            rerollPerksButton.interactable = _playerData.currentResources >= _rerollCost;
+            rerollCostText.text = $"Perk ReRoll\nCost: {_rerollCost}";
+        }
+        
         foreach (var perkUI in _activePerkUIItems)
         {
             perkUI.UpdateInteractable();
@@ -337,7 +356,7 @@ public class UIManager : MonoBehaviour
         return perks[perks.Count - 1];
     }
     
-    // 구매 관련
+    // 구매 관련 (자원이 충분 한지 판별)
     public bool CanAfford(int cost)
     {
         return _playerData != null && _playerData.currentResources >= cost;
@@ -390,19 +409,7 @@ public class UIManager : MonoBehaviour
         if (_playerData != null && _playerData.SpendResources(_maxHealthUpgradeCost))
         {
             _playerData.IncreaseMaxHealth(_maxHealthUpgradeAmount);
-            upgradeMaxHealthButton.interactable = false;
-        }
-    }
-    public void OnUpgradeMoveSpeedButtonPressed()
-    {
-        if (_playerData != null && _playerData.SpendResources(_moveSpeedUpgradeCost))
-        {
-            _playerData.IncreaseMoveSpeed(_moveSpeedUpgradeAmount);
-            upgradeMaxHealthButton.interactable = false;
-        }
-        else
-        {
-            Debug.Log("이동 속도 업그레이드 실패: 자원 부족 또는 PlayerData 없음");
+            UpdateShopStatsUI();
         }
     }
 
@@ -411,7 +418,7 @@ public class UIManager : MonoBehaviour
         if (_playerData != null && _playerData.SpendResources(_attackDamageUpgradeCost))
         {
             _playerData.IncreaseAttackDamage(_attackDamageUpgradeAmount);
-            upgradeMaxHealthButton.interactable = false;
+            UpdateShopStatsUI();
         }
         else
         {
@@ -426,7 +433,25 @@ public class UIManager : MonoBehaviour
             _playerData.SpendResources(_attackSpeedUpgradeCost))
         {
             _playerData.IncreaseAttackSpeed(_attackSpeedAmount, _attackSpeedCap);
-            upgradeMaxHealthButton.interactable = false;
+            UpdateShopStatsUI();
+        }
+    }
+    public void OnHealButtonPressed()
+    {
+        // 버튼이 눌릴 수 있는 조건은 이미 UpdateShopStatsUI에서 관리하지만, 한번 더 확인
+        if (_playerData != null && _playerData.currentHealth < _playerData.maxHealth && _playerData.SpendResources(_healCost))
+        {
+            _playerData.Heal(_healAmount);
+            UpdateShopStatsUI(); // HP 회복 후 UI 즉시 갱신
+        }
+    }
+
+    public void OnRerollPerksButtonPressed()
+    {
+        if (_playerData != null && _playerData.SpendResources(_rerollCost))
+        {
+            PopulatePerks(); // 특성 목록을 다시 생성 (이 메서드는 내부적으로 UpdateShopStatsUI를 호출함)
+            Debug.Log("특성을 리롤했습니다.");
         }
     }
 
