@@ -37,7 +37,12 @@ public class PlayerData : MonoBehaviour
     public bool isInvincible;
     public bool isDashing;
 
+    // 업그래이드 벼용관리
+    public int maxHealthUpgradeCost;
+    public int attackDamageUpgradeCost;
+    public int attackSpeedUpgradeCost;
 
+    
     [Header("스킬 관련 스탯")]
     public float currentSkillCooldown;
 
@@ -126,14 +131,21 @@ public class PlayerData : MonoBehaviour
             currentDashInvincibleDuration = baseStatsData.dashInvincibleDuration;
         }
 
+        
+        //업그레이드 비용 초기화
+        maxHealthUpgradeCost = 10;
+        attackDamageUpgradeCost = 15;
+        attackSpeedUpgradeCost = 20;
+        
+        
         // ScriptableObject로부터 값 불러와서 현재 스탯 초기화
         currentHealth = maxHealth; // 시작 시 체력은 최대로
-
-        // 기타 초기화
         jumpCountAvailable = currentMaxJumpCount;
         dashCooldownTimer = 0f;
         isInvincible = false;
         isDashing = false;
+        isDead = false;
+        
         Debug.Log($"[{gameObject.name}] PlayerStats가 PlayerBaseStatsData로부터 초기화되었습니다.");
         
         if (UIManager.Instance != null)
@@ -141,8 +153,6 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
             UIManager.Instance.UpdateResourceDisplayUI(currentResources);
         }
-
-        isDead = false;
     }
     /// <summary>
     /// 대미지 받는 함수
@@ -152,8 +162,8 @@ public class PlayerData : MonoBehaviour
     {
         if (isDead || isInvincible)
         {
-            if(isDead) Debug.Log("[PlayerData] 플레이어가 이미 사망한 상태");
-            if(isInvincible) Debug.Log("[PlayerData] 플레이어 무적 상태");
+            if(isDead) Debug.Log($"[{gameObject.name}] 플레이어가 이미 사망한 상태");
+            if(isInvincible) Debug.Log($"[{gameObject.name}] 플레이어 무적 상태");
             return;
         }
         currentHealth -= amount;
@@ -304,22 +314,14 @@ public class PlayerData : MonoBehaviour
             return false;
         }
     }
-    /// <summary>
-    /// 이동 속도 증가
-    /// </summary>
-    public void IncreaseMoveSpeed(float additionalSpeed)
-    {
-        currentMaxSpeed += additionalSpeed;
-        Debug.Log($"[PlayerData] 이동 속도 증가! 현재 이동 속도: {currentMaxSpeed}");
-        // 필요하다면 UIManager를 통해 변경된 스탯을 UI에 표시할 수 있습니다.
-        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
-    }
+    
     /// <summary>
     /// 공격력 증가
     /// </summary>
     public void IncreaseAttackDamage(float additionalDamage)
     {
         currentAttackDamage += additionalDamage;
+        attackDamageUpgradeCost += 8;
         Debug.Log($"[PlayerData] 공격력 증가! 현재 공격력: {currentAttackDamage}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
@@ -331,6 +333,8 @@ public class PlayerData : MonoBehaviour
         {
             currentAttackSpeed = attackSpeedCap;
         }
+
+        attackSpeedUpgradeCost += 10;
         Debug.Log($"[{gameObject.name}] 공격 쿨다운 감소. 현재 공격 쿨다운 {currentAttackSpeed}");
         // 상점 ui 스텟 정보 업데이트
         if (UIManager.Instance != null)
@@ -342,25 +346,13 @@ public class PlayerData : MonoBehaviour
     {
         maxHealth += amount;
         currentHealth += amount; // 현재 체력도 같이 올려줌
+        maxHealthUpgradeCost += 5;
         Debug.Log($"[PlayerData] 최대 체력 증가! 현재: {maxHealth}");
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
             UIManager.Instance.UpdateShopStatsUI();
         }
-    }
-
-    public void IncreaseMaxSpeed(float additionalMaxSpeed)
-    {
-        currentMaxSpeed += additionalMaxSpeed;
-        Debug.Log($"[PlayerData] 최고 속도 증가. 현재 최고 속도: {currentMaxSpeed}");
-        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
-    }
-    public void IncreaseAcceleration(float additionalAcceleration)
-    {
-        currentAcceleration += additionalAcceleration;
-        Debug.Log($"[PlayerData] 가속도 증가. 현재 가속도: {currentAcceleration}");
-        if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
     
     /// <summary>
