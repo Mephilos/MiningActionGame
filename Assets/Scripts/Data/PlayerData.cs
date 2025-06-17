@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class PlayerData : MonoBehaviour
 {
-    [Header("플레이어 스탯 데이터")] public PlayerBaseStatsData baseStatsData;
+    [Header("플레이어 스탯 데이터")] 
+    public PlayerBaseStatsData baseStatsData;
 
-    [Header("체력 스탯")] public float currentHealth;
+    [Header("체력 스탯")] 
+    public float currentHealth;
     public float maxHealth;
     public bool isDead;
 
-    [Header("자원 관련 스탯")] public int currentResources;
+    [Header("자원 관련 스탯")] 
+    public int currentResources;
 
-    [Header("전투 관련 스탯")] public float currentAttackDamage;
+    [Header("전투 관련 스탯")] 
+    public float currentAttackDamage;
 
     public float currentAttackSpeed;
 
@@ -40,10 +44,12 @@ public class PlayerData : MonoBehaviour
     public int attackSpeedUpgradeCost;
 
 
-    [Header("스킬 관련 스탯")] public float currentSkillCooldown;
+    [Header("스킬 관련 스탯")] 
+    public float currentSkillCooldown;
 
-    [Header("UI 설정")] public GameObject hpBarPrefab;
-    private WorldSpaceHealthBar _hpBarInstance;
+    [Header("UI 설정")] 
+    public GameObject hpBarPrefab;
+    public WorldSpaceHealthBar hpBarInstance;
     //TODO:아이템은 나중에 추가 (리스트 사용 예정)
 
     void Awake()
@@ -54,14 +60,14 @@ public class PlayerData : MonoBehaviour
         if (hpBarPrefab != null)
         {
             GameObject hpBarInstanceObj = Instantiate(hpBarPrefab, transform.position, Quaternion.identity, null);
-            _hpBarInstance = hpBarInstanceObj.GetComponent<WorldSpaceHealthBar>();
+            hpBarInstance = hpBarInstanceObj.GetComponent<WorldSpaceHealthBar>();
 
-            if (_hpBarInstance != null)
+            if (hpBarInstance != null)
             {
-                _hpBarInstance.healthBarFill.color = Color.green;
-                _hpBarInstance.targetToFollow = this.transform;
-                _hpBarInstance.offset = new Vector3(0, 2.5f, 0);
-                _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
+                hpBarInstance.healthBarFill.color = Color.green;
+                hpBarInstance.targetToFollow = this.transform;
+                hpBarInstance.offset = new Vector3(0, 2.5f, 0);
+                hpBarInstance.UpdateHealth(currentHealth, maxHealth);
             }
         }
     }
@@ -173,9 +179,9 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
         }
 
-        if (_hpBarInstance != null)
+        if (hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
+            hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
 
         if (currentHealth <= 0)
@@ -200,9 +206,9 @@ public class PlayerData : MonoBehaviour
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);
         }
 
-        if (_hpBarInstance != null)
+        if (hpBarInstance != null)
         {
-            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
+            hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
     }
 
@@ -238,9 +244,9 @@ public class PlayerData : MonoBehaviour
             Time.timeScale = 0f;
         }
 
-        if (_hpBarInstance != null)
+        if (hpBarInstance != null)
         {
-            _hpBarInstance.SetVisibility(false);
+            hpBarInstance.SetVisibility(false);
         }
     }
 
@@ -274,10 +280,10 @@ public class PlayerData : MonoBehaviour
             Debug.LogWarning("[PlayerData] PlayerController를 찾을 수 없음");
         }
 
-        if (_hpBarInstance != null)
+        if (hpBarInstance != null)
         {
-            _hpBarInstance.SetVisibility(true);
-            _hpBarInstance.UpdateHealth(currentHealth, maxHealth);
+            hpBarInstance.SetVisibility(true);
+            hpBarInstance.UpdateHealth(currentHealth, maxHealth);
         }
     }
 

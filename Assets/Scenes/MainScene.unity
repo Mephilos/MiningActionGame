@@ -1606,6 +1606,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1450903818}
     - target: {fileID: 4521416094532657764, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
+      propertyPath: hpBarInstance
+      value: 
+      objectReference: {fileID: 9079505508440645690, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
+    - target: {fileID: 4521416094532657764, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
       propertyPath: globalDamageMultiplier
       value: 1
       objectReference: {fileID: 0}

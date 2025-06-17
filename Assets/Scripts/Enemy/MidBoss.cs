@@ -42,14 +42,14 @@ public class MidBoss : EnemyBase
     {
         base.Awake();
         _currentBossState = BossState.Chasing;
-        _lastRangedAttackTime = -rangedAttackCooldown;
-        _lastMeleeAttackTime = -meleeAttackCooldown;
     }
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        
+
+        _lastRangedAttackTime = -rangedAttackCooldown;
+        _lastMeleeAttackTime = -meleeAttackCooldown;
         if (HpBarInstance != null)
         {
             HpBarInstance.offset = new Vector3(0, 4.0f, 0); 
@@ -63,12 +63,13 @@ public class MidBoss : EnemyBase
 
     void Update()
     {
+        base.Update();
         if (IsDead || PlayerTransform == null || !IsAgentActive || _playerController == null)
         {
             if (NavMeshAgent.enabled) NavMeshAgent.isStopped = true;
             return;
         }
-
+        
         float enrageMultiplier = CalculateEnrageMultiplier();
         NavMeshAgent.speed = enemyBaseData.moveSpeed * enrageMultiplier;
 
@@ -96,17 +97,17 @@ public class MidBoss : EnemyBase
 
         float distanceToPlayer = Vector3.Distance(transform.position, PlayerTransform.position);
 
-        if (distanceToPlayer <= meleeAttackRange && Time.time > _lastMeleeAttackTime + (meleeAttackCooldown / enrageMultiplier))
+        if (distanceToPlayer <= meleeAttackRange && Time.time >= _lastMeleeAttackTime + (meleeAttackCooldown / enrageMultiplier))
         {
             StartCoroutine(MeleeAttackCoroutine());
             return;
         }
 
-        if (distanceToPlayer <= rangedAttackRange && Time.time > _lastRangedAttackTime + (rangedAttackCooldown / enrageMultiplier))
+        if (distanceToPlayer <= rangedAttackRange && Time.time >= _lastRangedAttackTime + (rangedAttackCooldown / enrageMultiplier))
         {
             _currentBossState = BossState.RangedAiming;
-            _stateTimer = 0f; // 조준 타이머 초기화
-            NavMeshAgent.isStopped = true; // 조준 중에는 멈춤
+            _stateTimer = 0f;
+            NavMeshAgent.isStopped = true;
             return;
         }
 
@@ -200,16 +201,42 @@ public class MidBoss : EnemyBase
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 10f);
         }
     }
-    protected override void PerformUniqueDeathActions()
-    {
-        // TODO: 죽음 연출 추가
-    }
-
     protected override void Die()
     {
         if (IsDead) return;
         base.Die();
         PerformUniqueDeathActions();
         DestroyEnemy(1.0f);
+    }
+    protected override void PerformUniqueDeathActions()
+    {
+        // TODO: 죽음 연출 추가
+    }
+
+    protected override float CurrentAttackGaugeRatio
+    {
+        get
+        {
+            float enrage = CalculateEnrageMultiplier();
+            float finalRangedCD = rangedAttackCooldown / enrage;
+            float finalMeleeCD = meleeAttackCooldown / enrage;
+
+            float nextRangedAttackAvailableTime = _lastRangedAttackTime + finalRangedCD;
+            float nextMeleeAttackAvailableTime = _lastMeleeAttackTime + finalMeleeCD;
+
+            float rangedTimeRemaining = nextRangedAttackAvailableTime - Time.time;
+            float meleeTimeRemaining = nextMeleeAttackAvailableTime - Time.time;
+            
+            if (rangedTimeRemaining <= 0 && meleeTimeRemaining <= 0) return 0f;
+
+            if (rangedTimeRemaining > meleeTimeRemaining)
+            {
+                return Mathf.Clamp01(rangedTimeRemaining / finalRangedCD);
+            }
+            else
+            {
+                return Mathf.Clamp01(meleeTimeRemaining / finalMeleeCD);
+            }
+        }
     }
 }

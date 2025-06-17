@@ -16,17 +16,17 @@ public class WeaponController : MonoBehaviour
     private PlayerData _playerData; // 플레이어 스탯 참조
     private Transform _ownerTransform; // 사용자 본체
     private Animator _animator;
-    
-    
-    private float _nextFireTime; // 공격속도 관련 변수
-    private bool _isFiringRequested = false; 
+        
     private bool _isCharging;
-    private float _currentChargeLevel = 0f;
+    private float _currentChargeLevel;
+    private float _nextFireTime = 1f;
+    private bool _isFiringRequested = false;
     private GameObject _chargeEffectInstance;
     
-    // PlayerController 이용 에임 방향
+    public bool IsCharging => _isCharging;
+    public float CurrentChargeLevel => _currentChargeLevel;
     public Vector3 AimDirection { get; set; }
-    // PlayerController 이용한 락온 타켓 정보
+    // PlayerController를 이용(락온 타켓 정보)
     public Transform AimTarget { get; set; }
     void Awake()
     {
@@ -80,10 +80,15 @@ public class WeaponController : MonoBehaviour
         {
             if (_isCharging) CancelCharging(); // 죽으면 차징 캔슬
             _isFiringRequested = false;
+            if (_playerData != null && _playerData.hpBarInstance != null)
+            {
+                _playerData.hpBarInstance.SetAttackGaugeVisibility(false);
+            }
             return;
         }
         HandleCharging();
         HandleFiring();
+        UpdateAttackGaugeUI();
     }
 
     #region 외부입력처리(PlayerController)
@@ -314,6 +319,28 @@ public class WeaponController : MonoBehaviour
         {
             // TODO: 레이저 전용 이펙트 추가 
             Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
+        }
+    }
+    private void UpdateAttackGaugeUI()
+    {
+        if (_playerData == null || _playerData.hpBarInstance == null || currentWeaponData == null) return;
+        
+        _playerData.hpBarInstance.SetAttackGaugeVisibility(true);
+        // 차지 무기, 일반 무기 판별 다른 로직 적용
+        if (currentWeaponData.isChargeWeapon)
+        {
+            _playerData.hpBarInstance.UpdateAttackGauge(_currentChargeLevel);
+        }
+        else
+        {
+            float finalAttacksPerSecond = _playerData.currentAttackSpeed / _playerData.globalAttackCooldownMultiplier;
+            if (finalAttacksPerSecond <= 0) return;
+        
+            float finalCooldown = 1f / finalAttacksPerSecond;
+            float timeRemaining = _nextFireTime - Time.time;
+            
+            float fillAmount = (timeRemaining > 0) ? (timeRemaining / finalCooldown) : 0f;
+            _playerData.hpBarInstance.UpdateAttackGauge(fillAmount);
         }
     }
 }

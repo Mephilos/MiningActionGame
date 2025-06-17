@@ -50,6 +50,7 @@ public class BasicEnemy : EnemyBase
 
     void Update()
     {
+        base.Update();
         if (IsDead || !IsAgentActive || PlayerTransform == null || PlayerData == null || PlayerData.isDead)
         {
             if (NavMeshAgent != null && NavMeshAgent.enabled && NavMeshAgent.hasPath)
@@ -114,6 +115,15 @@ public class BasicEnemy : EnemyBase
     {
         // TODO: 자폭 이펙트 생성 코드 추가
     }
+
+    protected override float CurrentAttackGaugeRatio
+    {
+        get
+        {
+            return -1f;
+        }
+    }
+
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

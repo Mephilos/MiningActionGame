@@ -31,7 +31,7 @@ public abstract class EnemyBase : MonoBehaviour
     [Header("UI설정")]
     public GameObject hpBarPrefab;
     protected WorldSpaceHealthBar HpBarInstance;
-    
+    protected abstract float CurrentAttackGaugeRatio { get; }
     public virtual void Initialize(PlayerData playerData, Transform playerTransform)
     {
         this.PlayerData = playerData;
@@ -131,7 +131,11 @@ public abstract class EnemyBase : MonoBehaviour
             Debug.LogWarning($"[{gameObject.name}] 네비메쉬가 활성화 되지 않음");
         }
     }
-    
+
+    protected virtual void Update()
+    {
+        UpdateAttackGauge();
+    }
     public virtual void TakeDamage(float damageAmount)
     {
         if (IsDead || damageAmount <= 0) return;
@@ -236,6 +240,17 @@ public abstract class EnemyBase : MonoBehaviour
                 IsAgentActive = false;
                 DestroyEnemy();
             }
+        }
+    }
+    private void UpdateAttackGauge()
+    {
+        if (HpBarInstance == null) return;
+        
+        bool shouldShowGauge = !IsDead && CurrentAttackGaugeRatio > -1;
+        HpBarInstance.SetAttackGaugeVisibility(shouldShowGauge);
+        if (shouldShowGauge)
+        {
+            HpBarInstance.UpdateAttackGauge(CurrentAttackGaugeRatio);
         }
     }
 }

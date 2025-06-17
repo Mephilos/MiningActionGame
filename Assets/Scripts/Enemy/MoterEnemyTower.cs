@@ -54,6 +54,8 @@ public class MortarEnemyTower : EnemyBase
 
     void Update()
     {
+        base.Update();
+        
         if (IsDead || PlayerTransform == null || PlayerData == null || PlayerData.isDead)
         {
             if (_currentTargetIndicatorInstance != null) Destroy(_currentTargetIndicatorInstance);
@@ -66,10 +68,10 @@ public class MortarEnemyTower : EnemyBase
     private void HandleStateMachine()
     {
         float distanceToPlayer = Vector3.Distance(transform.position, PlayerTransform.position);
-
-        // 플레이어 방향으로 회전
-        if (PlayerTransform != null && CurrentState != EnemyState.Attacking && CurrentState != EnemyState.Cooldown)
+        
+        void RotateTowardsPlayer()
         {
+            if (PlayerTransform == null) return;
             Vector3 directionToPlayer = (PlayerTransform.position - transform.position).normalized;
             directionToPlayer.y = 0;
             if (directionToPlayer != Vector3.zero)
@@ -82,7 +84,11 @@ public class MortarEnemyTower : EnemyBase
         switch (CurrentState)
         {
             case EnemyState.Idle:
-                if (distanceToPlayer <= detectionRadius && distanceToPlayer >= minAttackRange && distanceToPlayer <= attackRange)
+                if (distanceToPlayer <= detectionRadius)
+                {
+                    RotateTowardsPlayer();
+                }
+                if (distanceToPlayer <= attackRange && distanceToPlayer >= minAttackRange)
                 {
                     if (Time.time >= _lastAttackTime + attackCooldown)
                     {
@@ -90,13 +96,14 @@ public class MortarEnemyTower : EnemyBase
                     }
                 }
                 break;
-
-            case EnemyState.Attacking:
             case EnemyState.Cooldown:
+                RotateTowardsPlayer();
                 if (Time.time >= _lastAttackTime + attackCooldown && CurrentState == EnemyState.Cooldown)
                 {
                      CurrentState = EnemyState.Idle;
                 }
+                break;
+            case EnemyState.Attacking:
                 break;
         }
     }
@@ -172,12 +179,21 @@ public class MortarEnemyTower : EnemyBase
 
     protected override void PerformUniqueDeathActions()
     {
-        // 파괴 이펙트/사운드 추가 필요
+        // TODO:파괴 이펙트/사운드 추가 필요
     }
 
     protected override IEnumerator EnsureAgentOnNavMeshCoroutine()
     {
         yield break;
+    }
+    protected override float CurrentAttackGaugeRatio
+    {
+        get
+        {
+            if (attackCooldown <= 0) return 0f;
+            float timeRemaining = (_lastAttackTime + attackCooldown) - Time.time;
+            return (timeRemaining > 0) ? (timeRemaining / attackCooldown) : 0f;
+        }
     }
 
     void OnDrawGizmosSelected()

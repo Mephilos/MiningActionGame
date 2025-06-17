@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -23,7 +21,7 @@ public class RangedEnemy : EnemyBase
     private Rigidbody _rb;
     private GameObject _projectilePrefab;
     private float _lastAttackTime;
-    private float _currentAttackCooldownTimer;
+    
 
     protected override void Awake()
     {
@@ -69,9 +67,8 @@ public class RangedEnemy : EnemyBase
 
     protected override void OnEnable()
     {
-        base.OnEnable(); // 부모 클래스 OnEnable (체력 재설정, 스포너 등록 등)
+        base.OnEnable(); 
         _lastAttackTime = -attackCooldown; // 처음에는 바로 공격 가능하도록
-        _currentAttackCooldownTimer = 0f;
     }
 
     protected override IEnumerator Start()
@@ -81,6 +78,7 @@ public class RangedEnemy : EnemyBase
 
     private void Update()
     {
+        base.Update();
         if (IsDead || !IsAgentActive || PlayerTransform == null || PlayerData == null || PlayerData.isDead)
         {
             if (NavMeshAgent != null && NavMeshAgent.enabled && NavMeshAgent.hasPath)
@@ -141,9 +139,6 @@ public class RangedEnemy : EnemyBase
                 if (Time.time >= _lastAttackTime + attackCooldown)
                 {
                     Attack();
-                    _lastAttackTime = Time.time;
-                    CurrentState = EnemyState.Cooldown;
-                    _currentAttackCooldownTimer = attackCooldown;
                 }
                 else if (distanceToPlayer > attackRange * 1.0f)
                 {
@@ -151,21 +146,9 @@ public class RangedEnemy : EnemyBase
                 }
                 break;
             case EnemyState.Cooldown:
-                _currentAttackCooldownTimer -= Time.deltaTime;
-                if (_currentAttackCooldownTimer <= 0)
+                if (Time.time >= _lastAttackTime + attackCooldown)
                 {
-                    if (distanceToPlayer <= attackRange)
-                    {
-                        CurrentState = EnemyState.Attacking;
-                    }
-                    else if (distanceToPlayer <= detectionRadius)
-                    {
-                        CurrentState = EnemyState.Chasing;
-                    }
-                    else
-                    {
-                        CurrentState = EnemyState.Idle;
-                    }
+                    CurrentState = EnemyState.Idle;
                 }
                 break;
         }
@@ -192,23 +175,20 @@ public class RangedEnemy : EnemyBase
             CurrentState = EnemyState.Idle;
             return;
         }
+        _lastAttackTime = Time.time;
+        CurrentState = EnemyState.Cooldown;
         
         Vector3 directionToPlayerWithOffset = (PlayerTransform.position + Vector3.up * aimHeightOffset - firePoint.position).normalized;
         
-        if (directionToPlayerWithOffset == Vector3.zero) 
-        {
-            directionToPlayerWithOffset = firePoint.forward; // 만약을 위한 처리
-        }
+        if (directionToPlayerWithOffset == Vector3.zero) directionToPlayerWithOffset = firePoint.forward;
         
         firePoint.rotation = Quaternion.LookRotation(directionToPlayerWithOffset);
         
-        // 플레이어를 향해 투사체 발사
         GameObject projGO = Instantiate(_projectilePrefab, firePoint.position, firePoint.rotation);
         Projectile projectileScript = projGO.GetComponent<Projectile>();
 
         if (projectileScript != null)
         {
-            // 적의 공격력을 투사체에 설정
             projectileScript.SetDamage(enemyBaseData != null ? enemyBaseData.attackDamage : 10f); // 기본값 10
             projectileScript.isEnemyProjectile = true;
         }
@@ -236,6 +216,17 @@ public class RangedEnemy : EnemyBase
     }
     protected override void PerformUniqueDeathActions()
     {
+        // TODO: 죽음 연출용    
+    }
+
+    protected override float CurrentAttackGaugeRatio
+    {
+        get
+        {
+            if (attackCooldown <= 0) return 0f;
+            float timeRemaining = (_lastAttackTime + attackCooldown) - Time.time;
+            return (timeRemaining > 0) ? (timeRemaining / attackCooldown) : 0f;
+        }
         
     }
 
