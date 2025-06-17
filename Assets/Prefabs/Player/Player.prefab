@@ -138,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeaponData: {fileID: 11400000, guid: af87e2e17c6c84f659529790711fc2b2, type: 2}
+  currentWeaponData: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
   firePoint: {fileID: 975871988846311673}
   bulletSpeed: 30
   muzzleFlashPrefab: {fileID: 915984143002522250, guid: b8f8a2f3ef749494f8fa13fe541596e3, type: 3}
@@ -186,10 +186,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseStatsData: {fileID: 11400000, guid: e4fa13eda78fe4e5d800a16a08179760, type: 2}
   currentHealth: 0
+  maxHealth: 0
   isDead: 0
   currentResources: 0
   currentAttackDamage: 0
   currentAttackSpeed: 0
+  globalDamageMultiplier: 1
+  globalAttackCooldownMultiplier: 1
   currentMaxSpeed: 0
   currentRotationSpeed: 0
   currentAcceleration: 0
@@ -205,8 +208,12 @@ MonoBehaviour:
   currentDashInvincibleDuration: 0
   isInvincible: 0
   isDashing: 0
+  maxHealthUpgradeCost: 0
+  attackDamageUpgradeCost: 0
+  attackSpeedUpgradeCost: 0
   currentSkillCooldown: 0
   hpBarPrefab: {fileID: 6455096524345293041, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
+  hpBarInstance: {fileID: 9079505508440645690, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
 --- !u!143 &-5910758365971810844
 CharacterController:
   m_ObjectHideFlags: 0
