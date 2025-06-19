@@ -1,4 +1,3 @@
-// Scripts/Data 폴더에 새로 생성
 using UnityEngine;
 
 public abstract class SkillData : ScriptableObject

@@ -656,7 +656,7 @@ public class StageManager : MonoBehaviour
     {
         int waves = skillData.waves;
         int projectilesPerWave = skillData.projectilesPerWave;
-        float waveDelay = 0.8f; // 이 값도 skillData에 추가할 수 있습니다.
+        float waveDelay = 0.8f;
         float spawnRadius = skillData.spawnRadius;
         float aimDuration = skillData.aimDuration;
         float fallDuration = skillData.fallDuration;
@@ -679,7 +679,7 @@ public class StageManager : MonoBehaviour
                 GameObject indicator = null;
                 if (skillData.targetIndicatorPrefab != null)
                 {
-                    indicator = Instantiate(skillData.targetIndicatorPrefab, targetPos, Quaternion.Euler(90, 0, 0));
+                    indicator = Instantiate(skillData.targetIndicatorPrefab, targetPos + new Vector3(0, 0.1f, 0), Quaternion.Euler(90, 0, 0));
                 }
 
                 Vector3 startPos = targetPos + Vector3.up * spawnHeight;

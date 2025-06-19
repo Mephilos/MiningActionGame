@@ -19,9 +19,9 @@ MonoBehaviour:
   grenadePrefab: {fileID: 3805954997797676055, guid: 0d7c32f76b0608549a9a286412ffb53b, type: 3}
   throwForce: 15
   fireSupportProjectilePrefab: {fileID: 4164615049386094086, guid: 51ace7d0bd95940c292d0bee1a630eb8, type: 3}
-  targetIndicatorPrefab: {fileID: 6441246495927980022, guid: 8c863477e28ef4ac79f46095dd5f7268, type: 3}
+  targetIndicatorPrefab: {fileID: 1591534230915432378, guid: edba33355c61f4bda8105357d843a3d8, type: 3}
   waves: 3
   projectilesPerWave: 4
-  spawnRadius: 2.64
-  aimDuration: 0.87
-  fallDuration: 1.24
+  spawnRadius: 4
+  aimDuration: 1
+  fallDuration: 2

@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     private static readonly int IsDashing = Animator.StringToHash("IsDashing");
     private static readonly int Aiming = Animator.StringToHash("IsAiming");
     private static readonly int JumpTrigger = Animator.StringToHash("JumpTrigger");
+    private static readonly int ThrowTrigger = Animator.StringToHash("ThrowTrigger");
+    private static readonly int IsAimingSkill = Animator.StringToHash("IsAimingSkill");
+    private static readonly int IsActionLockedAnim = Animator.StringToHash("IsActionLocked");
+    
     
     [SerializeField] private float isometricCameraAngleY = 45f;
     [SerializeField] private float shortPressThreshold = 0.2f;
@@ -50,7 +54,7 @@ public class PlayerController : MonoBehaviour
     [Header("Aim Assist Settings")]
     public float aimAssistRadius = 10f; // 에임 어시스트 감지 반경
     public float horizontalAimConeAngle = 15f; // 플레이어 정면 기준 각도
-    public float verticalAimConeAngle = 25f;
+    public float verticalAimConeAngle = 25f; // 플레이어 정면 기준 수직
     public LayerMask aimAssistLayerMask; // 에임 어시스트 적용 레이어 마스크 
     public LayerMask obstacleLayerMask; // 장애물 판별용 레이어 마스크 
     public float onReticleHorizontalAngle = 5.0f; // 조준선 일치 각도
@@ -81,9 +85,6 @@ public class PlayerController : MonoBehaviour
             
             return;
         }
-        // TODO: 스킬 쿨타임 표기 UI 추가
-
-        //플레이어 웨폰컨트롤러 기능 분리위해 새로 작성
         HandleInput();
         HandleSkillInput();
         UpdateAiming();
@@ -97,24 +98,45 @@ public class PlayerController : MonoBehaviour
         if (_playerData.isDashing)
         {
             ApplyFinalMovement();
-            return; // 대쉬 중에는 이동 로직 건너뜀
+            return; // 대쉬 중에는 이동 로직 건너뜀 록맨X 점프 대쉬 같이 하기 위
         }
         HandleMovement();
         ApplyRotationFixedUpdate();
         ApplyGravity();
         ApplyFinalMovement();
     }
+
+    public void LockAction()
+    {
+        if (_animator != null) _animator.SetBool(IsActionLockedAnim, true);
+    }
+    public void UnlockAction()
+    {
+        if (_animator != null) _animator.SetBool(IsActionLockedAnim, false);
+    }
+    public void ExecuteGrenadeThrow()
+    {
+        SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
+        if (currentSkill == null) return;
+        
+        ThrowSkillGrenade(currentSkill);
+        _playerData.currentSkillCooldown = currentSkill.cooldown;
+    }
     void HandleSkillInput()
     {
         SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
         
-        // 스킬이 없거나, 궤도 예측기가 없으면 실행하지 않음
-        if (currentSkill == null || trajectoryPredictor == null) return;
-        
+        if (currentSkill == null || trajectoryPredictor == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] 스킬 설정에 이슈 발생 ");
+            return;
+        }
+        // Q키 누르기 시작 할 때
         if (Input.GetKeyDown(KeyCode.Q) && _playerData.currentSkillCooldown <= 0)
         {
             _isAimingSkill = true;
-            trajectoryPredictor.Show(); // 궤도 UI 표시
+            if (_animator != null) _animator.SetBool(IsAimingSkill, true);
+            trajectoryPredictor.Show();
         }
 
         // Q키를 누르고 있는 동안
@@ -128,11 +150,13 @@ public class PlayerController : MonoBehaviour
         // Q키를 뗐을 때 
         if (_isAimingSkill && Input.GetKeyUp(KeyCode.Q))
         {
-            ThrowSkillGrenade(currentSkill); // 수류탄 투척
-            _playerData.currentSkillCooldown = currentSkill.cooldown; // 쿨타임 시작
-
+            if (_animator != null)
+            {
+                _animator.SetBool(IsAimingSkill, false);
+                _animator.SetTrigger(ThrowTrigger);
+            }
             _isAimingSkill = false;
-            trajectoryPredictor.Hide(); // 궤도 UI 숨김
+            trajectoryPredictor.Hide();
         }
     }
     private Vector3 GetThrowDirection(float force)
@@ -630,7 +654,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 넉백 적용 메서드
+    /// 넉백 적용 메서드 (보스 스킬 피드백) 
     /// </summary>
     /// <param name="direction">밀려난 방향</param>
     /// <param name="force">미는 힘</param>
