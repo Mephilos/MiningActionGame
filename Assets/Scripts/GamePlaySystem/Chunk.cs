@@ -676,12 +676,12 @@ public class Chunk : MonoBehaviour
 
                             _objectBounds.Add(newObjectBounds); // 배치된 오브젝트 목록에 추가 (로컬 좌표 기준 바운드)
                             spawnedCount++;
-                            goto nextObjectSpawn; // 다음 오브젝트 스폰 시도로 이동
+                            
+                            break;
                         }
                     }
                 }
             }
-            nextObjectSpawn: ;
         }
     }
     private T GetWeightedRandomObject<T>(T[] objects) where T : ScriptableObject, IWeightedItem // 제네릭 제약 조건에 IWeightedItem 추가

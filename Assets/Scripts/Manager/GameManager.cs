@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public string resultsSceneName = "Result";
 
     public WeaponData SelectedWeapon { get; private set; }
+    public int LastClearedStage { get; private set; }
 
     void Awake()
     {
@@ -65,10 +66,8 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Loading Scene: {resultsSceneName}");
     }
 
-    // TODO:무기 데이터 설정 
-    // public void SetSelectedWeapon(WeaponData weapon)
-    // {
-    //     SelectedWeapon = weapon;
-    //     Debug.Log($"GameManager: Weapon '{weapon.weaponName}' selected.");
-    // }
+    public void RecordResults(int clearedStage)
+    {
+        LastClearedStage = clearedStage;
+    }
 }

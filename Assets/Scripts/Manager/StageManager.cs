@@ -185,13 +185,18 @@ public class StageManager : MonoBehaviour
         _isGameOver = true;
         _isLoadingNextStage = false;
         _isWaitingForPlayerToProceed = false;
-
         Debug.Log("[StageManager] 플레이어 사망 처리 시작.");
-        
-        //enemySpawner.StopAndClearAllEnemies();
-        
-        Time.timeScale = 0f;
-        Debug.Log("[StageManager] 게임 오버.");
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RecordResults(_currentStageNumber);
+            GameManager.Instance.LoadResultsScene();
+        }
+        else
+        {
+            Debug.LogError($"[{gameObject.name}] GameManager 인스턴스를 찾을 수 없어 결과 씬 로드 불가");
+            Time.timeScale = 0f;
+        }
         OnGameOver?.Invoke();
     }
 
