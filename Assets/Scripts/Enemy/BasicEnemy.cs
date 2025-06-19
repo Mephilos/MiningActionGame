@@ -48,7 +48,7 @@ public class BasicEnemy : EnemyBase
         yield return base.Start();
     }
 
-    void Update()
+    protected override void Update()
     {
         base.Update();
         if (IsDead || !IsAgentActive || PlayerTransform == null || PlayerData == null || PlayerData.isDead)

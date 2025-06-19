@@ -52,7 +52,7 @@ public class MortarEnemyTower : EnemyBase
         if (_currentTargetIndicatorInstance != null) Destroy(_currentTargetIndicatorInstance);        
     }
 
-    void Update()
+    protected override void Update()
     {
         base.Update();
         

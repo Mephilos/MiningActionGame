@@ -61,7 +61,7 @@ public class MidBoss : EnemyBase
         _playerController = playerTransform.GetComponent<PlayerController>();
     }
 
-    void Update()
+    protected override void Update()
     {
         base.Update();
         if (IsDead || PlayerTransform == null || !IsAgentActive || _playerController == null)
