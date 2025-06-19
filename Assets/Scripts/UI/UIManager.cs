@@ -70,6 +70,11 @@ public class UIManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            Initialize(playerObj.GetComponent<PlayerData>());
+        }
     }
     public void Initialize(PlayerData playerData)
     {
@@ -77,6 +82,7 @@ public class UIManager : MonoBehaviour
         if (_playerData == null)
         {
             Debug.LogError($"[{gameObject.name}] Initialize: PlayerData가 null입니다!");
+            return;
         }
         // PlayerData가 설정된 후 관련 UI 초기 업데이트
         if (_playerData != null)
@@ -120,6 +126,55 @@ public class UIManager : MonoBehaviour
         if (rerollPerksButton != null)
         {
             rerollPerksButton.onClick.AddListener(OnRerollPerksButtonPressed);
+        }
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.OnStageStarted += HandleStageStarted;
+            StageManager.Instance.OnStageCleared += HandleStageCleared;
+            StageManager.Instance.OnGameOver += HandleGameOver;
+            StageManager.Instance.OnGameRestart += HandleGameRestart;
+        }
+    }
+
+    void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (StageManager.Instance != null)
+        {
+            StageManager.Instance.OnStageStarted -= HandleStageStarted;
+            StageManager.Instance.OnStageCleared -= HandleStageCleared;
+            StageManager.Instance.OnGameOver -= HandleGameOver;
+            StageManager.Instance.OnGameRestart -= HandleGameRestart;
+        }
+    }
+    
+    private void HandleStageStarted(int stageNumber)
+    {
+        if (shopPanel != null && shopPanel.activeSelf)
+        {
+            HideShopPanel();
+        }
+        UpdateStageNumberUI(stageNumber);
+        UpdateStageClearUI(stageNumber); // 다음 스테이지 클리어 텍스트 미리 준비
+    }
+
+    private void HandleStageCleared()
+    {
+        ShowStageClearScreen();
+    }
+
+    private void HandleGameOver()
+    {
+        ShowGameOverScreem();
+    }
+
+    private void HandleGameRestart()
+    {
+        HideGameOverScreem();
+        HideShopPanel();
+        if (_playerData != null)
+        {
+            UpdateResourceDisplayUI(_playerData.currentResources);
         }
     }
 

@@ -43,15 +43,39 @@ public class EnemySpawner : MonoBehaviour
         
         ActiveEnemies.Clear();
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null) _playerTransform = playerObject.transform;
+        if (playerObject != null)
+        {
+            _playerTransform = playerObject.transform;
+            _playerData = playerObject.GetComponent<PlayerData>();
+        }
     }
-
-    public void Initialize(PlayerData playerData, Transform playerTransform)
+    void Start() 
     {
-        _playerData = playerData;
-        _playerTransform = playerTransform;
+        if (StageManager.Instance != null)
+        {
+            // 이벤트 구독
+            StageManager.Instance.OnStageStarted += HandleStageStart;
+            StageManager.Instance.OnStageCleared += StopAndClearAllEnemies; 
+            StageManager.Instance.OnGameOver += StopAndClearAllEnemies; 
+            StageManager.Instance.OnGameRestart += StopAndClearAllEnemies; 
+        }
     }
-
+    void OnDestroy() // 오브젝트 파괴 시 반드시 구독 해제하여 메모리 누수 방지
+    {
+        if (StageManager.Instance != null)
+        {
+            // 이벤트 구독 해제
+            StageManager.Instance.OnStageStarted -= HandleStageStart;
+            StageManager.Instance.OnStageCleared -= StopAndClearAllEnemies;
+            StageManager.Instance.OnGameOver -= StopAndClearAllEnemies;
+            StageManager.Instance.OnGameRestart -= StopAndClearAllEnemies;
+        }
+    }
+    private void HandleStageStart(int stageNumber)
+    {
+        StartSpawningForStage(stageNumber);
+    }
+    
     public void StartSpawningForStage(int stageNumber)
     {
         if (_playerTransform == null || _playerData == null)
