@@ -190,6 +190,7 @@ public class StageManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.RecordResults(_currentStageNumber);
+            GameManager.Instance.Leaderboard.AddScore(_currentStageNumber);
             GameManager.Instance.LoadResultsScene();
         }
         else

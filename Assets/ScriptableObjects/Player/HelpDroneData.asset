@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3caaf9c268f5e4f159d04f31c2e6c401, type: 3}
   m_Name: HelpDroneData
   m_EditorClassIdentifier: 
-  attackDamage: 1000
+  attackDamage: 10
   attackCooldown: 1.5
   projectileSpeed: 100
   projectilePrefab: {fileID: 6730927503448550575, guid: 7c112116d497b416a9a01d64583aa8ed, type: 3}

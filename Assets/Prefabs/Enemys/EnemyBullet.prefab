@@ -97,6 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc1093a972404c17ac91f025d45bc5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactEffectPrefab: {fileID: 8394628367630756674, guid: 1d2ff93097a052c4db277ef0c018b98a, type: 3}
   lifeTime: 5
   isEnemyProjectile: 1
 --- !u!1001 &8872668363408407900

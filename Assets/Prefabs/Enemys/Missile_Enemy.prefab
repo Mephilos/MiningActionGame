@@ -125,6 +125,7 @@ MonoBehaviour:
   hpBarPrefab: {fileID: 6455096524345293041, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
   detectionRadius: 15
   selfDestructDelay: 0
+  explosionEffectPrefab: {fileID: 3097778116688820250, guid: 5660205a880b5e74cb28a8df98c1f11e, type: 3}
 --- !u!1001 &4472349531518333114
 PrefabInstance:
   m_ObjectHideFlags: 0

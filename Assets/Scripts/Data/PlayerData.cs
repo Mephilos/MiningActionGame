@@ -341,7 +341,8 @@ public class PlayerData : MonoBehaviour
     public void IncreaseAttackSpeed(float amountToAdd, float attackSpeedCap = 5f)
     {
         currentAttackSpeed += amountToAdd;
-        if (currentAttackSpeed < attackSpeedCap)
+        
+        if (currentAttackSpeed > attackSpeedCap)
         {
             currentAttackSpeed = attackSpeedCap;
         }

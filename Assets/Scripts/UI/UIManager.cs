@@ -299,12 +299,18 @@ public class UIManager : MonoBehaviour
         {
             // 이미 최소 쿨다운에 도달했으면 더 이상 업그레이드 불가
             bool canUpgrade = _playerData.currentResources >= _playerData.attackSpeedUpgradeCost 
-                              && _playerData.currentAttackSpeed > _attackSpeedCap;
+                              && _playerData.currentAttackSpeed < _attackSpeedCap;
             
             upgradeAttackSpeedButton.interactable = canUpgrade;
-            if (_playerData.currentAttackSpeed <= _attackSpeedCap && attackSpeedStatText != null)
+            if (_playerData.currentAttackSpeed >= _attackSpeedCap && attackSpeedStatText != null)
             {
                 attackSpeedStatText.text += "\n(Max AttackCooldown)";
+                upgradeAttackSpeedButton.interactable = false;
+            }
+            else if (attackSpeedStatText != null)
+            {
+                attackSpeedStatText.text =
+                    $"Attack Rate: {_playerData.currentAttackSpeed:F2}\n(cost: {_playerData.attackSpeedUpgradeCost} / +{_attackSpeedAmount:F2}회)";
             }
         }
         

@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
 
     public WeaponData SelectedWeapon { get; private set; }
     public int LastClearedStage { get; private set; }
+    public LeaderboardManager Leaderboard { get; private set; }
 
     void Awake()
     {
@@ -20,6 +21,8 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            Leaderboard = new LeaderboardManager();
         }
         else
         {

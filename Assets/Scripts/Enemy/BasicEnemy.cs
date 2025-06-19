@@ -13,6 +13,8 @@ public class BasicEnemy : EnemyBase
     [Tooltip("자폭대기 시간")]
     public float selfDestructDelay;
     
+    public GameObject explosionEffectPrefab;
+    
     private Rigidbody _rb;                 
     
     protected override void Awake()
@@ -39,7 +41,6 @@ public class BasicEnemy : EnemyBase
         }
         else
         {
-            // enemyBaseData가 없을 경우 인스펙터 값 또는 기본값 사용 (이미 detectionRadius에 설정되어 있음)
             Debug.LogWarning($"[{gameObject.name}] EnemyBaseStatsData가 없어 인스펙터의 detectionRadius ({this.detectionRadius})를 사용합니다.");
         }
     }
@@ -88,7 +89,6 @@ public class BasicEnemy : EnemyBase
 
         if (other.CompareTag("Player"))
         {
-            // Debug.Log($"[{gameObject.name}] Collided with Player.");
             if (PlayerData != null && enemyBaseData != null)
             {
                 PlayerData.TakeDamage(enemyBaseData.selfDestructDamage);
@@ -113,7 +113,10 @@ public class BasicEnemy : EnemyBase
 
     protected override void PerformUniqueDeathActions()
     {
-        // TODO: 자폭 이펙트 생성 코드 추가
+        if (explosionEffectPrefab != null)
+        {
+            Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+        }
     }
 
     protected override float CurrentAttackGaugeRatio
