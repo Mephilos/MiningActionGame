@@ -147,6 +147,7 @@ public class EnemySpawner : MonoBehaviour
             if (bossGO.TryGetComponent<EnemyBase>(out var bossScript))
             {
                 bossScript.Initialize(_playerData, _playerTransform);
+                bossScript.SetStageScaling(_currentStageNumberForSpawner);
             }
             Debug.Log($"보스 [{bossPrefab.name}] 소환 완료!");
         }
@@ -187,6 +188,7 @@ public class EnemySpawner : MonoBehaviour
                 if (enemyGO.TryGetComponent<EnemyBase>(out var enemyScript))
                 {
                     enemyScript.Initialize(_playerData, _playerTransform);
+                    enemyScript.SetStageScaling(_currentStageNumberForSpawner);
                 }
                 enemiesSpawnedSoFar++;
             }

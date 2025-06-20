@@ -8,6 +8,10 @@ public abstract class EnemyBase : MonoBehaviour
     public float MaxHealth { get; protected set; }
     public float CurrentHealth { get; protected set; }
     public bool IsDead { get; protected set; }
+
+    [Header("적 성장 스탯(체력)")]
+    [SerializeField] private float healthScalePerStage = 0.1f;
+    
     
     protected Transform PlayerTransform;
     protected PlayerData PlayerData;
@@ -163,6 +167,25 @@ public abstract class EnemyBase : MonoBehaviour
         if (PlayerData != null && enemyBaseData != null)
         {
             PlayerData.GainResources(enemyBaseData.resourcesToGive);
+        }
+    }
+    
+    /// <summary>
+    /// 스테이지 증가에 맞게 적의 체력을 설정
+    /// </summary>
+    /// <param name="stageNumber">현재 스테이지 번호</param>
+    public virtual void SetStageScaling(int stageNumber)
+    {
+        if (enemyBaseData == null) return;
+        
+        float finalHealth = enemyBaseData.maxHealth * (1f + (stageNumber - 1) * healthScalePerStage);
+
+        MaxHealth = finalHealth;
+        CurrentHealth = finalHealth;
+        
+        if (HpBarInstance != null)
+        {
+            HpBarInstance.UpdateHealth(CurrentHealth, MaxHealth);
         }
     }
     /// <summary>
