@@ -45,6 +45,7 @@ public class PlayerController : MonoBehaviour
 
     public bool IsAiming { get; private set; }
     private Vector3 _aimingDirection;
+    public Vector3 AimingDirection => _aimingDirection;
     private Transform _lockedAimAssistTarget; // 현재 감지된 에임 어시스트 타겟
     
     [Header("Mobile Controls")]
