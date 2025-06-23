@@ -12,7 +12,7 @@ public class ExplosiveGrenadeSkillData : SkillData
     {
         if (impactEffectPrefab != null)
         {
-            Instantiate(impactEffectPrefab, position, Quaternion.identity);
+            ObjectPoolManager.Instance.GetFromPool(impactEffectPrefab.name, position, Quaternion.identity);
         }
 
         if (StageManager.Instance != null)

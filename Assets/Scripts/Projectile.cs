@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections;
 public class Projectile : MonoBehaviour
 {
     public GameObject impactEffectPrefab;
@@ -10,10 +10,30 @@ public class Projectile : MonoBehaviour
     private float _explosionRadius;
     private GameObject _explosionEffectPrefab;
     private LayerMask _explosionDamageLayerMask;
-    void Start()
+    private Coroutine _lifeTimeCoroutine;
+    void OnEnable()
     {
-        // 일정 시간 후 자동 파괴
-        Destroy(gameObject, lifeTime);
+        _lifeTimeCoroutine = StartCoroutine(ReturnToObjPoolDelay(lifeTime));
+    }
+
+    void OnDisable()
+    {
+        if (_lifeTimeCoroutine != null)
+        {
+            StopCoroutine(_lifeTimeCoroutine);
+            _lifeTimeCoroutine = null;
+        }
+        if (TryGetComponent<Rigidbody>(out var rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+    }
+
+    private IEnumerator ReturnToObjPoolDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ObjectPoolManager.Instance.ReturnToPool(gameObject);
     }
     public void SetDamage(float damage)
     {
@@ -48,7 +68,7 @@ public class Projectile : MonoBehaviour
                     if (destructibleObjectHit != null) destructibleObjectHit.TakeDamage(_damageAmount); //
                     
                     ShowImpactEffect(); 
-                    Destroy(gameObject);
+                    ObjectPoolManager.Instance.ReturnToPool(gameObject);
                     return;
                 }
                 directTargetHit = true; // 범위 공격 시 지정된 타겟에 직접 맞음
@@ -65,7 +85,7 @@ public class Projectile : MonoBehaviour
                     Debug.Log($"플레이어가 적 투사체에 맞음! 데미지: {_damageAmount}"); //
                 }
                 ShowImpactEffect();
-                Destroy(gameObject);
+                ObjectPoolManager.Instance.ReturnToPool(gameObject);
                 return;
             }
         }
@@ -73,18 +93,18 @@ public class Projectile : MonoBehaviour
         // 지면 또는 기타 환경 레이어와 충돌 확인
         bool hitEnvironment = (other.gameObject.layer == LayerMask.NameToLayer("Ground") ||
                                other.gameObject.layer == LayerMask.NameToLayer("Default") ||
-                               other.gameObject.layer == LayerMask.NameToLayer("Obstacle"));
+                               other.gameObject.layer == LayerMask.NameToLayer("Obstacles"));
         
         if (_explosionRadius > 0f && (hitEnvironment || directTargetHit))
         {
             HandleExplosion(transform.position);
-            Destroy(gameObject);
+            ObjectPoolManager.Instance.ReturnToPool(gameObject);
         }
         // 폭발형이 아니지만 환경에 부딪혔을 때
         else if (!directTargetHit && hitEnvironment) 
         {
             ShowImpactEffect();
-            Destroy(gameObject);
+            ObjectPoolManager.Instance.ReturnToPool(gameObject);
         }
         
     }
@@ -93,7 +113,7 @@ public class Projectile : MonoBehaviour
     {
         if (_explosionEffectPrefab != null)
         {
-            Instantiate(_explosionEffectPrefab, explosionCenter, Quaternion.identity);
+            ObjectPoolManager.Instance.GetFromPool(_explosionEffectPrefab.name, explosionCenter, Quaternion.identity);
         }
 
         Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, _explosionRadius, _explosionDamageLayerMask);
@@ -122,7 +142,7 @@ public class Projectile : MonoBehaviour
     {
         if (impactEffectPrefab != null)
         {
-            Instantiate(impactEffectPrefab, transform.position, Quaternion.identity); //
+            ObjectPoolManager.Instance.GetFromPool(impactEffectPrefab.name, transform.position, Quaternion.identity);
         }
     }
 }

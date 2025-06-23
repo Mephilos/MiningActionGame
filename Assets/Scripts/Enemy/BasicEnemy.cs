@@ -115,7 +115,7 @@ public class BasicEnemy : EnemyBase
     {
         if (explosionEffectPrefab != null)
         {
-            Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+            ObjectPoolManager.Instance.GetFromPool(explosionEffectPrefab.name, transform.position, Quaternion.identity);
         }
     }
 

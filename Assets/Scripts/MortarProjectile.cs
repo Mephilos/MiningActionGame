@@ -76,7 +76,7 @@ public class MortarProjectile : MonoBehaviour
         // 폭발 이펙트
         if (impactEffectPrefab != null)
         {
-            Instantiate(impactEffectPrefab, _targetPosition, Quaternion.identity);
+            ObjectPoolManager.Instance.GetFromPool(impactEffectPrefab.name, transform.position, Quaternion.identity);
         }
 
         // 지형 파괴

@@ -179,12 +179,11 @@ public class RangedEnemy : EnemyBase
         CurrentState = EnemyState.Cooldown;
         
         Vector3 directionToPlayerWithOffset = (PlayerTransform.position + Vector3.up * aimHeightOffset - firePoint.position).normalized;
-        
         if (directionToPlayerWithOffset == Vector3.zero) directionToPlayerWithOffset = firePoint.forward;
-        
         firePoint.rotation = Quaternion.LookRotation(directionToPlayerWithOffset);
         
-        GameObject projGO = Instantiate(_projectilePrefab, firePoint.position, firePoint.rotation);
+        string projectileTag = _projectilePrefab.name;
+        GameObject projGO = ObjectPoolManager.Instance.GetFromPool(projectileTag, firePoint.position, firePoint.rotation);
         Projectile projectileScript = projGO.GetComponent<Projectile>();
 
         if (projectileScript != null)
@@ -202,8 +201,6 @@ public class RangedEnemy : EnemyBase
         {
             projRb.linearVelocity = directionToPlayerWithOffset * projectileSpeed;
         }
-
-        // TODO: 발사 애니메이션, 사운드 등 추가
         Debug.Log($"[{gameObject.name}] 공격. 다음 공격 시간: {_lastAttackTime + attackCooldown}");
     }
 

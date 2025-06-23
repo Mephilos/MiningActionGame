@@ -201,41 +201,51 @@ public class WeaponController : MonoBehaviour
 
     private void TryFireProjectile()
     {
-        float finalAttacksPerSecond = _playerData.currentAttackSpeed / _playerData.globalAttackCooldownMultiplier; // global multiplier는 쿨다운에 곱해지므로, 여기선 나눠줍니다.
-        if (finalAttacksPerSecond <= 0) return; // 0으로 나누기 방지
+        float weaponBaseAps = currentWeaponData.attackSpeed;
+        float playerBonusAps = _playerData.currentAttackSpeed;
+        float finalAttacksPerSecond = weaponBaseAps + playerBonusAps;
 
+        if (_playerData.globalAttackCooldownMultiplier > 0)
+        {
+            finalAttacksPerSecond /= _playerData.globalAttackCooldownMultiplier;
+        }
+        if (finalAttacksPerSecond <= 0) return;
         float finalCooldown = 1f / finalAttacksPerSecond;
-
         if (Time.time >= _nextFireTime)
         {
             FireProjectileInternal();
             _nextFireTime = Time.time + finalCooldown;
         }
-    }private void FireProjectileInternal()
+    }
+    private void FireProjectileInternal()
     {
         if (currentWeaponData.projectilePrefab == null) return;
         
+        string projectileTag = currentWeaponData.projectilePrefab.name;
+        
         Vector3 fireDirection = this.AimDirection;
         Quaternion bulletRotation = Quaternion.LookRotation(fireDirection);
+        
+        GameObject bullet = ObjectPoolManager.Instance.GetFromPool(projectileTag, firePoint.position, firePoint.rotation);
+        bullet.transform.rotation = bulletRotation;
 
+        
         if (this.AimTarget != null) // 락온 타겟이 있다면 그쪽으로 방향을 재계산
         {
             Vector3 targetCenter = AimTarget.GetComponent<Collider>()?.bounds.center ?? AimTarget.position;
             fireDirection = (targetCenter - firePoint.position).normalized;
-            if (fireDirection != Vector3.zero)
-            {
-                bulletRotation = Quaternion.LookRotation(fireDirection);
-            }
+            // if (fireDirection != Vector3.zero)
+            // {
+            //     bulletRotation = Quaternion.LookRotation(fireDirection);
+            // }
         }
-
-        GameObject bullet = Instantiate(currentWeaponData.projectilePrefab, firePoint.position, bulletRotation);
         
-        if (bullet.TryGetComponent<Rigidbody>(out var rb))
+        if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
              rb.linearVelocity = fireDirection * bulletSpeed;
         }
 
-        if (bullet.TryGetComponent<Projectile>(out var projectileScript))
+        if (bullet.TryGetComponent<Projectile>(out Projectile projectileScript))
         {
             // 플레이어 무기의 기본 데미지 합산값
             float baseTotalDamage = _playerData.currentAttackDamage + currentWeaponData.baseDamage;
@@ -261,7 +271,11 @@ public class WeaponController : MonoBehaviour
         
         if (muzzleFlashPrefab != null && firePoint != null)
         {
-            Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
+            GameObject muzzleFlash = ObjectPoolManager.Instance.GetFromPool(muzzleFlashPrefab.name, firePoint.position, firePoint.rotation);
+            if (muzzleFlash != null)
+            {
+                muzzleFlash.transform.parent = firePoint;
+            }
         }
     }
     private void FireLaser()
@@ -314,13 +328,13 @@ public class WeaponController : MonoBehaviour
             
             if (muzzleFlashPrefab != null)
             {
-                Instantiate(muzzleFlashPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                ObjectPoolManager.Instance.GetFromPool(muzzleFlashPrefab.name, hit.point, Quaternion.LookRotation(hit.normal));
             }
         }
         
         if (muzzleFlashPrefab != null)
         {
-            Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
+            ObjectPoolManager.Instance.GetFromPool(muzzleFlashPrefab.name, firePoint.position, firePoint.rotation);
         }
     }
     private void UpdateAttackGaugeUI()

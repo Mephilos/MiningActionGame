@@ -41,7 +41,7 @@ public class FireSupportProjectile : MonoBehaviour
     {
         if (impactEffectPrefab != null)
         {
-            Instantiate(impactEffectPrefab, transform.position, Quaternion.identity);
+            ObjectPoolManager.Instance.GetFromPool(impactEffectPrefab.name, transform.position, Quaternion.identity);
         }
 
         if (StageManager.Instance != null)
@@ -50,7 +50,7 @@ public class FireSupportProjectile : MonoBehaviour
         }
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius, LayerMask.GetMask("Enemy"));
-        foreach (var hit in hitColliders)
+        foreach (Collider hit in hitColliders)
         {
             if (hit.TryGetComponent<EnemyBase>(out var enemy))
             {

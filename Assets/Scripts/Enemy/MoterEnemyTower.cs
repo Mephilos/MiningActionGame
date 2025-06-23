@@ -148,7 +148,8 @@ public class MortarEnemyTower : EnemyBase
         // 발사
         if (mortarProjectilePrefab != null && projectileSpawnPoint != null)
         {
-            GameObject projectileGO = Instantiate(mortarProjectilePrefab, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
+            string projectileTag = mortarProjectilePrefab.name;
+            GameObject projectileGO = ObjectPoolManager.Instance.GetFromPool(projectileTag, projectileSpawnPoint.position, projectileSpawnPoint.rotation);
             MortarProjectile projectileScript = projectileGO.GetComponent<MortarProjectile>();
             if (projectileScript != null)
             {
