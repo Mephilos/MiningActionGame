@@ -262,7 +262,7 @@ GameObject:
   m_Component:
   - component: {fileID: 60137403}
   - component: {fileID: 60137406}
-  - component: {fileID: 60137404}
+  - component: {fileID: 60137407}
   m_Layer: 5
   m_Name: SkillSlotUI
   m_TagString: Untagged
@@ -292,22 +292,6 @@ RectTransform:
   m_AnchoredPosition: {x: -910, y: -490}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &60137404
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 60137402}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f66fb01aa12354191a48c607ee9505f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerObject: {fileID: 1782055444}
-  skillIcon: {fileID: 432650317}
-  cooldownOverlay: {fileID: 1897357390}
-  cooldownText: {fileID: 1738353426}
 --- !u!222 &60137406
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -316,6 +300,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 60137402}
   m_CullTransparentMesh: 1
+--- !u!114 &60137407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 60137402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d34693d84d7047f88baea0fbf7365d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldownOverlay: {fileID: 1897357390}
+  cooldownText: {fileID: 1738353426}
 --- !u!1 &149414534
 GameObject:
   m_ObjectHideFlags: 0
@@ -1267,8 +1265,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2117336584302238645, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: b510deb155efddf49bc1d00839a57356, type: 3}
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -2497,7 +2495,7 @@ GameObject:
   m_Component:
   - component: {fileID: 641158866}
   - component: {fileID: 641158869}
-  - component: {fileID: 641158867}
+  - component: {fileID: 641158870}
   m_Layer: 5
   m_Name: PlayerDashUI
   m_TagString: Untagged
@@ -2527,22 +2525,6 @@ RectTransform:
   m_AnchoredPosition: {x: -810, y: -490}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &641158867
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 641158865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01ec95c1e5735498485ec8b4d5c02220, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerObject: {fileID: 1782055444}
-  dashIcon: {fileID: 1833472247}
-  cooldownOverlay: {fileID: 981452850}
-  cooldownText: {fileID: 1455246326}
 --- !u!222 &641158869
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2551,6 +2533,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 641158865}
   m_CullTransparentMesh: 1
+--- !u!114 &641158870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641158865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d34693d84d7047f88baea0fbf7365d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldownOverlay: {fileID: 981452850}
+  cooldownText: {fileID: 1455246326}
 --- !u!1 &647351659
 GameObject:
   m_ObjectHideFlags: 0
@@ -3387,8 +3383,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2117336584302238645, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
-  m_Type: 3
+  m_Sprite: {fileID: 1650199349, guid: 497bc1d7a85c9bd489bcea525984cdc1, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -3863,6 +3859,9 @@ MonoBehaviour:
   stageNumberText: {fileID: 334881764}
   stageClearText: {fileID: 453573242}
   playerResourceDisplayText: {fileID: 1210524362}
+  dashCooldownDisplay: {fileID: 641158870}
+  skillCooldownDisplay: {fileID: 60137407}
+  skillIcon: {fileID: 432650317}
   gameOverPanel: {fileID: 165141940}
   stageClearPanel: {fileID: 1605669641}
   shopPanel: {fileID: 2012970318}
@@ -4489,8 +4488,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4279900698
+  m_fontColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -4507,15 +4506,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -4971,7 +4970,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: -2656565280028974690, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
   m_PrefabInstance: {fileID: 466908796}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1782055444}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afb699531626c44e0a90fa3eb8b483e6, type: 3}
@@ -5322,8 +5321,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4279900698
+  m_fontColor: {r: 0.1, g: 0.1, b: 0.1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -5340,15 +5339,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -5392,11 +5391,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1738353424}
   m_CullTransparentMesh: 1
---- !u!1 &1782055444 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6312218769451610566, guid: 50bacb0f0af3b4f039c633f6a85c83c7, type: 3}
-  m_PrefabInstance: {fileID: 466908796}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1812075048
 GameObject:
   m_ObjectHideFlags: 0
@@ -5611,8 +5605,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2117336584302238645, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 184a260157178b2468cd651a8efbc251, type: 3}
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -6135,8 +6129,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 2117336584302238645, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
-  m_Type: 3
+  m_Sprite: {fileID: 1650199349, guid: 497bc1d7a85c9bd489bcea525984cdc1, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4

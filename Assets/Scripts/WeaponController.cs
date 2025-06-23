@@ -274,19 +274,24 @@ public class WeaponController : MonoBehaviour
         }
         
         if (fireDirection == Vector3.zero) fireDirection = firePoint.forward;
-
-        float actualDamage = currentWeaponData.baseDamage + _playerData.currentAttackDamage;
+        
+        float baseTotalDamage = currentWeaponData.baseDamage + _playerData.currentAttackDamage;
+        float bonusDamageRatio = _playerData.globalDamageMultiplier - 1f;
+        float scaledBonusDamage = baseTotalDamage * bonusDamageRatio * currentWeaponData.damageMultiplierScale;
+        float finalDamage = baseTotalDamage + scaledBonusDamage;
+        
+        
         if (currentWeaponData.damageScalesWithCharge)
         {
             float chargeRatio = Mathf.Clamp01((_currentChargeLevel - currentWeaponData.minChargeToFire) / (1f - currentWeaponData.minChargeToFire));
-            actualDamage *= Mathf.Lerp(1f, currentWeaponData.maxChargeDamageMultiplier, chargeRatio);
+            finalDamage *= Mathf.Lerp(1f, currentWeaponData.maxChargeDamageMultiplier, chargeRatio);
         }
-        else if (_currentChargeLevel >= currentWeaponData.minChargeToFire && currentWeaponData.maxChargeDamageMultiplier > 1f && !currentWeaponData.damageScalesWithCharge) 
+        
+        else if (_currentChargeLevel >= currentWeaponData.minChargeToFire && currentWeaponData.maxChargeDamageMultiplier > 1f) 
         {
-            actualDamage *= currentWeaponData.maxChargeDamageMultiplier;
+            finalDamage *= currentWeaponData.maxChargeDamageMultiplier;
         }
-        actualDamage *= _playerData.globalDamageMultiplier;
-
+        
         Vector3 laserEndPoint = firePoint.position + fireDirection * currentWeaponData.range;
         if (currentWeaponData.laserEffectPrefab != null)
         {
@@ -303,21 +308,18 @@ public class WeaponController : MonoBehaviour
 
         if (Physics.Raycast(firePoint.position, fireDirection, out RaycastHit hit, currentWeaponData.range, aimLayerMask))
         {
-            // 충돌 이펙트 생성용
             laserEndPoint = hit.point;
-            if (hit.collider.TryGetComponent<EnemyBase>(out var enemy)) enemy.TakeDamage(actualDamage);
-            if (hit.collider.TryGetComponent<Destructible>(out var destructible)) destructible.TakeDamage(actualDamage);
-            // 충돌 지점 이펙트 생성
+            if (hit.collider.TryGetComponent<EnemyBase>(out var enemy)) enemy.TakeDamage(finalDamage);
+            if (hit.collider.TryGetComponent<Destructible>(out var destructible)) destructible.TakeDamage(finalDamage); 
+            
             if (muzzleFlashPrefab != null)
             {
-                // TODO: 레이저 전용 이펙트 추가 WeaponData를 이용
                 Instantiate(muzzleFlashPrefab, hit.point, Quaternion.LookRotation(hit.normal));
             }
         }
-        // 발사지점 이펙트
+        
         if (muzzleFlashPrefab != null)
         {
-            // TODO: 레이저 전용 이펙트 추가 
             Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation, firePoint);
         }
     }

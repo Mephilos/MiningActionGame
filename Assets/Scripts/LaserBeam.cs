@@ -28,17 +28,15 @@ public class LaserBeam : MonoBehaviour
         _lineRenderer.SetPosition(1, endPoint);
         gameObject.SetActive(true); // 혹시 모르니 활성화
         
-        // beamDuration 후에 오브젝트를 파괴하거나, 코루틴으로 서서히 사라지게 함
-        // Destroy(gameObject, beamDuration); 
         StartCoroutine(FadeOutBeam());
     }
 
     private IEnumerator FadeOutBeam()
     {
-        // 초기 딜레이 (빔이 선명하게 보이는 시간)
+        // 초기 딜레이
         yield return new WaitForSeconds(Mathf.Max(0, beamDuration - fadeOutDelay - fadeOutDuration)); 
         
-        // 서서히 사라지는 효과 (선택 사항)
+        // 서서히 사라지는 효과
         if (fadeOutDuration > 0)
         {
             float timer = 0;

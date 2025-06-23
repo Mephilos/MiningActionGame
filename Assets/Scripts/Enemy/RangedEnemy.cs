@@ -14,7 +14,7 @@ public class RangedEnemy : EnemyBase
     public float attackCooldown = 2f;
     [Tooltip("투사체 발사 위치")]
     public Transform firePoint;
-	public float aimHeightOffset = 1.5f;
+	public float aimHeightOffset = 1.0f;
     [Tooltip("투사체 속도")]
     public float projectileSpeed = 15f;
 

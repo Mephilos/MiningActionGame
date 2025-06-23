@@ -26,7 +26,7 @@ public class Projectile : MonoBehaviour
         _explosionEffectPrefab = effectPrefab;
         _explosionDamageLayerMask = damageLayerMask;
     }
-        void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         if (!isEnemyProjectile && other.CompareTag("Player"))
         {
@@ -98,7 +98,7 @@ public class Projectile : MonoBehaviour
 
         Collider[] hitColliders = Physics.OverlapSphere(explosionCenter, _explosionRadius, _explosionDamageLayerMask);
 
-        foreach (var hitCollider in hitColliders)
+        foreach (Collider hitCollider in hitColliders)
         {
             if (!isEnemyProjectile) // 플레이어의 발사체인 경우
             {
@@ -116,7 +116,6 @@ public class Projectile : MonoBehaviour
                     destructible.TakeDamage(_damageAmount);
                 }
             }
-            //TODO: 폭발형 적 추가시 else if로 추가해서 사용
         }
     }
     void ShowImpactEffect()

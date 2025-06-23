@@ -37,6 +37,7 @@ public class MidBoss : EnemyBase
     private float _lastMeleeAttackTime;
     private float _stateTimer;
     private PlayerController _playerController;
+    private CharacterController _playerCharacterController;
 
     protected override void Awake()
     {
@@ -59,6 +60,7 @@ public class MidBoss : EnemyBase
     {
         base.Initialize(playerData, playerTransform);
         _playerController = playerTransform.GetComponent<PlayerController>();
+        _playerCharacterController = playerTransform.GetComponent<CharacterController>();
     }
 
     protected override void Update()
@@ -140,9 +142,9 @@ public class MidBoss : EnemyBase
             Transform firePoint = firePoints[i % firePoints.Length];
             if (projectilePrefab != null)
             {
-                Vector3 direction = (PlayerTransform.position + Vector3.up * 1.5f - firePoint.position).normalized;
-                Quaternion rotation = Quaternion.LookRotation(direction);
-                
+                Vector3 targetCenter = PlayerTransform.position + _playerCharacterController.center;
+                Vector3 direction = (targetCenter - firePoint.position).normalized;
+
                 GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
                 if (projectileGO.TryGetComponent<Projectile>(out var projectileScript))

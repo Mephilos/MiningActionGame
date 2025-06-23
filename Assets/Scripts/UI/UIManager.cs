@@ -14,6 +14,10 @@ public class UIManager : MonoBehaviour
     public TMP_Text stageNumberText;
     public TMP_Text stageClearText;
     public TMP_Text playerResourceDisplayText;
+    public CooldownDisplay dashCooldownDisplay;
+    public CooldownDisplay skillCooldownDisplay;
+    public Image skillIcon;
+    
     
     [Header("진행 화면 전환 UI")] 
     [Tooltip("게임 오버 시 활성화")]
@@ -57,8 +61,9 @@ public class UIManager : MonoBehaviour
     private int _initialRerollCost = 20;
     private int _currentRerollCost;
     
-    private PlayerData _playerData; // 의존성 주입 방식
-    
+    private PlayerData _playerData;
+    private WeaponController _weaponController;
+    private SkillData _currentSkillData;
     
     private void Awake()
     {
@@ -74,6 +79,7 @@ public class UIManager : MonoBehaviour
         if (playerObj != null)
         {
             Initialize(playerObj.GetComponent<PlayerData>());
+            _weaponController = playerObj.GetComponent<WeaponController>();
         }
     }
     public void Initialize(PlayerData playerData)
@@ -134,6 +140,13 @@ public class UIManager : MonoBehaviour
             StageManager.Instance.OnGameOver += HandleGameOver;
             StageManager.Instance.OnGameRestart += HandleGameRestart;
         }
+    }
+
+    void Update()
+    {
+        if (_playerData == null) return;
+        
+        HandleCooldownDisplays();
     }
 
     void OnDestroy()
@@ -233,7 +246,48 @@ public class UIManager : MonoBehaviour
             shopResourceText.text = $"Resource: {currentResource} ";
         }
     }
-    
+
+    private void HandleCooldownDisplays()
+    {
+        if (dashCooldownDisplay != null)
+        {
+            dashCooldownDisplay.UpdateDisplay(_playerData.dashCooldownTimer, _playerData.currentDashCooldown);
+        }
+
+        if (skillCooldownDisplay != null && _weaponController != null)
+        {
+            UpdateSkillIcon();
+
+            if (_currentSkillData != null)
+            {
+                skillCooldownDisplay.UpdateDisplay(_playerData.currentSkillCooldown, _currentSkillData.cooldown);
+            }
+            else
+            {
+                skillCooldownDisplay.UpdateDisplay(0, 0);
+            }
+        }
+    }
+
+    private void UpdateSkillIcon()
+    {
+        if (_weaponController == null || _weaponController.currentWeaponData == null) return;
+        SkillData weaponSkill = _weaponController.currentWeaponData.specialSkill;
+        
+        if (_currentSkillData != weaponSkill)
+        {
+            _currentSkillData = weaponSkill;
+            if (_currentSkillData != null && skillIcon != null)
+            { 
+                skillIcon.sprite = _currentSkillData.skillIcon;
+                skillIcon.enabled = true;
+            }
+            else if (skillIcon != null)
+            {
+                skillIcon.enabled = false;
+            }
+        }
+    }
     // 상점 UI 관련 메서드
     public void ShowShopPanel()
     {
@@ -476,7 +530,7 @@ public class UIManager : MonoBehaviour
     public void OnUpgradeAttackSpeedButtonPressed()
     {
         if (_playerData != null &&
-            _playerData.currentAttackSpeed > _attackSpeedCap &&
+            _playerData.currentAttackSpeed < _attackSpeedCap &&
             _playerData.SpendResources(_playerData.attackSpeedUpgradeCost))
         {
             _playerData.IncreaseAttackSpeed(_attackSpeedAmount, _attackSpeedCap);

@@ -153,13 +153,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyBaseData: {fileID: 11400000, guid: 65fbbb1328a1d4b79a33567eb68de1df, type: 2}
+  healthScalePerStage: 0.1
   navMeshSampleRadius: 2
   hpBarPrefab: {fileID: 6455096524345293041, guid: 78c88300b04194aca92af96b8ca9e06c, type: 3}
   detectionRadius: 20
   attackRange: 1
   attackCooldown: 2
   firePoint: {fileID: 9130034459655231602}
-  aimHeightOffset: 1.5
+  aimHeightOffset: 1
   projectileSpeed: 15
 --- !u!1 &2614480427290558163
 GameObject:

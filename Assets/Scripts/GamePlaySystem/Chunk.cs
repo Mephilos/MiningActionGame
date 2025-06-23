@@ -688,37 +688,33 @@ public class Chunk : MonoBehaviour
     {
         if (objects == null || objects.Length == 0) return null;
 
-        // 가중치가 0보다 큰 오브젝트만 필터링하여 사용 (선택 사항이지만 권장)
-        var weightedObjects = objects.Where(obj => obj.SpawnWeight > 0).ToList();
+        // 가중치가 0보다 큰 오브젝트만 필터링하여 사용
+        List<T> weightedObjects = objects.Where(obj => obj.SpawnWeight > 0).ToList();
         if (weightedObjects.Count == 0)
         {
-            // 유효한 가중치를 가진 오브젝트가 없는 경우
-            // return objects.Length > 0 ? objects[Random.Range(0, objects.Length)] : null; // 이전 방식: 가중치 없으면 일반 랜덤
-            return null; // 또는 null을 반환하여 스폰하지 않도록 처리
+            return null;
         }
 
         float totalWeight = 0f;
-        foreach (var objData in weightedObjects) // 필터링된 리스트 사용
+        foreach (T objData in weightedObjects)
         {
-            totalWeight += objData.SpawnWeight; // 인터페이스를 통해 안전하게 접근
+            totalWeight += objData.SpawnWeight;
         }
 
-        if (totalWeight <= 0) // 모든 유효 가중치의 합이 0 이하인 경우 (이론적으로는 weightedObjects.Count == 0에서 걸러짐)
+        if (totalWeight <= 0)
         {
-            // return weightedObjects.Count > 0 ? weightedObjects[Random.Range(0, weightedObjects.Count)] : null; // 가중치 없으면 일반 랜덤
             return null;
         }
 
         float randomPoint = Random.value * totalWeight;
-        foreach (var objData in weightedObjects) // 필터링된 리스트 사용
+        foreach (T objData in weightedObjects)
         {
-            if (randomPoint < objData.SpawnWeight) // 인터페이스를 통해 안전하게 접근
+            if (randomPoint < objData.SpawnWeight)
             {
                 return objData;
             }
-            randomPoint -= objData.SpawnWeight; // 인터페이스를 통해 안전하게 접근
+            randomPoint -= objData.SpawnWeight;
         }
-        // 부동 소수점 연산 오류 등으로 인해 여기까지 도달할 경우, 마지막 항목 반환 (안전장치)
         return weightedObjects.Count > 0 ? weightedObjects[weightedObjects.Count - 1] : null;
     }
 }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: 
   description: 
-  skillIcon: {fileID: 0}
+  skillIcon: {fileID: 6409830552331150148, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
   cooldown: 1
   grenadePrefab: {fileID: 3805954997797676055, guid: 0d7c32f76b0608549a9a286412ffb53b, type: 3}
   throwForce: 15

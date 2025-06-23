@@ -487,7 +487,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b07a1fdc2cfc4e39af14f38dd8e1a0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentWeaponData: {fileID: 11400000, guid: b713f8a17eb3f47b78649ae06ee5260d, type: 2}
+  currentWeaponData: {fileID: 11400000, guid: 15d074fd1c5944ff989a3f5164396572, type: 2}
   firePoint: {fileID: 975871988846311673}
   bulletSpeed: 30
   muzzleFlashPrefab: {fileID: 915984143002522250, guid: b8f8a2f3ef749494f8fa13fe541596e3, type: 3}
