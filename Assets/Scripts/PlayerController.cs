@@ -106,15 +106,7 @@ public class PlayerController : MonoBehaviour
         ApplyGravity();
         ApplyFinalMovement();
     }
-
-    public void LockAction()
-    {
-        if (_animator != null) _animator.SetBool(IsActionLockedAnim, true);
-    }
-    public void UnlockAction()
-    {
-        if (_animator != null) _animator.SetBool(IsActionLockedAnim, false);
-    }
+    
     public void ExecuteGrenadeThrow()
     {
         SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;

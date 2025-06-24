@@ -5,7 +5,6 @@ public class SkillGrenade : MonoBehaviour
     public SkillData sourceSkillData;
 
     public float lifeTime = 5f;
-    public GameObject smokeEffectPrefab;
     public bool _isLanded = false;
 
     void Start()
@@ -26,14 +25,18 @@ public class SkillGrenade : MonoBehaviour
                 rb.linearVelocity = Vector3.zero;
                 rb.isKinematic = true;
             }
-            if (smokeEffectPrefab != null) Instantiate(smokeEffectPrefab, transform.position, Quaternion.identity);
+
+            if (sourceSkillData is FireSupportSkillData fireSupportSkill && fireSupportSkill.smokePrefab != null)
+            {
+                Instantiate(fireSupportSkill.smokePrefab, transform.position, Quaternion.Euler(90, 0, 0));
+            }
             
             if (sourceSkillData != null) sourceSkillData.ExecuteEffect(transform.position);
             
 
             MeshRenderer renderer = GetComponent<MeshRenderer>();
             if (renderer) renderer.enabled = false;
-            Destroy(renderer, 1f);
+            Destroy(gameObject, 1f);
         }
     }
 }

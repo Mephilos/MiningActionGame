@@ -11,7 +11,8 @@ public class FireSupportSkillData : SkillData
     public float spawnRadius = 5f;
     public float aimDuration = 1.5f;
     public float fallDuration = 0.5f;
-    
+
+    public GameObject smokePrefab;
     // 수류탄이 땅에 닿으면 이 메서드를 호출
     public override void ExecuteEffect(Vector3 position)
     {
