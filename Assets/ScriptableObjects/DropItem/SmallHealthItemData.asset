@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: SmallHealthItemData
   m_EditorClassIdentifier: 
   itemName: "\uD790\uD329"
-  itemPickupPrefab: {fileID: 1788743715782441880, guid: 259b96fff504a438586e1c3faae4300f, type: 3}
+  itemPickupPrefab: {fileID: 8293539352981262785, guid: 74aa221c371a745d2bb0b45d219169f7, type: 3}
   healAmount: 25
