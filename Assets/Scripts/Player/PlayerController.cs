@@ -292,9 +292,17 @@ public class PlayerController : MonoBehaviour
     void PassDataToWeaponController()
     {
         if (_weaponController == null) return;
-        
-        _weaponController.AimDirection = (_aimingDirection.sqrMagnitude > 0.01f) ? _aimingDirection : transform.forward;
-        _weaponController.AimTarget = _lockedAimAssistTarget;
+
+        if (IsAiming)
+        {
+            _weaponController.AimDirection = (_aimingDirection.sqrMagnitude > 0.01f) ? _aimingDirection : transform.forward;
+            _weaponController.AimTarget = _lockedAimAssistTarget;
+        }
+        else
+        {
+            _weaponController.AimDirection = transform.forward;
+            _weaponController = null;
+        }
     }
 
 
