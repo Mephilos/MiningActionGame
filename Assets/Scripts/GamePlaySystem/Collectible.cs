@@ -34,7 +34,7 @@ public class Collectible : MonoBehaviour
         {
             if (itemData == null)
             {
-                Debug.LogError($"[{gameObject.name}] ItemData가 설정되지 필요");
+                Debug.LogError($"[{gameObject.name}] ItemData 설정 필요");
                 Destroy(gameObject);
                 return;
             }

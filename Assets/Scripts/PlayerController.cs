@@ -607,7 +607,7 @@ public class PlayerController : MonoBehaviour
         {
             if(_characterController != null) // 풀백 케릭터 컨트롤러 확인
             {
-                Debug.LogWarning($"[{gameObject.name}] WeaponController 또는 firePoint를 찾을 수 없음 캐릭터 머리 기준으로 대체.");
+                Debug.LogWarning($"[{gameObject.name}] WeaponController 또는 firePoint를 찾을 수 없음");
                 float headHeightRatio = 0.45f; 
                 rayStartPoint = (transform.position + _characterController.center) + Vector3.up * (_characterController.height * headHeightRatio);
             }
@@ -685,13 +685,11 @@ public class PlayerController : MonoBehaviour
     public void OnJumpButtonPressed()
     {
         if (_playerData == null || _playerData.isDead) return;
-        Debug.Log("Jump Button Pressed"); // 버튼 클릭 로그 확인용
         TryJump();
     }
     public void OnDashButtonPressed()
     {
         if (_playerData == null || _playerData.isDead) return;
-        Debug.Log("Dash Button Pressed"); // 버튼 클릭 로그 확인용
         TryDash();
     }
     /// <summary>
@@ -736,9 +734,6 @@ public class PlayerController : MonoBehaviour
             Gizmos.DrawRay(gizmoOrigin, leftRayOnReticleH * aimAssistRadius); 
             Gizmos.DrawRay(gizmoOrigin, rightRayOnReticleH * aimAssistRadius);
             Gizmos.DrawLine(gizmoOrigin + leftRayOnReticleH * aimAssistRadius, gizmoOrigin + rightRayOnReticleH * aimAssistRadius);
-
-            // (참고: verticalAimConeAngle을 3D로 정확히 시각화하는 것은 더 복잡합니다.
-            // 위 기즈모는 수평 범위만 보여주며, 실제로는 이 수평 범위 내에서 수직으로도 verticalAimConeAngle 만큼의 허용치가 더해집니다.)
         }
         
         if (_lockedAimAssistTarget != null)
