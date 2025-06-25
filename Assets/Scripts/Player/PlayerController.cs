@@ -301,7 +301,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             _weaponController.AimDirection = transform.forward;
-            _weaponController = null;
+            _weaponController.AimTarget = null;
         }
     }
 
