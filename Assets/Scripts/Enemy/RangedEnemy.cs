@@ -46,7 +46,7 @@ public class RangedEnemy : EnemyBase
         }
         else
         {
-            Debug.LogWarning($"[{gameObject.name}] EnemyBaseStatsData 가 없습니다");
+            Debug.LogWarning($"[{gameObject.name}] EnemyBaseStatsData 가 없음");
         }
 
         if (NavMeshAgent != null)
@@ -193,7 +193,7 @@ public class RangedEnemy : EnemyBase
         }
         else
         {
-             Debug.LogWarning($"[{gameObject.name}] 발사된 투사체에 Projectile 스크립트가 없습니다.");
+             Debug.LogWarning($"[{gameObject.name}] 발사된 투사체에 Projectile 스크립트 할당 필요");
         }
         
         Rigidbody projRb = projGO.GetComponent<Rigidbody>();

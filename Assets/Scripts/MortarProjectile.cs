@@ -82,12 +82,12 @@ public class MortarProjectile : MonoBehaviour
         // 지형 파괴
         if (StageManager.Instance != null)
         {
-            Debug.Log($"[MortarProjectile] 지형 파괴 요청: {_targetPosition}");
+            Debug.Log($"[{gameObject.name}] 지형 파괴 요청: {_targetPosition}");
             StageManager.Instance.DestroyBlocksInArea(_targetPosition, 1, terrainDestructionDepth);
         }
         else
         {
-            Debug.LogError("[MortarProjectile] StageManager 인스턴스를 찾을 수 없습니다.");
+            Debug.LogError($"[{gameObject.name}] StageManager 인스턴스를 찾을 수 없습니다.");
         }
 
         // 폭발 범위 내 플레이어 데미지

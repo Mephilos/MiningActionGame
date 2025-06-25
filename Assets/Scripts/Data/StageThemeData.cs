@@ -22,9 +22,9 @@ public class StageThemeData : ScriptableObject
     [Header("파괴 오브젝트")]
     public DestructibleObjectData[] destructibleObjects; // 이 테마에서 스폰될 파괴 가능 오브젝트 목록
     [Tooltip("청크 내에서 파괴 가능 오브젝트를 몇 번이나 스폰 시도할지 결정합니다.")]
-    public int maxDestructibleSpawnAttempts = 10; // 이전: maxDestructibleObjectsPerChunk
+    public int maxDestructibleSpawnAttempts = 10; 
     [Tooltip("각 스폰 시도에서 실제로 오브젝트가 스폰될 확률입니다.")]
-    [Range(0f, 1f)] public float destructibleSpawnChancePerAttempt = 0.5f; // 이전: destructibleObjectSpawnChancePerChunkArea
+    [Range(0f, 1f)] public float destructibleSpawnChancePerAttempt = 0.5f; 
 
     [Header("장식 오브젝트")]
     public DecorativeObjectData[] decorativeObjects; // 이 테마에서 스폰될 장식용 오브젝트 목록

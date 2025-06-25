@@ -66,14 +66,14 @@ public class WeaponSelectorUI : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"{weaponNameForDebug}에 연결된 WeaponData가 없습니다.");
+            Debug.LogWarning($"{weaponNameForDebug}에 연결된 WeaponData가 없음");
         }
     }
     public void ConfirmSelectionAndStartGame()
     {
         if (_chosenWeaponData == null)
         {
-            Debug.LogError("선택된 무기가 없습니다!");
+            Debug.LogError("선택된 무기가 없음");
             return;
         }
 
@@ -85,7 +85,7 @@ public class WeaponSelectorUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("GameManager 인스턴스를 찾을 수 없습니다");
+            Debug.LogError("GameManager 인스턴스가 없음");
         }
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NewPlayerBaseStats", menuName = "Player Character/Player Base Stats", order = 0)]
-public class PlayerBaseStatsData : ScriptableObject // MonoBehaviour 대신 ScriptableObject를 상속
+public class PlayerBaseStatsData : ScriptableObject
 {
     [Header("기본 생존 스탯")]
     public float maxHealth = 100f;

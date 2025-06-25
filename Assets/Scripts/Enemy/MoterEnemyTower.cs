@@ -34,10 +34,10 @@ public class MortarEnemyTower : EnemyBase
         if (projectileSpawnPoint == null)
         {
             projectileSpawnPoint = transform;
-            Debug.LogWarning($"[{gameObject.name}] projectileSpawnPoint가 설정되지 않았습니다.");
+            Debug.LogWarning($"[{gameObject.name}] projectileSpawnPoint가 설정되지 않음");
         }
-        if (mortarProjectilePrefab == null) Debug.LogError($"[{gameObject.name}] MortarProjectilePrefab이 설정되지 않았습니다!");
-        if (targetIndicatorPrefab == null) Debug.LogError($"[{gameObject.name}] TargetIndicatorPrefab이 설정되지 않았습니다!");
+        if (mortarProjectilePrefab == null) Debug.LogError($"[{gameObject.name}] MortarProjectilePrefab이 설정되지 않음");
+        if (targetIndicatorPrefab == null) Debug.LogError($"[{gameObject.name}] TargetIndicatorPrefab이 설정되지 않음");
     }
 
     protected override void OnEnable()

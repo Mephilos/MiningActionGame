@@ -17,7 +17,7 @@ public class NavMeshManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[NavMeshManager] 이미 인스턴스가 존재하여 새로 생성된 인스턴스를 파괴합니다.");
+            Debug.LogWarning($"[{gameObject.name}] 이미 인스턴스가 존재");
             Destroy(gameObject);
         }
     }
@@ -30,7 +30,6 @@ public class NavMeshManager : MonoBehaviour
     {
         if (surfaceToManage == null)
         {
-            Debug.LogError("[NavMeshManager] RegisterAndBakeSurface 요청 시 NavMeshSurface가 null입니다.");
             IsSurfaceBaked = false;
             return;
         }
@@ -41,13 +40,12 @@ public class NavMeshManager : MonoBehaviour
 
     /// <summary>
     /// 현재 등록된 활성 NavMeshSurface에 대해 NavMesh를 다시 빌드
-    /// Chunk의 지형이 변경되었을 때 호출될 수 있습니다.
+    /// Chunk의 지형이 변경되었을 때 호출
     /// </summary>
     public void RebakeCurrentSurface()
     {
         if (_currentActiveSurface == null)
         {
-            Debug.LogWarning("[NavMeshManager] 리빌드할 활성 NavMeshSurface가 등록되어 있지 않습니다.");
             IsSurfaceBaked = false;
             return;
         }
@@ -77,7 +75,6 @@ public class NavMeshManager : MonoBehaviour
         NavMesh.RemoveAllNavMeshData();
         _currentActiveSurface = null; // 활성 Surface 참조도 초기화
         IsSurfaceBaked = false;
-        Debug.Log("[NavMeshManager] 모든 NavMesh 데이터가 성공적으로 제거되었습니다.");
     }
 
     /// <summary>

@@ -334,7 +334,7 @@ public class PlayerData : MonoBehaviour
     {
         currentAttackDamage += additionalDamage;
         attackDamageUpgradeCost += 8;
-        Debug.Log($"[PlayerData] 공격력 증가! 현재 공격력: {currentAttackDamage}");
+        Debug.Log($"[PlayerData] 공격력 증가 현재 공격력: {currentAttackDamage}");
         if (UIManager.Instance != null) UIManager.Instance.UpdateShopStatsUI();
     }
 
@@ -361,7 +361,7 @@ public class PlayerData : MonoBehaviour
         maxHealth += amount;
         currentHealth += amount; // 현재 체력도 같이 올려줌
         maxHealthUpgradeCost += 5;
-        Debug.Log($"[PlayerData] 최대 체력 증가! 현재: {maxHealth}");
+        Debug.Log($"[PlayerData] 최대 체력 증가 현재: {maxHealth}");
         if (UIManager.Instance != null)
         {
             UIManager.Instance.UpdatePlayerHpUI(currentHealth, maxHealth);

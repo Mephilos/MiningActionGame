@@ -6,7 +6,7 @@ using UnityEngine;
 public class LaserBeam : MonoBehaviour
 {
     private LineRenderer _lineRenderer;
-    public float beamDuration = 0.15f; // 레이저가 보이는 시간
+    public float beamDuration = 0.25f; // 레이저가 보이는 시간
     public float fadeOutDelay = 0.05f; // 사라지기 시작 전 딜레이 (beamDuration 내에 포함)
     public float fadeOutDuration = 0.1f; // 사라지는 데 걸리는 시간 (beamDuration 내에 포함)
 
@@ -26,7 +26,7 @@ public class LaserBeam : MonoBehaviour
 
         _lineRenderer.SetPosition(0, startPoint);
         _lineRenderer.SetPosition(1, endPoint);
-        gameObject.SetActive(true); // 혹시 모르니 활성화
+        gameObject.SetActive(true);
         
         StartCoroutine(FadeOutBeam());
     }

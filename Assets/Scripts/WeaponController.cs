@@ -247,10 +247,6 @@ public class WeaponController : MonoBehaviour
         {
             Vector3 targetCenter = AimTarget.GetComponent<Collider>()?.bounds.center ?? AimTarget.position;
             fireDirection = (targetCenter - firePoint.position).normalized;
-            // if (fireDirection != Vector3.zero)
-            // {
-            //     bulletRotation = Quaternion.LookRotation(fireDirection);
-            // }
         }
         
         if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))

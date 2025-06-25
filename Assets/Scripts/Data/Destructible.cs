@@ -22,15 +22,12 @@ public class Destructible : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float amount, PlayerData attackerData = null) // 공격자 정보 추가 (선택사항)
+    public void TakeDamage(float amount, PlayerData attackerData = null)
     {
         if (_isDead || _data == null || _currentHealth <= 0) return;
 
         _currentHealth -= amount;
-        // Debug.Log($"[{gameObject.name}] {_data.objectName}이(가) {amount} 데미지를 받음. 현재 체력: {_currentHealth}");
-
-        // TODO: 피격 이펙트, 사운드 등
-
+        
         if (_currentHealth <= 0)
         {
             Die(attackerData);
@@ -41,8 +38,6 @@ public class Destructible : MonoBehaviour
     {
         if (_isDead) return;
         _isDead = true;
-
-        // Debug.Log($"[{gameObject.name}] {_data.objectName} 파괴됨!");
 
         // 파괴 이펙트 및 사운드 재생
         if (_data.destructionEffectPrefab != null)

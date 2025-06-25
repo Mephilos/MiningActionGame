@@ -187,7 +187,7 @@ public class Chunk : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[{gameObject.name}] CurrentThemeData가 null이므로 오브젝트를 스폰할 수 없습니다.");
+            Debug.LogWarning($"[{gameObject.name}] CurrentThemeData null");
         }
     }
 
@@ -336,7 +336,7 @@ public class Chunk : MonoBehaviour
         }
         ApplyMeshDataToFilter(meshData);
         ApplyMeshToCollider(_meshFilter.sharedMesh);
-        
+
         // NavMeshManager를 통해 NavMesh 빌드/리빌드 요청
         if (NavMeshManager.Instance != null)
         {
@@ -345,14 +345,6 @@ public class Chunk : MonoBehaviour
                 // Chunk가 생성/업데이트될 때마다 NavMeshManager에 등록하고 빌드를 요청
                 NavMeshManager.Instance.RegisterAndBakeSurface(_navMeshSurface);
             }
-            else
-            {
-                Debug.LogError($"[Chunk {gameObject.name}] NavMeshSurface가 할당되지 않아 NavMesh를 빌드할 수 없습니다.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"[Chunk {gameObject.name}] NavMeshManager 인스턴스를 찾을 수 없어 NavMesh 빌드 요청을 스킵합니다.");
         }
     }
     /// <summary>
@@ -436,10 +428,6 @@ public class Chunk : MonoBehaviour
             meshCollider.sharedMesh = null; 
             meshCollider.sharedMesh = meshToApply; 
         }
-        else
-        {
-            Debug.LogWarning($"[Chunk {gameObject.name}] MeshCollider component not found"); //
-        }
     }
     /// <summary>
     /// 청크 내 로컬 좌표 기준 이웃 블록의 상태를 확인(판별용)
@@ -486,7 +474,7 @@ public class Chunk : MonoBehaviour
 
             default: // 정의되지 않은 블록은 기본 텍스처 또는 에러 텍스처
                 tileOffset = new Vector2(AtlasTotalTilesX - 1, AtlasTotalTilesY - 1);
-                Debug.LogWarning($"GetFaceUVs: Unhandled BlockType '{blockType}'. Using default UVs (Atlas last tile).");
+    
                 break;
         }
         // UV 좌표 계산 (타일 오프셋 * 타일 크기)를 기준으로 각 꼭짓점의 UV를 설정
@@ -510,7 +498,6 @@ public class Chunk : MonoBehaviour
             if (Application.isPlaying)
             {
                 Destroy(_meshFilter.sharedMesh);
-                Debug.Log($"[Chunk {gameObject.name}] Shared mesh destroyed.");
             }
         }
     }
@@ -529,7 +516,6 @@ public class Chunk : MonoBehaviour
             localY < 0 || localY >= _chunkHeight ||
             localZ < 0 || localZ >= _chunkSize)
         {
-            Debug.LogWarning($"ChangeBlock failed: Coordinate ({localX}, {localY}, {localZ}) is out of bounds for chunk {_chunkCoordinates}.");
             return false; // 청크 범위 밖
         }
 
@@ -543,11 +529,9 @@ public class Chunk : MonoBehaviour
         _blockData[localX, localY, localZ] = newType;
 
         // 메시 재생성 요청
-        CreateChunkMesh(); // 변경된 데이터로 메시를 다시 만듦
-        
-        //TODO: 만약 변경된 블록이 청크 경계에 있다면 인접 청크의 메시도 업데이트해야 할 수 있음(이웃 블록의 노출 여부가 있기 때문)
+        CreateChunkMesh(); // 변경된 데이터로 메시를 다시 만듬
 
-        return true; // 변경 성공
+        return true;
     }
 
     /// <summary>

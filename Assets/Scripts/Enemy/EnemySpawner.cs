@@ -148,11 +148,11 @@ public class EnemySpawner : MonoBehaviour
                 bossScript.Initialize(_playerData, _playerTransform);
                 bossScript.SetStageScaling(_currentStageNumberForSpawner);
             }
-            Debug.Log($"보스 [{bossPrefab.name}] 소환 완료!");
+            Debug.Log($"보스 [{bossPrefab.name}] 소환 완료");
         }
         else
         {
-            Debug.LogError("[EnemySpawner] 보스를 소환할 유효한 위치를 찾지 못했습니다.");
+            Debug.LogError("[EnemySpawner] 보스를 소환할 유효한 위치를 찾지 못함");
         }
         
         _isSpawning = false;

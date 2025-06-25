@@ -11,7 +11,7 @@ public class LockOnReticleUI : MonoBehaviour
     {
         if (lockOnMarkerImage == null)
         {
-            Debug.LogError("LockOnMarkerImage가 할당 필요");
+            Debug.LogError("LockOnMarkerImage 할당 필요");
             enabled = false;
             return;
         }

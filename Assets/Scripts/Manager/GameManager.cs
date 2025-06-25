@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
     {
         if (SelectedWeapon == null)
         {
-            Debug.LogError("무기가 선택되지 않음.");
+            Debug.LogError("무기가 선택되지 않음");
             return;
         }
         

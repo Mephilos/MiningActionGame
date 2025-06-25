@@ -14,10 +14,6 @@ public class Collectible : MonoBehaviour
     protected virtual void Awake()
     {
         Collider col = GetComponent<Collider>();
-        if (col != null && !col.isTrigger)
-        {
-            Debug.LogWarning($"[{gameObject.name}] Collectible의 Collider가 IsTrigger가 아닙니다. 플레이어 감지를 위해 Trigger로 설정하는 것을 권장합니다.");
-        }
     }
 
     protected virtual void Update()
@@ -38,7 +34,7 @@ public class Collectible : MonoBehaviour
         {
             if (itemData == null)
             {
-                Debug.LogError($"[{gameObject.name}] ItemData가 설정되지 않았습니다!");
+                Debug.LogError($"[{gameObject.name}] ItemData가 설정되지 필요");
                 Destroy(gameObject);
                 return;
             }

@@ -24,7 +24,6 @@ public class DynamicCamera : MonoBehaviour
     private Vector3 _currentVelocity = Vector3.zero; // SmoothDamp용 현재 속도
 
     // 플레이어 컨트롤러 참조 
-    // TODO: 플레이어 상태에 따라 FOV 조절 예정 (예: 일반 적 상대시, 보스 상대시)
     private PlayerController _playerController;
     private PlayerData _playerData;
 
@@ -34,7 +33,7 @@ public class DynamicCamera : MonoBehaviour
         _cam = GetComponent<Camera>();
         if (_cam == null)
         {
-            Debug.LogError("DynamicFluidCamera 스크립트는 Camera 컴포넌트가 있는 오브젝트에 부착되어야 합니다.");
+            Debug.LogError($"[{gameObject.name}] 카메라 오브젝트 필요");
             enabled = false;
             return;
         }
@@ -48,7 +47,7 @@ public class DynamicCamera : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("카메라 타겟이 설정되지 않았습니다. 일부 동적 기능이 제한될 수 있습니다.");
+            Debug.LogWarning($"[{gameObject}] 카메라 확인");
         }
     }
 
