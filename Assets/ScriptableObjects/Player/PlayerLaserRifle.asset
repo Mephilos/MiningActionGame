@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: "\uAE30\uBCF8 \uBB34\uAE30"
   specialSkill: {fileID: 11400000, guid: afa744e8ae058409c88a5f4924aba90c, type: 2}
-  baseDamage: 15
-  attackSpeed: 1
+  baseDamage: 30
+  attackSpeed: 10
   range: 100
   projectilePrefab: {fileID: 0}
+  damageMultiplierScale: 0.5
   explosionRadius: 0
   explosionEffectPrefab: {fileID: 0}
   explosionDamageLayerMask:

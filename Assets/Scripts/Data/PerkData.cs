@@ -1,6 +1,5 @@
-using Unity.Burst.Intrinsics;
 using UnityEngine;
-using UnityEngine.Serialization;
+
 
 public enum PerkRarity
 {

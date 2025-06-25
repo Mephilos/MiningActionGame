@@ -52,7 +52,7 @@ public class FireSupportProjectile : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius, LayerMask.GetMask("Enemy"));
         foreach (Collider hit in hitColliders)
         {
-            if (hit.TryGetComponent<EnemyBase>(out var enemy))
+            if (hit.TryGetComponent<EnemyBase>(out EnemyBase enemy))
             {
                 enemy.TakeDamage(damage);
             }

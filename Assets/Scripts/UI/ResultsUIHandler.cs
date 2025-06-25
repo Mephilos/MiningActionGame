@@ -11,12 +11,6 @@ public class ResultsUIHandler : MonoBehaviour
     [SerializeField] private List<TMP_Text> rankingTexts;
     void Start()
     {
-        if (scoreText == null || backToTitleButton == null)
-        {
-            Debug.LogError("ResultsUIHandler에 UI 요소들이 연결되지 않았습니다!");
-            return;
-        }
-
         DisplayScore();
         DisplayRanking();
         
@@ -55,11 +49,11 @@ public class ResultsUIHandler : MonoBehaviour
             {
                 if (i < highScores.Count && highScores[i] > 0)
                 {
-                    rankingTexts[i].text = $"{i + 1}위: STAGE {highScores[i]}";
+                    rankingTexts[i].text = $"{i + 1}: STAGE {highScores[i]}";
                 }
                 else
                 {
-                    rankingTexts[i].text = $"{i + 1}위: -";
+                    rankingTexts[i].text = $"{i + 1}: -";
                 }
             }
         }

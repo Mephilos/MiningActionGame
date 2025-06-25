@@ -15,9 +15,10 @@ MonoBehaviour:
   weaponName: AssaultRifle
   specialSkill: {fileID: 11400000, guid: 3cf458b2611e34adfad919e3dda46539, type: 2}
   baseDamage: 10
-  attackSpeed: 1
+  attackSpeed: 5
   range: 100
   projectilePrefab: {fileID: 6730927503448550575, guid: 7c112116d497b416a9a01d64583aa8ed, type: 3}
+  damageMultiplierScale: 0.5
   explosionRadius: 0
   explosionEffectPrefab: {fileID: 0}
   explosionDamageLayerMask:

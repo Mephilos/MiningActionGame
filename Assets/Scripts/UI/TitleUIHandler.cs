@@ -3,6 +3,7 @@ using UnityEngine.UI;
 public class TitleUIHandler : MonoBehaviour
 {
     public Button startGameButton;
+    public GameObject controlSheetPanel;
 
     void Start()
     {
@@ -15,12 +16,33 @@ public class TitleUIHandler : MonoBehaviour
         {
             if (GameManager.Instance == null)
             {
-                Debug.LogError("TitleUIHandler: GameManager.Instance를 찾을 수 없습니다!");
+                Debug.LogError("TitleUIHandler: GameManager.Instance를 찾을 수 없음");
             }
             if (startGameButton == null)
             {
-                Debug.LogError("TitleUIHandler: startGameButton이 연결되지 않았습니다!");
+                Debug.LogError("TitleUIHandler: startGameButton 확인 필요");
             }
+        }
+
+        if (controlSheetPanel != null)
+        {
+            controlSheetPanel.SetActive(false);
+        }
+    }
+
+    public void ShowControlSheetPanel()
+    {
+        if (controlSheetPanel != null)
+        {
+            controlSheetPanel.SetActive(true);
+        }
+    }
+
+    public void HideControlSheetPanel()
+    {
+        if (controlSheetPanel != null)
+        {
+            controlSheetPanel.SetActive(false);
         }
     }
 }

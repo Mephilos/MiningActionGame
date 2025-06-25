@@ -10,7 +10,7 @@ public class UIPlatformHelper : MonoBehaviour
 #if UNITY_IOS || UNITY_ANDROID // 모바일 플랫폼
         if (mobileControlsRoot != null) mobileControlsRoot.SetActive(true);
         if (pcSpecificUIRoot != null) pcSpecificUIRoot.SetActive(false);
-#elif UNITY_STANDALONE || UNITY_EDITOR // PC 또는 에디터
+#elif UNITY_STANDALONE || UNITY_EDITOR || UNITY_WEBGL// PC 또는 에디터
         
         if (Application.isEditor) // 에디터 셋팅
         {

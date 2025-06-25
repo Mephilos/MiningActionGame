@@ -17,7 +17,6 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Enemy Settings")] 
     public List<EnemySpawnInfo> enemyTypes = new List<EnemySpawnInfo>();
-    public int maxEnemiesToSpawnAtOnce = 1;
 
     [Header("Boss Settings")]
     public GameObject bossPrefab;
@@ -104,7 +103,7 @@ public class EnemySpawner : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[EnemySpawner] 보스 프리팹이 할당되지 않았습니다! 보스를 소환할 수 없습니다.");
+                Debug.LogError("[EnemySpawner] 보스 프리팹이 할당되지 않았습니다");
             }
         }
         else
@@ -185,7 +184,7 @@ public class EnemySpawner : MonoBehaviour
             if (FindValidSpawnPosition(out Vector3 spawnPosition))
             {
                 GameObject enemyGO = Instantiate(enemyPrefabToSpawn, spawnPosition, Quaternion.identity);
-                if (enemyGO.TryGetComponent<EnemyBase>(out var enemyScript))
+                if (enemyGO.TryGetComponent<EnemyBase>(out EnemyBase enemyScript))
                 {
                     enemyScript.Initialize(_playerData, _playerTransform);
                     enemyScript.SetStageScaling(_currentStageNumberForSpawner);

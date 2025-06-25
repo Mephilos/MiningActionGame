@@ -115,14 +115,6 @@ public class StageManager : MonoBehaviour
 
     private void Update()
     {
-        if (_isGameOver || _isLoadingNextStage || (UIManager.Instance != null && UIManager.Instance.shopPanel.activeSelf))
-        {
-            if (_isGameOver && Input.GetKeyDown(KeyCode.R))
-            {
-                RestartGame();
-            }
-            return;
-        }
         if (_isWaitingForPlayerToProceed)
         {
             return;
@@ -139,17 +131,20 @@ public class StageManager : MonoBehaviour
         {
             _currentStageTimer += Time.deltaTime;
             float currentStageSurvivalTime = (_currentActiveTheme != null && _currentActiveTheme.timeToSurvivePerStage > 0)
-                ? _currentActiveTheme.timeToSurvivePerStage
-                : this.timeToSurvivePerStage;
+                ? _currentActiveTheme.timeToSurvivePerStage : this.timeToSurvivePerStage;
             float timeLeft = currentStageSurvivalTime - _currentStageTimer;
 
             if (UIManager.Instance != null)
             {
                 UIManager.Instance.UpdateStageTimerUI(timeLeft);
             }
-
-
-            if (_currentStageTimer >= currentStageSurvivalTime)
+            
+            // 일반 스테이지의 타임 만료, 모든적 섬멸 확인
+            bool timerCompleted = (_currentStageTimer >= currentStageSurvivalTime);
+            bool allEnemiesDefeated = (_spawningCompleted && EnemySpawner.ActiveEnemies.Count == 0);
+            
+            // 타임만료, 모든 적 섬멸 둘중하나 달성시 일반 스테이지 클리어
+            if (timerCompleted || allEnemiesDefeated)
             {
                 InitiateStageClearSequence();
             }

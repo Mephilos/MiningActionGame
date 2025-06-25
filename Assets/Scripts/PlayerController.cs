@@ -206,23 +206,14 @@ public class PlayerController : MonoBehaviour
         }
 #endif 
 
-#if UNITY_EDITOR || UNITY_STANDALONE
+#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBGL
         // pc
         moveX = Input.GetAxisRaw("Horizontal");
         moveZ = Input.GetAxisRaw("Vertical");
-#endif
+        
         Vector3 rawInputDir = new Vector3(moveX, 0, moveZ);
         
-        // 이동 입력 방향 계산 (카메라 각도 고려)
-        if (rawInputDir.sqrMagnitude > 0.01f)
-        {
-            _worldTargetDirection = Quaternion.Euler(0, isometricCameraAngleY, 0) * rawInputDir.normalized;
-        }
-        else 
-        {
-            _worldTargetDirection = Vector3.zero; // 이동 입력 없으면 0벡터
-        }
-#if !(UNITY_IOS || UNITY_ANDROID) // PC 환경
+        
         // Shift 키 (대쉬/부스트)
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -243,9 +234,6 @@ public class PlayerController : MonoBehaviour
         {
             TryJump();
         }
-#endif
-        
-#if UNITY_EDITOR || UNITY_STANDALONE
         // 마우스 우클릭 (조준 상태)
         IsAiming = Input.GetMouseButton(1);
 
@@ -265,6 +253,15 @@ public class PlayerController : MonoBehaviour
             _weaponController.HandleFireInput(Input.GetMouseButton(0));
         }
 #endif
+        // 이동 입력 방향 계산 (카메라 각도 고려)
+        if (rawInputDir.sqrMagnitude > 0.01f)
+        {
+            _worldTargetDirection = Quaternion.Euler(0, isometricCameraAngleY, 0) * rawInputDir.normalized;
+        }
+        else 
+        {
+            _worldTargetDirection = Vector3.zero; // 이동 입력 없으면 0벡터
+        }
     }
     void UpdateAiming()
     {

@@ -159,11 +159,12 @@ public class WeaponController : MonoBehaviour
 
         _isCharging = true;
         _currentChargeLevel = 0f;
-        if (_animator != null)
-        {
-            _animator.SetBool(IsAttack, true); // 공격 시작을 알리는 애니메이션
-            _animator.SetBool(IsChargingAnim, true); // 특정 차징 애니메이션이 있다면 활성화
-        }
+        // TODO: 레이저 무기 차징 에니메이션 추가
+        // if (_animator != null)
+        // {
+        //     _animator.SetBool(IsAttack, true); // 공격 시작을 알리는 애니메이션
+        //     _animator.SetBool(IsChargingAnim, true); // 특정 차징 애니메이션이 있다면 활성화
+        // }
 
         if (currentWeaponData.chargeEffectPrefab != null && _chargeEffectInstance == null)
         {
@@ -177,8 +178,8 @@ public class WeaponController : MonoBehaviour
         _currentChargeLevel = 0f;
         if (_animator != null)
         {
-            _animator.SetBool(IsAttack, false);
-            _animator.SetBool(IsChargingAnim, false);
+            // _animator.SetBool(IsAttack, false);
+            // _animator.SetBool(IsChargingAnim, false);
         }
 
         if (_chargeEffectInstance != null)
@@ -195,7 +196,19 @@ public class WeaponController : MonoBehaviour
         if (Time.time >= _nextFireTime)
         {
             FireLaser();
-            _nextFireTime = Time.time + currentWeaponData.attackSpeed;
+
+            float weaponAttackSpeed = currentWeaponData.attackSpeed;
+            float playerAttackSpeed = _playerData.currentAttackSpeed;
+            float finalAttackSpeed = weaponAttackSpeed + playerAttackSpeed;
+
+            if (_playerData.globalAttackCooldownMultiplier > 0)
+            {
+                finalAttackSpeed /= _playerData.globalAttackCooldownMultiplier;
+            }
+
+            float finalCooldown = (finalAttackSpeed > 0) ? (1f / finalAttackSpeed) : float.MaxValue;
+            
+            _nextFireTime = Time.time + finalCooldown;
         }
     }
 
@@ -345,17 +358,49 @@ public class WeaponController : MonoBehaviour
         // 차지 무기, 일반 무기 판별 다른 로직 적용
         if (currentWeaponData.isChargeWeapon)
         {
-            _playerData.hpBarInstance.UpdateAttackGauge(_currentChargeLevel);
+            // 차징중
+            if (_isCharging)
+            {
+                _playerData.hpBarInstance.UpdateAttackGauge(_currentChargeLevel);
+            }
+            // 아닐 때는 무기 쿨다운 표시
+            else
+            {
+                float weaponAttackSpeed = currentWeaponData.attackSpeed;
+                float playerAttackSpeed = _playerData.currentAttackSpeed;
+                float finalAttackSpeed = weaponAttackSpeed + playerAttackSpeed;
+
+                if (_playerData.globalAttackCooldownMultiplier > 0)
+                {
+                    finalAttackSpeed /= _playerData.globalAttackCooldownMultiplier;
+                }
+
+                float finalCooldown = (finalAttackSpeed > 0) ? (1f / finalAttackSpeed) : float.MaxValue;
+                if (finalCooldown == float.MaxValue) return;
+                
+                float timeRemaining = _nextFireTime - Time.time;
+                float fillAmount = (timeRemaining > 0) ? 
+                    (timeRemaining / finalCooldown) : 0f; 
+                _playerData.hpBarInstance.UpdateAttackGauge(fillAmount);
+            }
         }
         else
         {
-            float finalAttacksPerSecond = _playerData.currentAttackSpeed / _playerData.globalAttackCooldownMultiplier;
-            if (finalAttacksPerSecond <= 0) return;
-        
-            float finalCooldown = 1f / finalAttacksPerSecond;
+            float weaponAttackSpeed = currentWeaponData.attackSpeed;
+            float playerAttackSpeed = _playerData.currentAttackSpeed;
+            float finalAttackSpeed = weaponAttackSpeed + playerAttackSpeed;
+
+            if (_playerData.globalAttackCooldownMultiplier > 0)
+            {
+                finalAttackSpeed /= _playerData.globalAttackCooldownMultiplier;
+            }
+            if (finalAttackSpeed <= 0) return;
+
+            float finalCooldown = 1f / finalAttackSpeed;
             float timeRemaining = _nextFireTime - Time.time;
-            
-            float fillAmount = (timeRemaining > 0) ? (timeRemaining / finalCooldown) : 0f;
+        
+            float fillAmount = (timeRemaining > 0) ? 
+                (timeRemaining / finalCooldown) : 0f;
             _playerData.hpBarInstance.UpdateAttackGauge(fillAmount);
         }
     }
