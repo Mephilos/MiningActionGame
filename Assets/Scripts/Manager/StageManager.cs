@@ -9,7 +9,7 @@ public class StageManager : MonoBehaviour
     public static StageManager Instance { get; private set; }
 
     public event Action<int> OnStageStarted; // 스테이지가 시작될 때 (번호 전달)
-    public event Action OnStageCleared; // 스테이지가 클리어
+    public event Action OnStageCleared; // 스테이지 클리어
     public event Action OnGameOver; // 게임 오버
     public event Action OnGameRestart; // 게임 재시작
 
