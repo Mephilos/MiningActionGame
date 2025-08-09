@@ -6,6 +6,7 @@ public class WeaponController : MonoBehaviour
 {
     public event Action<float> OnChargeChanged;
     public event Action<float, float> OnCooldownChanged;
+    public event Action<WeaponData> OnWeaponEquipped;
 
     private static readonly int IsAttack = Animator.StringToHash("IsAttack");
 
@@ -65,15 +66,13 @@ public class WeaponController : MonoBehaviour
     }
 
     /// <summary>
-    /// 지정된 무기를 장착하고 발사 형식 설정
+    /// 지정된 무기를 장착하고 발사 전략을 설정합니다.
     /// </summary>
     public void EquipWeapon(WeaponData newWeaponData)
     {
         currentWeaponData = newWeaponData;
         
-        // 무기 데이터에 따라 적절한 발사 형식을 선택
-        // TODO: 향후에는 WeaponData에 직접 전략 타입을 명시하는 방식으로 개선할 수 있습니다.
-        if (currentWeaponData.isChargeWeapon) // 임시로 차지 여부로 레이저/투사체 구분
+        if (currentWeaponData.isChargeWeapon)
         {
             _currentStrategy = new LaserStrategy();
         }
@@ -82,6 +81,7 @@ public class WeaponController : MonoBehaviour
             _currentStrategy = new ProjectileStrategy();
         }
         
+        OnWeaponEquipped?.Invoke(currentWeaponData);
         Debug.Log($"[{gameObject.name}] '{currentWeaponData.weaponName}' 무기 장착. 발사 전략: {_currentStrategy.GetType().Name}");
     }
 
@@ -212,7 +212,7 @@ public class WeaponController : MonoBehaviour
     }
 
     /// <summary>
-    /// 최종 발사 데미지를 계산 (발사 형식 클래스에서 사용)
+    /// 최종 발사 데미지를 계산합니다. (전략 클래스에서 사용)
     /// </summary>
     public float CalculateFinalDamage()
     {

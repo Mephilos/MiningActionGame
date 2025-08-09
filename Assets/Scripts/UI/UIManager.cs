@@ -53,7 +53,6 @@ public class UIManager : MonoBehaviour
     private PlayerData _playerData;
     private StatUpgrader _statUpgrader;
     private WeaponController _weaponController;
-    private SkillData _currentSkillData;
     private WorldSpaceHealthBar _playerHealthBarInstance;
     
     private void Awake()
@@ -63,7 +62,7 @@ public class UIManager : MonoBehaviour
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
-        {
+        {   
             _playerData = playerObj.GetComponent<PlayerData>();
             _weaponController = playerObj.GetComponent<WeaponController>();
             Initialize(_playerData, _weaponController);
@@ -74,7 +73,7 @@ public class UIManager : MonoBehaviour
     {
         _playerData = playerData;
         _weaponController = weaponController;
-        _statUpgrader = _playerData.StatUpgrader; // PlayerData로부터 StatUpgrader 참조
+        _statUpgrader = _playerData.StatUpgrader;
 
         if (_playerData == null) Debug.LogError($"[{gameObject.name}] Initialize: PlayerData가 null입니다!");
         if (_weaponController == null) Debug.LogError($"[{gameObject.name}] Initialize: WeaponController가 null입니다!");
@@ -89,11 +88,8 @@ public class UIManager : MonoBehaviour
                 _playerHealthBarInstance.targetToFollow = _playerData.transform;
                 _playerData.OnHealthChanged += _playerHealthBarInstance.UpdateHealth;
                 _playerData.OnDeath += HandlePlayerDeathForHealthBar;
-                if (_weaponController != null)
-                {
-                    _weaponController.OnChargeChanged += HandleWeaponChargeChanged;
-                    _weaponController.OnCooldownChanged += HandleWeaponCooldownChanged;
-                }
+                _weaponController.OnChargeChanged += HandleWeaponChargeChanged;
+                _weaponController.OnCooldownChanged += HandleWeaponCooldownChanged;
             }
         }
 
@@ -101,6 +97,7 @@ public class UIManager : MonoBehaviour
         _playerData.OnHealthChanged += UpdatePlayerHpUI;
         _playerData.OnResourcesChanged += UpdateResourceDisplayUI;
         _playerData.OnDeath += HandleGameOver;
+        _weaponController.OnWeaponEquipped += UpdateSkillIcon;
 
         // 초기 UI 업데이트
         UpdatePlayerHpUI(_playerData.currentHealth, _playerData.maxHealth);
@@ -130,6 +127,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        HandleCooldownDisplays();
+    }
+
     void OnDestroy()
     {
         // 이벤트 구독 해제
@@ -144,10 +146,14 @@ public class UIManager : MonoBehaviour
                 _playerData.OnDeath -= HandlePlayerDeathForHealthBar;
             }
         }
-        if (_weaponController != null && _playerHealthBarInstance != null)
+        if (_weaponController != null)
         {
-            _weaponController.OnChargeChanged -= HandleWeaponChargeChanged;
-            _weaponController.OnCooldownChanged -= HandleWeaponCooldownChanged;
+            _weaponController.OnWeaponEquipped -= UpdateSkillIcon;
+            if (_playerHealthBarInstance != null)
+            {
+                _weaponController.OnChargeChanged -= HandleWeaponChargeChanged;
+                _weaponController.OnCooldownChanged -= HandleWeaponCooldownChanged;
+            }
         }
         if (StageManager.Instance != null)
         {
@@ -156,7 +162,7 @@ public class UIManager : MonoBehaviour
             StageManager.Instance.OnGameRestart -= HandleGameRestart;
         }
     }
-
+    
     // --- 이벤트 핸들러 --- 
     private void HandleWeaponChargeChanged(float chargeLevel)
     {
@@ -214,10 +220,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateStageClearUI(int stageNum)
     {
-        if (stageClearText != null)
-        {
-            stageClearText.text = $"{stageNum} Stage\nClear!";
-        }
+        if (stageClearText != null) stageClearText.text = $"{stageNum} Stage\nClear!";
     }
 
     public void UpdateResourceDisplayUI(int currentResource)
@@ -230,26 +233,35 @@ public class UIManager : MonoBehaviour
     {
         if (_playerData == null) return;
         dashCooldownDisplay?.UpdateDisplay(_playerData.dashCooldownTimer, _playerData.currentDashCooldown);
-        if (skillCooldownDisplay != null && _weaponController != null)
+        
+        if (skillCooldownDisplay != null && _weaponController != null && _weaponController.currentWeaponData != null)
         {
-            UpdateSkillIcon();
-            if (_currentSkillData != null) skillCooldownDisplay.UpdateDisplay(_playerData.currentSkillCooldown, _currentSkillData.cooldown);
-            else skillCooldownDisplay.UpdateDisplay(0, 0);
+            SkillData currentSkill = _weaponController.currentWeaponData.specialSkill;
+            if (currentSkill != null)
+            {
+                skillCooldownDisplay.UpdateDisplay(_playerData.currentSkillCooldown, currentSkill.cooldown);
+            }
+            else
+            {
+                skillCooldownDisplay.UpdateDisplay(0, 0);
+            }
         }
     }
 
-    private void UpdateSkillIcon()
+    private void UpdateSkillIcon(WeaponData weaponData)
     {
-        if (_weaponController == null || _weaponController.currentWeaponData == null) return;
-        SkillData weaponSkill = _weaponController.currentWeaponData.specialSkill;
-        if (_currentSkillData != weaponSkill)
+        if (skillIcon == null) return;
+
+        SkillData weaponSkill = weaponData.specialSkill;
+        if (weaponSkill != null)
         {
-            _currentSkillData = weaponSkill;
-            if (skillIcon != null)
-            {
-                skillIcon.sprite = _currentSkillData?.skillIcon;
-                skillIcon.enabled = _currentSkillData != null;
-            }
+            skillIcon.sprite = weaponSkill.skillIcon;
+            skillIcon.enabled = true;
+        }
+        else
+        {
+            skillIcon.sprite = null;
+            skillIcon.enabled = false;
         }
     }
 
