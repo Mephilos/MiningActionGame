@@ -40,8 +40,8 @@ public class WeaponController : MonoBehaviour
         _playerData = GetComponent<PlayerData>();
         _animator = GetComponent<Animator>();
 
-        if (_playerData == null) Debug.LogError($"[{gameObject.name}] PlayerData가 할당 되지 않음.");
-        if (firePoint == null) Debug.LogError($"[{gameObject.name}]의 WeaponController: FirePoint가 할당되지 않음.");
+        if (_playerData == null) Debug.LogError($"[{gameObject.name}] PlayerData가 할당 되지 않음");
+        if (firePoint == null) Debug.LogError($"[{gameObject.name}]의 WeaponController: FirePoint가 할당되지 않음");
 
         _aimDirection = transform.forward;
     }
@@ -55,18 +55,18 @@ public class WeaponController : MonoBehaviour
         }
         else if (currentWeaponData != null)
         {
-            Debug.LogWarning($"[{gameObject.name}] GameManager로부터 무기 정보를 받지 못함. 인스펙터에 설정된 '{currentWeaponData.weaponName}'을 사용합니다.");
+            Debug.LogWarning($"[{gameObject.name}] GameManager로부터 무기 정보를 받지 못함 인스펙터에 설정된 '{currentWeaponData.weaponName}'을 사용합니다");
             EquipWeapon(currentWeaponData);
         }
         else
         {
-            Debug.LogError($"[{gameObject.name}] 장착할 무기 정보가 없습니다.");
+            Debug.LogError($"[{gameObject.name}] 장착할 무기 정보가 없습니다");
             this.enabled = false;
         }
     }
 
     /// <summary>
-    /// 지정된 무기를 장착하고 발사 전략을 설정합니다.
+    /// 지정된 무기를 장착하고 발사 형태 설정
     /// </summary>
     public void EquipWeapon(WeaponData newWeaponData)
     {
@@ -82,7 +82,7 @@ public class WeaponController : MonoBehaviour
         }
         
         OnWeaponEquipped?.Invoke(currentWeaponData);
-        Debug.Log($"[{gameObject.name}] '{currentWeaponData.weaponName}' 무기 장착. 발사 전략: {_currentStrategy.GetType().Name}");
+        Debug.Log($"[{gameObject.name}] '{currentWeaponData.weaponName}' 무기 장착 발사 타입: {_currentStrategy.GetType().Name}");
     }
 
     void Update()
@@ -212,7 +212,7 @@ public class WeaponController : MonoBehaviour
     }
 
     /// <summary>
-    /// 최종 발사 데미지를 계산합니다. (전략 클래스에서 사용)
+    /// 최종 발사 데미지를 계산 (전략 패턴 클래스에서 사용)
     /// </summary>
     public float CalculateFinalDamage()
     {
