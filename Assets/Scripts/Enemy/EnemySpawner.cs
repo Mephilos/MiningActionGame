@@ -91,7 +91,7 @@ public class EnemySpawner : MonoBehaviour
             StopCoroutine(_spawnCoroutine);
         }
 
-        // 전달받은 stageNumber를 기반으로 보스 스테이지인지 판단하여 플래그를 설정합니다.
+        // 전달받은 stageNumber를 기반으로 보스 스테이지인지 판단하여 플래그를 설정
         _isBossStage = (stageNumber > 0 && stageNumber % 5 == 0);
 
         if (_isBossStage)

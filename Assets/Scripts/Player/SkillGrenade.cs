@@ -5,7 +5,7 @@ public class SkillGrenade : MonoBehaviour
     public SkillData sourceSkillData;
 
     public float lifeTime = 5f;
-    public bool _isLanded = false;
+    public bool isLanded = false;
 
     void Start()
     {
@@ -16,9 +16,9 @@ public class SkillGrenade : MonoBehaviour
     {
         int otherLayer = collision.gameObject.layer;
         
-        if (!_isLanded && otherLayer == LayerMask.NameToLayer("Ground") || otherLayer == LayerMask.NameToLayer("Enemy"))
+        if (!isLanded && otherLayer == LayerMask.NameToLayer("Ground") || otherLayer == LayerMask.NameToLayer("Enemy"))
         {
-            _isLanded = true;
+            isLanded = true;
 
             Rigidbody rb = GetComponent<Rigidbody>();
             {

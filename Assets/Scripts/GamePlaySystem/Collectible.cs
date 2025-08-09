@@ -4,9 +4,9 @@ using UnityEngine;
 public class Collectible : MonoBehaviour
 {
     public ItemData itemData; // 이 픽업 오브젝트가 나타내는 아이템의 데이터
-    public float attractionRadius = 3f; // 플레이어가 가까이 오면 끌려가는 반경 (선택 사항)
-    public float attractionSpeed = 5f;  // 끌려가는 속도 (선택 사항)
-    public AudioClip pickupSound;       // 획득 시 효과음 (선택 사항)
+    public float attractionRadius = 3f; // 플레이어가 가까이 오면 끌려가는 반경
+    public float attractionSpeed = 5f;  // 끌려가는 속도
+    public AudioClip pickupSound; // 획득 시 효과음
 
     private Transform _playerTransform;
     private bool _isAttracting = false;
@@ -38,7 +38,7 @@ public class Collectible : MonoBehaviour
                 Destroy(gameObject);
                 return;
             }
-            // 바로 줍거나, 혹은 끌어당기기 시작
+            // 끌어당기기 시작
             if (attractionRadius > 0)
             {
                 _playerTransform = other.transform;

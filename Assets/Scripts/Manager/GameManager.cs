@@ -3,7 +3,19 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject go = new GameObject("GameManager");
+                instance = go.AddComponent<GameManager>();
+            }
+            return instance;
+        }
+    }
+    private static GameManager instance;
     
     [Header("Scene Names")]
     public string titleSceneName = "Title";
@@ -17,14 +29,14 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
+        if (instance == null)
         {
-            Instance = this;
+            instance = this;
             DontDestroyOnLoad(gameObject);
             
             Leaderboard = new LeaderboardManager();
         }
-        else
+        else if (instance != this)
         {
             Destroy(gameObject);
         }

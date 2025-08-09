@@ -244,11 +244,11 @@ public class StageManager : MonoBehaviour
 
     public void PlayerConfirmedNextStage()
     {
-        if (!_isWaitingForPlayerToProceed)
-        {
-            Debug.LogWarning($"[{gameObject.name}] PlayerConfirmedNextStage 호출 문제");
-            return;
-        }
+        // if (!_isWaitingForPlayerToProceed)
+        // {
+        //     Debug.LogWarning($"[{gameObject.name}] PlayerConfirmedNextStage 호출 문제");
+        //     return;
+        // }
 
         _isWaitingForPlayerToProceed = false;
         _currentStageNumber++;
@@ -470,7 +470,7 @@ public class StageManager : MonoBehaviour
             return;
         }
 
-        bool changedAnyBlock = false;
+        
 
         // 월드 좌표를 청크 로컬 좌표로 변환 준비
         Vector3 chunkBaseWorldPosition = _currentLoadedStageChunk.transform.position;
@@ -494,10 +494,7 @@ public class StageManager : MonoBehaviour
                         localZ >= 0 && localZ < stageSize &&
                         targetLocalY >= 0 && targetLocalY < stageBuildHeight)
                     {
-                        if (_currentLoadedStageChunk.ChangeBlock(localX, targetLocalY, localZ, BlockType.Air))
-                        {
-                            changedAnyBlock = true;
-                        }
+                        _currentLoadedStageChunk.ChangeBlock(localX, targetLocalY, localZ, BlockType.Air);
                     }
                 }
             }

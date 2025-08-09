@@ -3,37 +3,39 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class AimGuideController : MonoBehaviour
 {
-    public PlayerController playerController;
+    public PlayerInputHandler playerInputHandler;
+    public AimController aimController;
     public WeaponController weaponController;
 
     public float guideLength = 15f;
     public LayerMask obstacleLayerMask;
     
     private LineRenderer _lineRenderer;
-    void Awake()
+
+    void Start()
     {
         _lineRenderer = GetComponent<LineRenderer>();
-        if (playerController == null || weaponController == null)
-        {
-            Debug.LogError($"[{gameObject.name}] 필요한 참조 누락");
-            enabled = false;
-            return;
-        }
         _lineRenderer.enabled = false;
     }
 
     void Update()
     {
-        if (playerController == null || weaponController == null || weaponController.firePoint == null) return;
-
-        if (playerController.IsAiming)
+        // 참조가 하나라도 준비되지 않았다면 아무것도 하지 않고 대기
+        if (playerInputHandler == null || aimController == null || weaponController == null || weaponController.firePoint == null)
         {
-            _lineRenderer.enabled = true;
+            // 아직 참조가 연결되지 않았을 수 있으므로, 비활성화만 하고 오류는 출력하지 않음
+            if(_lineRenderer.enabled) _lineRenderer.enabled = false;
+            return;
+        }
+
+        if (playerInputHandler.IsAiming)
+        {
+            if(!_lineRenderer.enabled) _lineRenderer.enabled = true;
             UpdateGuideLine();
         }
         else
         {
-            _lineRenderer.enabled = false;
+            if(_lineRenderer.enabled) _lineRenderer.enabled = false;
         }
     }
 
@@ -43,7 +45,7 @@ public class AimGuideController : MonoBehaviour
     private void UpdateGuideLine()
     {
         Vector3 startPoint = weaponController.firePoint.position;
-        Vector3 aimDirection = playerController.AimingDirection;
+        Vector3 aimDirection = aimController.AimingDirection;
         Vector3 endPoint;
         
         RaycastHit hit;

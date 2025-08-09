@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class LockOnReticleUI : MonoBehaviour
 {
     public Image lockOnMarkerImage;
-    public PlayerController playerController;
+    public AimController aimController; // PlayerController 대신 AimController 참조
     public Camera mainCamera;
 
     void Start()
@@ -15,16 +15,16 @@ public class LockOnReticleUI : MonoBehaviour
             enabled = false;
             return;
         }
-        if (playerController == null)
+        if (aimController == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
             {
-                playerController = playerObj.GetComponent<PlayerController>();
+                aimController = playerObj.GetComponent<AimController>();
             }
-            if (playerController == null)
+            if (aimController == null)
             {
-                Debug.LogError($"[{gameObject.name}]씬에 PlayerController가 존재하지 않습니다");
+                Debug.LogError($"[{gameObject.name}]씬에 AimController가 존재하지 않습니다");
                 enabled = false;
                 return;
             }
@@ -44,9 +44,9 @@ public class LockOnReticleUI : MonoBehaviour
 
     void Update()
     {
-        if (playerController == null || lockOnMarkerImage == null || mainCamera == null) return;
+        if (aimController == null || lockOnMarkerImage == null || mainCamera == null) return;
 
-        Transform currentTarget = playerController.GetLockedTarget();
+        Transform currentTarget = aimController.LockedAimAssistTarget; // 변경된 부분
 
         if (currentTarget != null && currentTarget.gameObject.activeInHierarchy)
         {

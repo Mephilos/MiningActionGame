@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "OrbitalLaseerSkill", menuName = "Player Character/OrbitalLaseerSkillData")]
+[CreateAssetMenu(fileName = "OrbitalLaserSkill", menuName = "Player Character/OrbitalLaseerSkillData")]
 public class OrbitalLaserSkillData : SkillData
 {
     public GameObject laserBeamPrefab;

@@ -6,19 +6,19 @@ public class DynamicCamera : MonoBehaviour
     public Transform target; // 플레이어 Transform
 
     [Header("카메라 기본 위치 및 각도")]
-    [SerializeField] private float distance = 15f;         // 타겟으로부터의 기본 거리
-    // [SerializeField] private float height = 12f;           // 타겟보다 얼마나 높이 있을지
-    [SerializeField] private float horizontalAngle = 45f;  // Y축 기준 기본 회전 각도
-    [SerializeField] private float verticalAngle = 35f;    // X축 기준 기본 기울기 각도 (내려다보는 각도)
+    [SerializeField] private float distance = 15f; // 타겟으로부터의 기본 거리
+    // [SerializeField] private float height = 12f; // 타겟보다 얼마나 높이 있을지
+    [SerializeField] private float horizontalAngle = 45f; // Y축 기준 기본 회전 각도
+    [SerializeField] private float verticalAngle = 35f; // X축 기준 기본 기울기 각도 (내려다보는 각도)
 
     [Header("추적 설정")]
-    [SerializeField] private float followSmoothSpeed = 5f;   // 카메라 이동 시 부드러움 정도
+    [SerializeField] private float followSmoothSpeed = 5f; // 카메라 이동 시 부드러움 정도
     [SerializeField] private float rotationSmoothSpeed = 5f; // 카메라 회전 시 부드러움 정도
 
     [Header("동적 줌 (Perspective 모드 - FOV 조절)")]
-    [SerializeField] private float baseFieldOfView = 50f;    // 기본 시야각
-    [SerializeField] private float zoomedFieldOfView = 40f;  // 줌 인 되었을 때 시야각 (예: 플레이어 부스트 시)
-    [SerializeField] private float fovSmoothSpeed = 3f;      // FOV 변경 시 부드러움 정도
+    [SerializeField] private float baseFieldOfView = 50f; // 기본 시야각
+    [SerializeField] private float zoomedFieldOfView = 40f; // 줌 인 되었을 때 시야각 (예: 플레이어 부스트 시)
+    [SerializeField] private float fovSmoothSpeed = 3f; // FOV 변경 시 부드러움 정도
 
     private Camera _cam;
     private Vector3 _currentVelocity = Vector3.zero; // SmoothDamp용 현재 속도
@@ -70,7 +70,6 @@ public class DynamicCamera : MonoBehaviour
 
         // 부드럽게 카메라 위치 이동 SmoothDamp 
         transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref _currentVelocity, 1f / followSmoothSpeed);
-        // Lerp
         //transform.position = Vector3.Lerp(transform.position, desiredPosition, Time.deltaTime * followSmoothSpeed);
         
         Vector3 lookAtPoint = target.position + Vector3.up * 1.5f; // 플레이어의 가슴 높이 정도
@@ -85,9 +84,9 @@ public class DynamicCamera : MonoBehaviour
     {
         float targetFOV = baseFieldOfView;
         
-        if (_playerData != null && _playerData.isDashing) // 또는 별도의 'isBoosting' 상태 변수 사용
+        if (_playerData != null && _playerData.isDashing)
         {
-            targetFOV = zoomedFieldOfView; // 대쉬/부스트 시 FOV 변경 (값을 더 크게 하면 Zoom Out)
+            targetFOV = zoomedFieldOfView; // 대쉬/부스트 시 FOV 변경
         }
 
         _cam.fieldOfView = Mathf.Lerp(_cam.fieldOfView, targetFOV, Time.deltaTime * fovSmoothSpeed);
