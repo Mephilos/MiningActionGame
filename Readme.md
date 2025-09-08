@@ -106,7 +106,8 @@
     * ObjectPoolManager를 구현하여 총알, 폭발 이펙트 등 자주 생성/파괴되는 오브젝트들을 재활용함으로써 GC(Garbage Collection)을 줄였습니다. ([**ObjectPoolManager.cs**](https://github.com/Mephilos/MiningActionGame/blob/main/Assets/Scripts/ObjectPool/ObjectPoolManager.cs))
 * 메시 결합 (Mesh Combining)
     * Chunk.cs에서 수많은 복셀 블록의 메시를 단일 메시로 결합하여 렌더링 부하를 줄이고 드로우 콜을 줄였습니다.  ([**Chunk.cs**](https://github.com/Mephilos/MiningActionGame/blob/main/Assets/Scripts/GamePlaySystem/Chunk.cs#L318-L489))
-
+    > 맵 단독 렌더링 기준 **DrawCalls 1**
+      ![Frame Debugger 캡처](_images/DrawCalls1.png)       
 
 
 ## 주요 개발 과제 및 해결
